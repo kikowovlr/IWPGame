@@ -1,18 +1,25 @@
 using UnityEngine;
 using FishNet.Connection;
 using FishNet.Object;
-using UnityEngine.Rendering;
+using UnityEngine.InputSystem;
 
 public class PlayerController : NetworkBehaviour
 {
-    [SerializeField] private float _speed; // forward + back
-    [SerializeField] private float _strafeSpeed; // left + right
+    [Header("References")]
+    [SerializeField] private Transform _orientationPivot;
+    [SerializeField] private Rigidbody _hips;
+
+    [Header("Movement Settings")]
+    [SerializeField] private float _speed = 150f; // forward + back
+    [SerializeField] private float _strafeSpeed = 100f; // left + right
     [SerializeField] private float _runSpeedMultiplier = 1.5f;
     [SerializeField] private float _jumpForce;
+
     [SerializeField] private float _cameraYOffset = 0.4f;
     private Camera _playerCamera;
-    private Rigidbody _hips;
     private bool _isGrounded;
+    private Vector2 _inputVector;
+    private bool _isRunning;
 
     // runs before Start fn
     public override void OnStartClient()
@@ -31,23 +38,35 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    private void Start()
+    // called by player input component (message: OnMove)
+    public void OnMove(InputValue value)
     {
-        _hips = GetComponent<Rigidbody>();
+        _inputVector = value.Get<Vector2>();
+    }
+
+    public void OnSprint(InputValue value)
+    {
+        _isRunning = value.isPressed;
     }
 
     private void FixedUpdate()
     {
-        if (Input.GetKey(KeyCode.W))
+        Move();
+    }
+
+    private void Move()
+    {
+        // calculate dir based on orientation
+        Vector3 moveDir = _orientationPivot.forward * _inputVector.y + _orientationPivot.right * _inputVector.x;
+        moveDir.Normalize();
+
+        // determine final speed
+        float currSpeed = _isRunning ? _speed * _runSpeedMultiplier : _speed;
+
+        // apply force to hips
+        if (moveDir.magnitude > 0.1f)
         {
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                _hips.AddForce(_hips.transform.forward * _speed * _runSpeedMultiplier);
-            }
-            else
-            {
-                _hips.AddForce(_hips.transform.forward * _speed);
-            }
+            _hips.AddForce(currSpeed * moveDir, ForceMode.Acceleration);
         }
     }
 }
