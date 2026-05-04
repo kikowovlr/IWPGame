@@ -12,7 +12,9 @@ public class PlayerController : NetworkBehaviour
     [Header("Movement Settings")]
     [SerializeField] private float _speed = 150f;
     [SerializeField] private float _runSpeedMultiplier = 1.5f;
-    [SerializeField] private float _groundCheckDist = 1.2f;
+    [SerializeField] private Transform _leftFoot;
+    [SerializeField] private Transform _rightFoot;
+    [SerializeField] private float _footGroundCheckDist = 0.3f;
     [SerializeField] private LayerMask _groundLayer;
     [SerializeField] private float _jumpForce = 10f;
     [SerializeField] private float _airControlMultiplier = 0.3f;
@@ -126,8 +128,13 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
-        _isGrounded = Physics.Raycast(_hips.position, Vector3.down, _groundCheckDist, _groundLayer);
-        Debug.DrawRay(_hips.position, Vector3.down * _groundCheckDist, _isGrounded ? Color.green : Color.red);
+        // check if either leg is touching floor
+        bool leftGrounded = Physics.Raycast(_leftFoot.position, Vector3.down, _footGroundCheckDist, _groundLayer);
+        bool rightGrounded = Physics.Raycast(_rightFoot.position, Vector3.down, _footGroundCheckDist, _groundLayer);
+
+        _isGrounded = leftGrounded || rightGrounded;
+        Debug.DrawRay(_leftFoot.position, Vector3.down * _footGroundCheckDist, leftGrounded ? Color.green : Color.red);
+        Debug.DrawRay(_rightFoot.position, Vector3.down * _footGroundCheckDist, rightGrounded ? Color.green : Color.red);
     }
 
     private void HandleJump()

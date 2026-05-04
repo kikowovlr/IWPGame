@@ -67,7 +67,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584237288041535315
+  _initializedTimestamp: -8584237224863557046
   _localLevelOfDetailCalculationType: 0
   _useLevelOfDetail: 0
   _useRootLevelOfDetail: 1
@@ -190,7 +190,9 @@ MonoBehaviour:
   _hips: {fileID: 7964604261890451267}
   _speed: 100
   _runSpeedMultiplier: 1.5
-  _groundCheckDist: 0.35
+  _leftFoot: {fileID: 1874956003713844330}
+  _rightFoot: {fileID: 1702527435407752946}
+  _footGroundCheckDist: 0.08
   _groundLayer:
     serializedVersion: 2
     m_Bits: 128
