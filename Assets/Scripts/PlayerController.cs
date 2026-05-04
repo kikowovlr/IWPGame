@@ -10,16 +10,26 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private Rigidbody _hips;
 
     [Header("Movement Settings")]
-    [SerializeField] private float _speed = 150f; // forward + back
-    [SerializeField] private float _strafeSpeed = 100f; // left + right
+    [SerializeField] private float _speed = 150f;
     [SerializeField] private float _runSpeedMultiplier = 1.5f;
-    [SerializeField] private float _jumpForce;
+    [SerializeField] private float _groundCheckDist = 1.2f;
+    [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private float _jumpForce = 10f;
+    [SerializeField] private float _airControlMultiplier = 0.3f;
+    [SerializeField] private float _jumpTimeout = 0.15f; // time to ignore ground after jumping
+    private float _jumpTimeoutDelta;
+
+
+    [Header("Balancing")]
+    [SerializeField] private float _uprightStiffness = 1000f; // strength of pull
+    [SerializeField] private float _uprightDamping = 100f; // prevents wobbling
 
     [SerializeField] private float _cameraYOffset = 0.4f;
     private Camera _playerCamera;
     private bool _isGrounded;
     private Vector2 _inputVector;
     private bool _isRunning;
+    private bool _jumpRequested;
 
     // runs before Start fn
     public override void OnStartClient()
@@ -49,9 +59,20 @@ public class PlayerController : NetworkBehaviour
         _isRunning = value.isPressed;
     }
 
+    public void OnJump(InputValue value)
+    {
+        if (value.isPressed)
+            _jumpRequested = true;
+    }
+
     private void FixedUpdate()
     {
+        CheckGrounded();
         Move();
+        ApplyUprightForce();
+
+        if (_jumpRequested)
+            HandleJump();
     }
 
     private void Move()
@@ -63,10 +84,66 @@ public class PlayerController : NetworkBehaviour
         // determine final speed
         float currSpeed = _isRunning ? _speed * _runSpeedMultiplier : _speed;
 
+        if (!_isGrounded)
+        {
+            currSpeed *= _airControlMultiplier;
+        }
+
         // apply force to hips
         if (moveDir.magnitude > 0.1f)
         {
             _hips.AddForce(currSpeed * moveDir, ForceMode.Acceleration);
         }
+    }
+
+    private void ApplyUprightForce()
+    {
+        // determine what is upright
+        Quaternion targetRotation = Quaternion.identity;
+
+        // rotation diff
+        Quaternion rotationError = targetRotation * Quaternion.Inverse(_hips.rotation); // basically subtracting but for rotation so need to multiply instead to find diff
+        rotationError.ToAngleAxis(out float angle, out Vector3 axis);
+
+        if (angle > 180f) angle -= 360f; // normalize to 180f to -180f
+
+        // convert rotation error to torque
+        if (Mathf.Abs(angle) > 0.01f)
+        {
+            // PID formula - (stiffness * error) - (damping * currVelocity)
+            Vector3 torque = (axis * angle * _uprightStiffness) - (_hips.angularVelocity * _uprightDamping);
+            _hips.AddTorque(torque, ForceMode.Acceleration);
+        }
+    }
+
+
+    private void CheckGrounded()
+    {
+        if (_jumpTimeoutDelta > 0)
+        {
+            _jumpTimeoutDelta -= Time.fixedDeltaTime;
+            _isGrounded = false;
+            return;
+        }
+
+        _isGrounded = Physics.Raycast(_hips.position, Vector3.down, _groundCheckDist, _groundLayer);
+        Debug.DrawRay(_hips.position, Vector3.down * _groundCheckDist, _isGrounded ? Color.green : Color.red);
+    }
+
+    private void HandleJump()
+    {
+        if (!_isGrounded)
+        {
+            _jumpRequested = false;
+            return;
+        }
+
+        _jumpTimeoutDelta = _jumpTimeout;
+
+        // reset vertical velocity 
+        _hips.linearVelocity = new Vector3(_hips.linearVelocity.x, 0f, _hips.linearVelocity.z);
+
+        _hips.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+        _jumpRequested = false;
     }
 }
