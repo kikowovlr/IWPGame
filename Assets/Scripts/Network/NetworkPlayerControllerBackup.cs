@@ -3,11 +3,11 @@ using FishNet.Connection;
 using FishNet.Object;
 using UnityEngine.InputSystem;
 
-public class PlayerController : NetworkBehaviour
+public class NetworkPlayerControllerBackup : NetworkBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform _orientationPivot;
-    [SerializeField] private Rigidbody _hips;
+    [SerializeField] private Rigidbody _rb;
+    [SerializeField] private ConfigurableJoint _mainJoint;
 
     [Header("Movement Settings")]
     [SerializeField] private float _speed = 150f;
@@ -46,7 +46,7 @@ public class PlayerController : NetworkBehaviour
         else
         {
             // if not owner then disable player controller - dont control other players
-            gameObject.GetComponent<PlayerController>().enabled = false;
+            gameObject.GetComponent<NetworkPlayerControllerBackup>().enabled = false;
         }
     }
 
@@ -71,7 +71,7 @@ public class PlayerController : NetworkBehaviour
     {
         CheckGrounded();
         Move();
-        ApplyUprightForce();
+        //ApplyUprightForce();
 
         if (_jumpRequested)
             HandleJump();
@@ -80,7 +80,7 @@ public class PlayerController : NetworkBehaviour
     private void Move()
     {
         // calculate dir based on orientation
-        Vector3 moveDir = _orientationPivot.forward * _inputVector.y + _orientationPivot.right * _inputVector.x;
+        Vector3 moveDir = transform.forward * _inputVector.y + transform.right * _inputVector.x;
         moveDir.Normalize();
 
         // determine final speed
@@ -94,7 +94,7 @@ public class PlayerController : NetworkBehaviour
         // apply force to hips
         if (moveDir.magnitude > 0.1f)
         {
-            _hips.AddForce(currSpeed * moveDir, ForceMode.Acceleration);
+            _rb.AddForce(currSpeed * moveDir, ForceMode.Acceleration);
         }
     }
 
@@ -104,7 +104,7 @@ public class PlayerController : NetworkBehaviour
         Quaternion targetRotation = Quaternion.identity;
 
         // rotation diff
-        Quaternion rotationError = targetRotation * Quaternion.Inverse(_hips.rotation); // basically subtracting but for rotation so need to multiply instead to find diff
+        Quaternion rotationError = targetRotation * Quaternion.Inverse(_rb.rotation); // basically subtracting but for rotation so need to multiply instead to find diff
         rotationError.ToAngleAxis(out float angle, out Vector3 axis);
 
         if (angle > 180f) angle -= 360f; // normalize to 180f to -180f
@@ -113,8 +113,8 @@ public class PlayerController : NetworkBehaviour
         if (Mathf.Abs(angle) > 0.01f)
         {
             // PID formula - (stiffness * error) - (damping * currVelocity)
-            Vector3 torque = (axis * angle * _uprightStiffness) - (_hips.angularVelocity * _uprightDamping);
-            _hips.AddTorque(torque, ForceMode.Acceleration);
+            Vector3 torque = (axis * angle * _uprightStiffness) - (_rb.angularVelocity * _uprightDamping);
+            _rb.AddTorque(torque, ForceMode.Acceleration);
         }
     }
 
@@ -148,9 +148,9 @@ public class PlayerController : NetworkBehaviour
         _jumpTimeoutDelta = _jumpTimeout;
 
         // reset vertical velocity 
-        _hips.linearVelocity = new Vector3(_hips.linearVelocity.x, 0f, _hips.linearVelocity.z);
+        _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
 
-        _hips.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+        _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
         _jumpRequested = false;
     }
 }

@@ -212,7 +212,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 434714327667330335}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.2
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -349,8 +349,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 7648868511138948392}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &452829077640482997
 GameObject:
   m_ObjectHideFlags: 0
@@ -470,7 +471,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 452829077640482997}
   serializedVersion: 4
-  m_Mass: 0.5
+  m_Mass: 0.2
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -607,8 +608,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 8554621694691159680}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &953162215037566412
 GameObject:
   m_ObjectHideFlags: 0
@@ -1091,7 +1093,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1549411509113926164}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.1
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1126,8 +1128,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 7508039585819688246}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!153 &4024396533089822750
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -1419,7 +1422,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1747706171622013280}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.1
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1556,8 +1559,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 7500705641375194183}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &1928252148763907510
 GameObject:
   m_ObjectHideFlags: 0
@@ -1949,7 +1953,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2262303059975867433}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.1
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -2086,8 +2090,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 5571820606724876177}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &2283737652725976039
 GameObject:
   m_ObjectHideFlags: 0
@@ -2148,8 +2153,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2127295964970525829}
+  m_Children: []
   m_Father: {fileID: 881346188540891922}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2382583464650294224
@@ -2527,7 +2531,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2794383280416821564}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.1
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -2664,8 +2668,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 2012053725512113886}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &2938393947075299153
 GameObject:
   m_ObjectHideFlags: 0
@@ -2729,6 +2734,38 @@ Transform:
   - {fileID: 4248826615224159740}
   m_Father: {fileID: 3295026494860011471}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3081746424397339890
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7501418960767063063}
+  m_Layer: 6
+  m_Name: Ragdoll
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7501418960767063063
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3081746424397339890}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4685477114321467528}
+  m_Father: {fileID: 881346188540891922}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1 &3186522002012851149
 GameObject:
   m_ObjectHideFlags: 0
@@ -3386,7 +3423,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3609577224704988497}
   serializedVersion: 4
-  m_Mass: 0.5
+  m_Mass: 0.2
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -3523,8 +3560,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 5964279620991114902}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &3635446330434015524
 GameObject:
   m_ObjectHideFlags: 0
@@ -3676,7 +3714,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3870942852088836040}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.2
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -3813,8 +3851,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 5697746238080281144}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &3966233250018723476
 GameObject:
   m_ObjectHideFlags: 0
@@ -4115,7 +4154,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4070261730559491140}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.2
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -4252,8 +4291,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 6618726150643518993}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &4110072889000214716
 GameObject:
   m_ObjectHideFlags: 0
@@ -4394,7 +4434,7 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
@@ -4406,7 +4446,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4202714082503742001}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.1
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -4543,8 +4583,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 5780565681970217317}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &4309704254814152621
 GameObject:
   m_ObjectHideFlags: 0
@@ -4653,7 +4694,7 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
@@ -4802,8 +4843,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 3834140314746459531}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &4321484140442131857
 GameObject:
   m_ObjectHideFlags: 0
@@ -5073,7 +5115,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4727931905533195960}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.25999993, y: 0.26, z: 0.25999993}
   m_ConstrainProportionsScale: 0
@@ -5081,7 +5123,7 @@ Transform:
   - {fileID: 51422425552746115}
   - {fileID: 4108821963114209807}
   - {fileID: 2126216519671987168}
-  m_Father: {fileID: 2127295964970525829}
+  m_Father: {fileID: 7501418960767063063}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8937633268385553493
 MeshFilter:
@@ -5153,7 +5195,7 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
@@ -5166,7 +5208,7 @@ Rigidbody:
   m_GameObject: {fileID: 4727931905533195960}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0.05
+  m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0.5, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -5403,6 +5445,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2894629458285578027}
+  - {fileID: 7501418960767063063}
   - {fileID: 6470149672739709793}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5558,6 +5601,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 6664872664561360868}
   _orientationPivot: {fileID: 2894629458285578027}
+  _ragdollPivot: {fileID: 7501418960767063063}
   _hips: {fileID: 4109659447497811438}
   _speed: 100
   _runSpeedMultiplier: 1.5
@@ -5571,7 +5615,7 @@ MonoBehaviour:
   _airControlMultiplier: 0.3
   _jumpTimeout: 0.3
   _uprightStiffness: 100
-  _uprightDamping: 100
+  _uprightDamping: 10
   _cameraYOffset: 0.4
 --- !u!1 &4961838664877480892
 GameObject:
@@ -6358,7 +6402,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6082155358551529801}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 0.1
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -6495,8 +6539,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 9032246318909559935}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &6084996906786332636
 GameObject:
   m_ObjectHideFlags: 0
@@ -6521,14 +6566,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6084996906786332636}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 0.08846149, z: -0.48846143}
   m_LocalScale: {x: 0.41577843, y: 0.4157785, z: 0.41577843}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5142925590835474747}
   m_Father: {fileID: 2812774285740460069}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6167211216106749762
 GameObject:
   m_ObjectHideFlags: 0
@@ -7856,7 +7901,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7727831775412123444}
   serializedVersion: 4
-  m_Mass: 0.5
+  m_Mass: 0.2
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -7993,8 +8038,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 398173823500517737}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &7737247166601283467
 GameObject:
   m_ObjectHideFlags: 0
@@ -8338,7 +8384,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8111541702010686463}
   serializedVersion: 4
-  m_Mass: 0.5
+  m_Mass: 0.2
   m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -8475,40 +8521,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 1490126595638817549}
-  _muscleSpring: 1500
-  _muscleDamper: 50
---- !u!1 &8129732772736642747
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2127295964970525829}
-  m_Layer: 6
-  m_Name: Model
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2127295964970525829
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8129732772736642747}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 4685477114321467528}
-  m_Father: {fileID: 2894629458285578027}
-  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &8139375360268698844
 GameObject:
   m_ObjectHideFlags: 0
@@ -8741,7 +8756,7 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
@@ -8890,8 +8905,9 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 6664872664561360868}
   _networkObjectCache: {fileID: 0}
   _targetLimb: {fileID: 7027331136323164290}
-  _muscleSpring: 1500
-  _muscleDamper: 50
+  _muscleSpring: 1000
+  _muscleDamper: 100
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!1 &8281197529520765052
 GameObject:
   m_ObjectHideFlags: 0

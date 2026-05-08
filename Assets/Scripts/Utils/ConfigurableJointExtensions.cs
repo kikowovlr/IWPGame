@@ -68,6 +68,11 @@ public static class ConfigurableJointExtensions
         joint.angularXMotion = ConfigurableJointMotion.Limited;
         joint.angularYMotion = ConfigurableJointMotion.Limited;
         joint.angularZMotion = ConfigurableJointMotion.Limited;
+
+        SoftJointLimit highLimit = new SoftJointLimit();
+        highLimit.limit = 120f;
+        joint.highAngularXLimit = highLimit;
+
         joint.breakForce = Mathf.Infinity;
         joint.breakTorque = Mathf.Infinity;
 
