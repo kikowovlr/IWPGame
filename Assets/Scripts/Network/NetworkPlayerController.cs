@@ -24,6 +24,14 @@ public class NetworkPlayerController : NetworkBehaviour
     //Raycasts
     RaycastHit[] _raycastHits = new RaycastHit[10];
 
+    //Syncing of ragdoll parts
+    ActiveRagdollMember[] _activeRagdollMembers;
+
+    private void Awake()
+    {
+        _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
+    }
+
     // runs before Start fn
     public override void OnStartClient()
     {
@@ -92,6 +100,12 @@ public class NetworkPlayerController : NetworkBehaviour
         {
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
             _isJumpButtonPressed = false;
+        }
+
+        // update joints rotation based on animation
+        for (int i = 0; i < _activeRagdollMembers.Length; i++)
+        {
+            _activeRagdollMembers[i].UpdateJointFromAnimation();
         }
     }
 }
