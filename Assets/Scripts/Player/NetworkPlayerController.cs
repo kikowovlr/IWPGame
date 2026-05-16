@@ -8,10 +8,12 @@ public class NetworkPlayerController : NetworkBehaviour
     [Header("References")]
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private ConfigurableJoint _mainJoint;
+    [SerializeField] private Animator _animator;
 
     [Header("Movement Settings")]
     [SerializeField] private float _maxSpeed = 3f;
     [SerializeField] private float _jumpForce = 10f;
+    [SerializeField] private float _rotationSpeed = 300f;
 
     //Input
     Vector2 _moveInputVector = Vector2.zero;
@@ -26,20 +28,26 @@ public class NetworkPlayerController : NetworkBehaviour
 
     //Syncing of ragdoll parts
     ActiveRagdollMember[] _activeRagdollMembers;
+    private Quaternion _initialJointRotation;
 
     private void Awake()
     {
         _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
+        _initialJointRotation = _mainJoint.transform.localRotation;
     }
 
     // runs before Start fn
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if (!base.IsOwner)
+        if (base.IsOwner)
+        {
+            PlayerRegistry.RegisterLocalPlayerTransform(_rb.transform);
+        }
+        else
         {
             // if not owner then disable player controller - dont control other players
-            gameObject.GetComponent<NetworkPlayerController>().enabled = false;
+            enabled = false;
         }
     }
 
@@ -76,23 +84,35 @@ public class NetworkPlayerController : NetworkBehaviour
         if (!_isGrounded)
             _rb.AddForce(Vector3.down * 10);
 
-        float inputMagnitued = _moveInputVector.magnitude;
+        float inputMagnitude = _moveInputVector.magnitude;
 
-        if (inputMagnitued != 0)
+        Vector3 localVelocityVsForward = transform.forward * Vector3.Dot(transform.forward, _rb.linearVelocity);
+        float localForwardVelocity = localVelocityVsForward.magnitude;
+
+        if (inputMagnitude != 0)
         {
-            Quaternion desiredRotation = Quaternion.LookRotation(new Vector3(_moveInputVector.x, 0, _moveInputVector.y * -1), transform.up);
+            // get cam dir vectors and flatten y
+            Vector3 camForward = Camera.main.transform.forward;
+            Vector3 camRight = Camera.main.transform.right;
+            camForward.y = 0f;
+            camRight.y = 0f;
+            camForward.Normalize();
+            camRight.Normalize();
+
+            // movement dir vector based on cam's POV
+            Vector3 moveDir = (camForward * _moveInputVector.y) + (camRight * _moveInputVector.x);
+
+            // based on camera dir
+            Quaternion desiredWorldRotation = Quaternion.LookRotation(moveDir, transform.up);
+            Quaternion jointSpaceRotation = Quaternion.Inverse(desiredWorldRotation) * _mainJoint.transform.rotation * _initialJointRotation;
 
             // rotate towards target dir
-            _mainJoint.targetRotation = Quaternion.RotateTowards(_mainJoint.targetRotation, desiredRotation, Time.fixedDeltaTime * 300);
-
-            Vector3 localVelocityVsForward = transform.forward * Vector3.Dot(transform.forward, _rb.linearVelocity);
-
-            float localForwardVelocity = localVelocityVsForward.magnitude;
+            _mainJoint.targetRotation = Quaternion.RotateTowards(_mainJoint.targetRotation, jointSpaceRotation, Time.fixedDeltaTime * _rotationSpeed);
 
             if (localForwardVelocity < _maxSpeed)
             {
                 // move character in the dir they're facing
-                _rb.AddForce(transform.forward * inputMagnitued * 30);
+                _rb.AddForce(moveDir * inputMagnitude * 30);
             }
         }
 
@@ -101,6 +121,8 @@ public class NetworkPlayerController : NetworkBehaviour
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
             _isJumpButtonPressed = false;
         }
+
+        _animator.SetFloat("MovementSpeed", localForwardVelocity * 0.4f);
 
         // update joints rotation based on animation
         for (int i = 0; i < _activeRagdollMembers.Length; i++)

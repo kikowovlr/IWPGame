@@ -3043,6 +3043,7 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 0}
   _rb: {fileID: 37877899543040228}
   _mainJoint: {fileID: 3264589864885462918}
+  _animator: {fileID: 6878340766807476932}
   _maxSpeed: 3
   _jumpForce: 10
 --- !u!1 &3185810106208519795
