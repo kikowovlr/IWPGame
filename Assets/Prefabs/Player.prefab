@@ -3044,8 +3044,9 @@ MonoBehaviour:
   _rb: {fileID: 37877899543040228}
   _mainJoint: {fileID: 3264589864885462918}
   _animator: {fileID: 6878340766807476932}
-  _maxSpeed: 3
-  _jumpForce: 10
+  _maxSpeed: 2
+  _jumpForce: 15
+  _rotationSpeed: 500
 --- !u!1 &3185810106208519795
 GameObject:
   m_ObjectHideFlags: 0
