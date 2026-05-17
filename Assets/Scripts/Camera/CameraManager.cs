@@ -4,11 +4,21 @@ using Unity.Cinemachine;
 [RequireComponent(typeof(CinemachineCamera))]
 public class CameraManager : MonoBehaviour
 {
+    private CinemachineBrain _brain;
     private CinemachineCamera _vcam;
 
     private void Awake()
     {
         _vcam = GetComponent<CinemachineCamera>();
+
+        if (Camera.main != null)
+        {
+            if (TryGetComponent<CinemachineBrain>(out CinemachineBrain brain))
+            {
+                _brain = brain;
+                PlayerRegistry.RegisterCameraSystem(_brain, _vcam);
+            }
+        }
     }
 
     private void OnEnable()

@@ -1,14 +1,21 @@
+using Fusion;
 using UnityEngine;
-using FishNet.Connection;
-using FishNet.Object;
 using UnityEngine.InputSystem;
+using Fusion.Addons.Physics;
+using Unity.Cinemachine;
 
-public class NetworkPlayerController : NetworkBehaviour
+/// <summary>
+/// IPlayerLeft - can clean up player later when they leave
+/// </summary>
+public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 {
+    public static NetworkPlayerController Local { get; set; }
+
     [Header("References")]
     [SerializeField] private Rigidbody _rb;
     [SerializeField] private ConfigurableJoint _mainJoint;
     [SerializeField] private Animator _animator;
+    [SerializeField] NetworkRigidbody3D _networkRb3D;
 
     [Header("Movement Settings")]
     [SerializeField] private float _maxSpeed = 6f;
@@ -40,31 +47,18 @@ public class NetworkPlayerController : NetworkBehaviour
     ActiveRagdollMember[] _activeRagdollMembers;
     private Quaternion _initialJointRotation;
 
+    //Syncing client ragdolls
+    // TODO: change to sending bytes instead of Quaternion and limite how much the joints can rotate
+    [Networked, Capacity(30)] public NetworkArray<Quaternion> _networkPhysicsSyncedRotation { get; }
+
+    private CinemachineCamera _cinemachineVirtualCamera;
+
     private const float InputThreshold = 0.01f;
 
     private void Awake()
     {
         _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
         _initialJointRotation = _mainJoint.transform.localRotation;
-    }
-
-    // runs before Start fn
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-        if (base.IsOwner)
-        {
-            PlayerRegistry.RegisterLocalPlayerTransform(_rb.transform);
-        }
-        else
-        {
-            // if not owner then disable player controller - dont control other players
-            if (TryGetComponent<PlayerInput>(out var playerInput))
-            {
-                playerInput.enabled = false;
-            }
-            enabled = false;
-        }
     }
 
     public void OnMove(InputValue value)
@@ -85,36 +79,78 @@ public class NetworkPlayerController : NetworkBehaviour
         _isRunning = value.Get<float>() > 0f;
     }
 
-    private void FixedUpdate()
+    public override void FixedUpdateNetwork()
     {
-        CheckForGround();
-        ApplyGravity();
+        Vector3 localVelocityVsForward = Vector3.zero;
+        float localForwardVelocity = 0;
 
-        // movement calculation
-        // if not sprinting, clamp input
-        Vector2 finalInput = _moveInputVector;
-        if (!_isRunning && finalInput.magnitude > InputThreshold)
-            finalInput = finalInput.normalized * _walkInputScale;
-
-        float inputMagnitude = finalInput.magnitude;
-        Vector3 localVelocityVsForward = transform.forward * Vector3.Dot(transform.forward, _rb.linearVelocity);
-        float localForwardVelocity = localVelocityVsForward.magnitude;
-
-        if (inputMagnitude > InputThreshold)
+        // only host can do this
+        if (Object.HasStateAuthority) // means we are controlling object
         {
-            Vector3 moveDir = CalculateMoveDirection();
+            CheckForGround();
+            ApplyGravity();
 
-            HandleRotation(moveDir);
+            localVelocityVsForward = transform.forward * Vector3.Dot(transform.forward, _rb.linearVelocity);
+            localForwardVelocity = localVelocityVsForward.magnitude;
+        }
 
-            if (localForwardVelocity < _maxSpeed * inputMagnitude)
+        if (GetInput(out NetworkInputData networkInputData))
+        {
+            // movement calculation
+            // if not sprinting, clamp input
+            Vector2 finalInput = networkInputData._movementInput;
+            if (!networkInputData._isSprintPressed && finalInput.magnitude > InputThreshold)
+                finalInput = finalInput.normalized * _walkInputScale;
+
+            float inputMagnitude = finalInput.magnitude;
+
+
+            if (inputMagnitude > InputThreshold)
             {
-                // move character in the dir they're facing
-                _rb.AddForce(moveDir * _movementForce);
+                Vector3 moveDir = CalculateMoveDirection(networkInputData);
+
+                HandleRotation(moveDir);
+
+                if (localForwardVelocity < _maxSpeed * inputMagnitude)
+                {
+                    // move character in the dir they're facing
+                    _rb.AddForce(moveDir * _movementForce);
+                }
+            }
+
+            HandleJump(networkInputData);
+        }
+
+        if (Object.HasStateAuthority)
+        {
+            UpdateAnimations(localForwardVelocity);
+
+            // TODO
+            // check if it is falling too far below map
+            if (transform.position.y < -10)
+                _networkRb3D.Teleport(Vector3.zero, Quaternion.identity);
+        }
+    }
+
+    public override void Render()
+    {
+        // all clients run this code
+        if (!Object.HasStateAuthority)
+        {
+            var interpolated = new NetworkBehaviourBufferInterpolator(this);
+
+            // get networked physics objects from the host and update clients
+            for (int i = 0; i < _activeRagdollMembers.Length; i++)
+            {
+                _activeRagdollMembers[i].transform.localRotation = Quaternion.Slerp(_activeRagdollMembers[i].transform.localRotation, _networkPhysicsSyncedRotation.Get(i), interpolated.Alpha);
             }
         }
 
-        HandleJump();
-        UpdateAnimations(localForwardVelocity);
+        if (Object.HasInputAuthority)
+        {
+            PlayerRegistry.SceneBrain.ManualUpdate();
+            _cinemachineVirtualCamera.UpdateCameraState(Vector3.up, Runner.LocalAlpha);
+        }
     }
 
     private void CheckForGround()
@@ -144,7 +180,7 @@ public class NetworkPlayerController : NetworkBehaviour
             _rb.AddForce(Vector3.down * _gravity);
     }
 
-    private Vector3 CalculateMoveDirection()
+    private Vector3 CalculateMoveDirection(NetworkInputData networkInputData)
     {
         // get cam dir vectors and flatten y
         Vector3 camForward = Camera.main.transform.forward;
@@ -155,7 +191,7 @@ public class NetworkPlayerController : NetworkBehaviour
         camRight.Normalize();
 
         // movement dir vector based on cam's POV
-        return (camForward * _moveInputVector.y) + (camRight * _moveInputVector.x);
+        return (camForward * networkInputData._movementInput.y) + (camRight * networkInputData._movementInput.x);
     }
 
     private void HandleRotation(Vector3 moveDir)
@@ -165,12 +201,12 @@ public class NetworkPlayerController : NetworkBehaviour
         Quaternion jointSpaceRotation = Quaternion.Inverse(desiredWorldRotation) * _initialJointRotation;
 
         // rotate towards target dir
-        _mainJoint.targetRotation = Quaternion.RotateTowards(_mainJoint.targetRotation, jointSpaceRotation, Time.fixedDeltaTime * _rotationSpeed);
+        _mainJoint.targetRotation = Quaternion.RotateTowards(_mainJoint.targetRotation, jointSpaceRotation, Runner.DeltaTime * _rotationSpeed);
     }
 
-    private void HandleJump()
+    private void HandleJump(NetworkInputData networkInputData)
     {
-        if (_isGrounded && _isJumpButtonPressed)
+        if (_isGrounded && networkInputData._isJumpPressed)
         {
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
             _isJumpButtonPressed = false; //reset immediately
@@ -179,17 +215,64 @@ public class NetworkPlayerController : NetworkBehaviour
 
     private void UpdateAnimations(float forwardVelocity)
     {
-        // calculate speed ratio
-        //float dynamicAnimSpeed = forwardVelocity / _maxSpeed;
-        //dynamicAnimSpeed = Mathf.Clamp(dynamicAnimSpeed, 0f, 1.5f);
-
         _animator.SetFloat("MovementSpeed", forwardVelocity / _maxSpeed);
-        //_animator.SetFloat("MovementSpeed", forwardVelocity * _animationSpeedScale);
 
         // update joints rotation based on animation
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
         {
             _activeRagdollMembers[i].UpdateJointFromAnimation();
+            _networkPhysicsSyncedRotation.Set(i, _activeRagdollMembers[i].transform.localRotation);
         }
+    }
+
+    // spawner calls this then transmit info to host
+    public NetworkInputData GetNetworkInput()
+    {
+        NetworkInputData networkInputData = new NetworkInputData();
+
+        // move data
+        networkInputData._movementInput = _moveInputVector;
+        networkInputData._isJumpPressed = _isJumpButtonPressed;
+        networkInputData._isSprintPressed = _isRunning;
+
+        // reset jump button 
+        _isJumpButtonPressed = false;
+
+        return networkInputData;
+    }
+
+    public override void Spawned()
+    {
+        // check if this is the owner's player
+        if (Object.HasInputAuthority)
+        {
+            Local = this;
+            _cinemachineVirtualCamera = PlayerRegistry.SceneVirtualCamera;
+            PlayerRegistry.RegisterLocalPlayerTransform(_rb.transform);
+            Utils.DebugLog("Spawned player with input authority");
+        }
+        else
+            Utils.DebugLog("Spawned player without input authority");
+
+        // make it easier to tell which player is which
+        transform.name = $"P_{Object.Id}";
+    }
+
+    public void PlayerLeft(PlayerRef player)
+    {
+        if (Object.InputAuthority == player)
+            Runner.Despawn(Object);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Vector3 origin = _rb != null ? _rb.position : transform.position;
+        Vector3 endPoint = origin + (transform.up * -1f * _groundCheckDist);
+
+        // Green if touching the floor, Red if in the air
+        Gizmos.color = _isGrounded ? Color.green : Color.red;
+
+        // Draw a single straight line down
+        Gizmos.DrawLine(origin, endPoint);
     }
 }

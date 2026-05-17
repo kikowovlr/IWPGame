@@ -146,7 +146,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
+  m_AnimatePhysics: 1
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -1580,7 +1580,7 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 1
+    positionSpring: 0.5
     positionDamper: 0
     maximumForce: 3.4028233e+38
     useAcceleration: 0
@@ -1608,7 +1608,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _animatedRb: {fileID: 5897264881726107465}
-  _syncAnimation: 0
+  _syncAnimation: 1
 --- !u!1 &2238744345739088276
 GameObject:
   m_ObjectHideFlags: 0
@@ -2076,7 +2076,7 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 1
+    positionSpring: 0.5
     positionDamper: 0
     maximumForce: 3.4028233e+38
     useAcceleration: 0
@@ -2104,7 +2104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _animatedRb: {fileID: 7559720329625480728}
-  _syncAnimation: 0
+  _syncAnimation: 1
 --- !u!1 &2802305090913601697
 GameObject:
   m_ObjectHideFlags: 0
@@ -2693,13 +2693,13 @@ GameObject:
   m_Component:
   - component: {fileID: 5420508240716220612}
   - component: {fileID: 37877899543040228}
-  - component: {fileID: 2117626657323688932}
-  - component: {fileID: 1158082231646370225}
   - component: {fileID: 7065124915991797771}
   - component: {fileID: 3264589864885462918}
   - component: {fileID: 5568516293430644018}
   - component: {fileID: 8023009080429224955}
   - component: {fileID: 3278528144607332742}
+  - component: {fileID: 5078696464308953251}
+  - component: {fileID: 1812134176541712537}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2751,110 +2751,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &2117626657323688932
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3101696821940572050}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <IsNested>k__BackingField: 0
-  WasActiveDuringEdit: 0
-  WasActiveDuringEdit_Set1: 1
-  <ComponentIndex>k__BackingField: 0
-  <PredictedSpawn>k__BackingField: {fileID: 0}
-  <PredictedOwner>k__BackingField: {fileID: 0}
-  NetworkBehaviours:
-  - {fileID: 1158082231646370225}
-  InitializedParentNetworkBehaviour: {fileID: 0}
-  InitializedNestedNetworkObjects: []
-  RuntimeParentNetworkBehaviour: {fileID: 0}
-  RuntimeChildNetworkBehaviours: []
-  _isNetworked: 1
-  _isSpawnable: 1
-  _isGlobal: 0
-  _initializeOrder: 0
-  _preventDespawnOnDisconnect: 0
-  _defaultDespawnType: 0
-  _initializedTimestamp: -8584233381251347045
-  _localLevelOfDetailCalculationType: 0
-  _useLevelOfDetail: 0
-  _useRootLevelOfDetail: 1
-  NetworkObserver: {fileID: 0}
-  _enablePrediction: 0
-  _predictionType: 0
-  _localReconcileCorrectionType: 2
-  _graphicalObject: {fileID: 0}
-  _detachGraphicalObject: 0
-  _enableStateForwarding: 1
-  _networkTransform: {fileID: 0}
-  _ownerInterpolation: 1
-  _ownerSmoothedProperties: 255
-  _adaptiveInterpolation: 3
-  _spectatorSmoothedProperties: 255
-  _spectatorInterpolation: 2
-  _enableTeleport: 0
-  _teleportThreshold: 1
-  <PrefabId>k__BackingField: 0
-  <SpawnableCollectionId>k__BackingField: 0
-  <AssetPathHash>k__BackingField: 2092870565765373345
-  SceneId: 0
-  SerializedTransformProperties:
-    Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 1}
-    Scale: {x: 1, y: 1, z: 1}
-    IsValid: 1
---- !u!114 &1158082231646370225
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3101696821940572050}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 0
-  _addedNetworkObject: {fileID: 2117626657323688932}
-  _networkObjectCache: {fileID: 2117626657323688932}
-  _componentConfiguration: 0
-  _synchronizeParent: 0
-  _packing:
-    Position: 1
-    Rotation: 1
-    Scale: 0
-  _useScaledTime: 1
-  _interpolation: 2
-  _extrapolation: 2
-  _enableTeleport: 0
-  _teleportThreshold: 1
-  _clientAuthoritative: 1
-  _sendToOwner: 1
-  _interval: 1
-  _synchronizePosition: 1
-  _positionSensitivity: 0.001
-  _positionSnapping:
-    X: 0
-    Y: 0
-    Z: 0
-  _synchronizeRotation: 1
-  _rotationSnapping:
-    X: 0
-    Y: 0
-    Z: 0
-  _synchronizeScale: 1
-  _scaleSensitivity: 0.001
-  _scaleSnapping:
-    X: 0
-    Y: 0
-    Z: 0
 --- !u!135 &7065124915991797771
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -3038,15 +2934,61 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c01cb2b42f460e34a8b1416f8a22e41b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
-  _addedNetworkObject: {fileID: 2117626657323688932}
-  _networkObjectCache: {fileID: 0}
   _rb: {fileID: 37877899543040228}
   _mainJoint: {fileID: 3264589864885462918}
   _animator: {fileID: 6878340766807476932}
+  _networkRb3D: {fileID: 1812134176541712537}
   _maxSpeed: 2
-  _jumpForce: 15
+  _movementForce: 30
   _rotationSpeed: 500
+  _walkInputScale: 0.5
+  _jumpForce: 15
+  _gravity: 10
+  _groundCheckRadius: 0.05
+  _groundCheckDist: 0.02
+--- !u!114 &5078696464308953251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3101696821940572050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SortKey: 3871071165
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 3278528144607332742}
+  - {fileID: 1812134176541712537}
+  ForceRemoteRenderTimeframe: 0
+--- !u!114 &1812134176541712537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3101696821940572050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a591d221a634417e9827eb58e17de84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 1
+  _interpolationTarget: {fileID: 0}
+  UsePreciseRotation: 0
+  UseRenderSleepThresholds: 1
+  RenderThresholds:
+    UseEnergy: 1
+    Position: 0.01
+    Rotation: 0.01
+    Scale: 0.01
 --- !u!1 &3185810106208519795
 GameObject:
   m_ObjectHideFlags: 0
@@ -5345,7 +5287,7 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 1
+    positionSpring: 0.5
     positionDamper: 0
     maximumForce: 3.4028233e+38
     useAcceleration: 0
@@ -5373,7 +5315,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _animatedRb: {fileID: 3869524433981528176}
-  _syncAnimation: 0
+  _syncAnimation: 1
 --- !u!1 &6443379591290697177
 GameObject:
   m_ObjectHideFlags: 0
@@ -7020,7 +6962,7 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 1
+    positionSpring: 0.5
     positionDamper: 0
     maximumForce: 3.4028233e+38
     useAcceleration: 0
@@ -7048,7 +6990,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _animatedRb: {fileID: 8993319328000666044}
-  _syncAnimation: 0
+  _syncAnimation: 1
 --- !u!1 &8545469061803955330
 GameObject:
   m_ObjectHideFlags: 0

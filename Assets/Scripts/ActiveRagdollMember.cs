@@ -1,4 +1,3 @@
-using FishNet.Object;
 using UnityEngine;
 
 public class ActiveRagdollMember : MonoBehaviour

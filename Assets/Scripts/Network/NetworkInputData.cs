@@ -1,0 +1,10 @@
+using Fusion;
+using UnityEngine;
+
+public struct NetworkInputData : INetworkInput
+{
+    // optimise by sending bytes instead of vector2
+    public Vector2 _movementInput;
+    public NetworkBool _isJumpPressed;
+    public NetworkBool _isSprintPressed;
+}
