@@ -13,10 +13,11 @@ public class CameraManager : MonoBehaviour
 
         if (Camera.main != null)
         {
-            if (TryGetComponent<CinemachineBrain>(out CinemachineBrain brain))
+            if (Camera.main.TryGetComponent<CinemachineBrain>(out CinemachineBrain brain))
             {
                 _brain = brain;
                 PlayerRegistry.RegisterCameraSystem(_brain, _vcam);
+                Utils.DebugLog("CameraManager: Successfully found Brain on Main Camera and registered system!");
             }
         }
     }

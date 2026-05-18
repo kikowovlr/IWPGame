@@ -40,6 +40,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private bool _isGrounded;
     private bool _isRunning;
 
+    //Slope handling
+    [SerializeField] private float _slopeForceMultiplier = 1.5f;
+    [SerializeField] private float _maxSlopeAngle = 55f;
+    private Vector3 _groundNormal = Vector3.up;
+
     //Raycasts
     private readonly RaycastHit[] _raycastHits = new RaycastHit[10];
 
@@ -49,9 +54,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     //Syncing client ragdolls
     // TODO: change to sending bytes instead of Quaternion and limite how much the joints can rotate
-    [Networked, Capacity(30)] public NetworkArray<Quaternion> _networkPhysicsSyncedRotation { get; }
-
-    private CinemachineCamera _cinemachineVirtualCamera;
+    [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
 
     private const float InputThreshold = 0.01f;
 
@@ -113,8 +116,19 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
                 if (localForwardVelocity < _maxSpeed * inputMagnitude)
                 {
+                    // calculate how steep the current slope is
+                    float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
+                    float finalForce = _movementForce;
+
+                    if (_isGrounded && slopeAngle > 5f && slopeAngle <= _maxSlopeAngle)
+                    {
+                        // as slope gets steeper, scale forces
+                        float slopeFactor = slopeAngle / _maxSlopeAngle;
+                        finalForce += _movementForce * slopeFactor * _slopeForceMultiplier;
+                    }
+
                     // move character in the dir they're facing
-                    _rb.AddForce(moveDir * _movementForce);
+                    _rb.AddForce(moveDir * finalForce);
                 }
             }
 
@@ -142,24 +156,29 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             // get networked physics objects from the host and update clients
             for (int i = 0; i < _activeRagdollMembers.Length; i++)
             {
-                _activeRagdollMembers[i].transform.localRotation = Quaternion.Slerp(_activeRagdollMembers[i].transform.localRotation, _networkPhysicsSyncedRotation.Get(i), interpolated.Alpha);
+                _activeRagdollMembers[i].transform.localRotation = Quaternion.Slerp(_activeRagdollMembers[i].transform.localRotation, NetworkPhysicsSyncedRotation.Get(i), interpolated.Alpha);
             }
         }
 
         if (Object.HasInputAuthority)
         {
-            PlayerRegistry.SceneBrain.ManualUpdate();
-            _cinemachineVirtualCamera.UpdateCameraState(Vector3.up, Runner.LocalAlpha);
-        }
+            if (PlayerRegistry.SceneBrain != null && PlayerRegistry.SceneVirtualCamera != null)
+            {
+                PlayerRegistry.SceneBrain.ManualUpdate();
+                PlayerRegistry.SceneVirtualCamera.UpdateCameraState(Vector3.up, Runner.LocalAlpha);
+            }
+        } 
     }
 
     private void CheckForGround()
     {
         // assume we are not grounded
         _isGrounded = false;
+        _groundNormal = Vector3.up;
+        Vector3 castOrigin = _rb.position + (Vector3.up * 0.2f);
 
         // check if we are grounded
-        int numOfHits = Physics.SphereCastNonAlloc(_rb.position, _groundCheckRadius, transform.up * -1, _raycastHits, _groundCheckDist);
+        int numOfHits = Physics.SphereCastNonAlloc(castOrigin, _groundCheckRadius, transform.up * -1, _raycastHits, _groundCheckDist);
 
         // check for valid results
         for (int i = 0; i < numOfHits; i++)
@@ -169,6 +188,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 continue;
 
             _isGrounded = true;
+            _groundNormal = _raycastHits[i].normal;
             break;
         }
     }
@@ -191,7 +211,16 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         camRight.Normalize();
 
         // movement dir vector based on cam's POV
-        return (camForward * networkInputData._movementInput.y) + (camRight * networkInputData._movementInput.x);
+        Vector3 rawMoveDir = (camForward * networkInputData._movementInput.y) + (camRight * networkInputData._movementInput.x);
+
+        // if grounded, tilt dir to match slope of ground
+        if (_isGrounded)
+        {
+            Vector3 slopeMoveDir = Vector3.ProjectOnPlane(rawMoveDir, _groundNormal).normalized;
+            return slopeMoveDir * rawMoveDir.magnitude; // keep input scaling accurate
+        }
+
+        return rawMoveDir;
     }
 
     private void HandleRotation(Vector3 moveDir)
@@ -221,7 +250,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
         {
             _activeRagdollMembers[i].UpdateJointFromAnimation();
-            _networkPhysicsSyncedRotation.Set(i, _activeRagdollMembers[i].transform.localRotation);
+            NetworkPhysicsSyncedRotation.Set(i, _activeRagdollMembers[i].transform.localRotation);
         }
     }
 
@@ -247,7 +276,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         if (Object.HasInputAuthority)
         {
             Local = this;
-            _cinemachineVirtualCamera = PlayerRegistry.SceneVirtualCamera;
             PlayerRegistry.RegisterLocalPlayerTransform(_rb.transform);
             Utils.DebugLog("Spawned player with input authority");
         }
@@ -267,12 +295,21 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private void OnDrawGizmos()
     {
         Vector3 origin = _rb != null ? _rb.position : transform.position;
-        Vector3 endPoint = origin + (transform.up * -1f * _groundCheckDist);
 
-        // Green if touching the floor, Red if in the air
+        // Draw where the spherecast starts
         Gizmos.color = _isGrounded ? Color.green : Color.red;
+        Gizmos.DrawWireSphere(origin, _groundCheckRadius);
 
-        // Draw a single straight line down
+        // Draw where the spherecast ends
+        Vector3 endPoint = origin + (Vector3.down * _groundCheckDist);
+        Gizmos.DrawWireSphere(endPoint, _groundCheckRadius);
         Gizmos.DrawLine(origin, endPoint);
+
+        if (_isGrounded)
+        {
+            // Draw the actual detected floor angle (Yellow)
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawRay(origin, _groundNormal * 2f);
+        }
     }
 }
