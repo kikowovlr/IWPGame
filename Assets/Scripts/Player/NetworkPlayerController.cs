@@ -58,6 +58,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     private const float InputThreshold = 0.01f;
 
+    [SerializeField] private float _animationSpeedDamp = 10f; // how fast animation blends
+    private float _smoothedInputSpeed = 0f;
+
     private void Awake()
     {
         _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
@@ -84,8 +87,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     public override void FixedUpdateNetwork()
     {
-        Vector3 localVelocityVsForward = Vector3.zero;
-        float localForwardVelocity = 0;
+        //Vector3 localVelocityVsForward = Vector3.zero;
+        //float localForwardVelocity = 0;
 
         // only host can do this
         if (Object.HasStateAuthority) // means we are controlling object
@@ -93,28 +96,40 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             CheckForGround();
             ApplyGravity();
 
-            localVelocityVsForward = transform.forward * Vector3.Dot(transform.forward, _rb.linearVelocity);
-            localForwardVelocity = localVelocityVsForward.magnitude;
+            //localVelocityVsForward = transform.forward * Vector3.Dot(transform.forward, _rb.linearVelocity);
+            //localForwardVelocity = localVelocityVsForward.magnitude;
         }
+
+
+        // holds the target anim float
+        float targetAnimSpeed = 0f;
 
         if (GetInput(out NetworkInputData networkInputData))
         {
             // movement calculation
             // if not sprinting, clamp input
             Vector2 finalInput = networkInputData._movementInput;
-            if (!networkInputData._isSprintPressed && finalInput.magnitude > InputThreshold)
-                finalInput = finalInput.normalized * _walkInputScale;
+            //if (!networkInputData._isSprintPressed && finalInput.magnitude > InputThreshold)
+            //    finalInput = finalInput.normalized * _walkInputScale;
 
             float inputMagnitude = finalInput.magnitude;
 
-
             if (inputMagnitude > InputThreshold)
             {
-                Vector3 moveDir = CalculateMoveDirection(networkInputData);
+                // calculate the animation speed should be based entirely on input
+                if (networkInputData._isSprintPressed)
+                {
+                    targetAnimSpeed = 1.0f;
+                }
+                else
+                {
+                    targetAnimSpeed = _walkInputScale;
+                }
 
+                Vector3 moveDir = CalculateMoveDirection(networkInputData);
                 HandleRotation(moveDir);
 
-                if (localForwardVelocity < _maxSpeed * inputMagnitude)
+                if (_rb.linearVelocity.magnitude < _maxSpeed * inputMagnitude)
                 {
                     // calculate how steep the current slope is
                     float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
@@ -131,13 +146,27 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                     _rb.AddForce(moveDir * finalForce);
                 }
             }
+            else
+            {
+                Vector3 currentVelocity = _rb.linearVelocity;
+                Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
+
+                // brake
+                float brakeStrength = 18f;
+                horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, brakeStrength * Runner.DeltaTime);
+
+                _rb.linearVelocity = new Vector3(horizontalVelocity.x, currentVelocity.y, horizontalVelocity.z);
+                _rb.angularVelocity = Vector3.MoveTowards(_rb.angularVelocity, Vector3.zero, brakeStrength * Runner.DeltaTime);
+            }
 
             HandleJump(networkInputData);
         }
 
         if (Object.HasStateAuthority)
         {
-            UpdateAnimations(localForwardVelocity);
+            _smoothedInputSpeed = Mathf.MoveTowards(_smoothedInputSpeed, targetAnimSpeed, Runner.DeltaTime * _animationSpeedDamp);
+
+            UpdateAnimations(_smoothedInputSpeed);
 
             // TODO
             // check if it is falling too far below map
@@ -242,9 +271,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
-    private void UpdateAnimations(float forwardVelocity)
+    private void UpdateAnimations(float animationValue)
     {
-        _animator.SetFloat("MovementSpeed", forwardVelocity / _maxSpeed);
+        _animator.SetFloat("MovementSpeed", animationValue);
 
         // update joints rotation based on animation
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
@@ -292,24 +321,24 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             Runner.Despawn(Object);
     }
 
-    private void OnDrawGizmos()
-    {
-        Vector3 origin = _rb != null ? _rb.position : transform.position;
+    //private void OnDrawGizmos()
+    //{
+    //    Vector3 origin = _rb != null ? _rb.position : transform.position;
 
-        // Draw where the spherecast starts
-        Gizmos.color = _isGrounded ? Color.green : Color.red;
-        Gizmos.DrawWireSphere(origin, _groundCheckRadius);
+    //    // Draw where the spherecast starts
+    //    Gizmos.color = _isGrounded ? Color.green : Color.red;
+    //    Gizmos.DrawWireSphere(origin, _groundCheckRadius);
 
-        // Draw where the spherecast ends
-        Vector3 endPoint = origin + (Vector3.down * _groundCheckDist);
-        Gizmos.DrawWireSphere(endPoint, _groundCheckRadius);
-        Gizmos.DrawLine(origin, endPoint);
+    //    // Draw where the spherecast ends
+    //    Vector3 endPoint = origin + (Vector3.down * _groundCheckDist);
+    //    Gizmos.DrawWireSphere(endPoint, _groundCheckRadius);
+    //    Gizmos.DrawLine(origin, endPoint);
 
-        if (_isGrounded)
-        {
-            // Draw the actual detected floor angle (Yellow)
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawRay(origin, _groundNormal * 2f);
-        }
-    }
+    //    if (_isGrounded)
+    //    {
+    //        // Draw the actual detected floor angle (Yellow)
+    //        Gizmos.color = Color.yellow;
+    //        Gizmos.DrawRay(origin, _groundNormal * 2f);
+    //    }
+    //}
 }

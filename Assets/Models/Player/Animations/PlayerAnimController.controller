@@ -55,7 +55,7 @@ AnimatorState:
   m_TimeParameter: 
 --- !u!1107 &-1805098983574909171
 AnimatorStateMachine:
-  serializedVersion: 6
+  serializedVersion: 7
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -98,7 +98,7 @@ BlendTree:
     m_DirectBlendParameter: MovementSpeed
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: -203655887218126122, guid: 5c6c1f4f1a7eb964fb86a5d6c3917649, type: 3}
+    m_Motion: {fileID: 1827226128182048838, guid: a9ffd44a2dadb4547a97d3b90c13d840, type: 3}
     m_Threshold: 0.5
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -106,7 +106,7 @@ BlendTree:
     m_DirectBlendParameter: MovementSpeed
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: -203655887218126122, guid: f151cce07a445a04eae16edf9aa5eacb, type: 3}
+    m_Motion: {fileID: 1827226128182048838, guid: ae0c79a1ab072f64d9e21880b3d97a10, type: 3}
     m_Threshold: 1
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -154,7 +154,7 @@ AnimatorController:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PlayerAnimController
-  serializedVersion: 5
+  serializedVersion: 6
   m_AnimatorParameters:
   - m_Name: MovementSpeed
     m_Type: 1
@@ -175,6 +175,7 @@ AnimatorController:
     m_IKPass: 0
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
+  m_EvaluateTransitionsOnStart: 0
 --- !u!1101 &78437255225842752
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
