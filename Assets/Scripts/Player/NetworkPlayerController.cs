@@ -39,6 +39,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     //States
     private bool _isGrounded;
     private bool _isRunning;
+    private bool _isActiveRagdoll;
 
     //Slope handling
     [SerializeField] private float _maxSlopeAngle = 55f;
@@ -67,10 +68,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     [SerializeField] private float _animationSpeedDamp = 10f; // how fast animation blends
     private float _smoothedInputSpeed = 0f;
 
+    float _startSlerpPositionSpring = 0.0f;
+
     private void Awake()
     {
         _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
         _initialJointRotation = _mainJoint.transform.localRotation;
+    }
+
+    private void Start()
+    {
+        // store initial slerp drive spring to reset when exiting ragdoll
+        _startSlerpPositionSpring = _mainJoint.slerpDrive.positionSpring;
     }
 
     public void OnMove(InputValue value)
@@ -345,6 +354,49 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             _activeRagdollMembers[i].UpdateJointFromAnimation();
             NetworkPhysicsSyncedRotation.Set(i, _activeRagdollMembers[i].transform.localRotation);
         }
+    }
+
+    //void OnCollisionEnter(Collision other)
+    //{
+    //    MakeRagdoll();
+    //}
+
+    void MakeRagdoll()
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        // update main joint
+        JointDrive jointDrive = _mainJoint.slerpDrive;
+        jointDrive.positionSpring = 0f;
+        _mainJoint.slerpDrive = jointDrive;
+
+        // update joints rotation and send them to clients
+        for (int i = 0; i < _activeRagdollMembers.Length; i++)
+        {
+            _activeRagdollMembers[i].MakeRagdoll();
+        }
+
+        _isActiveRagdoll = false;
+    }
+
+    void MakeActiveRagdoll()
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        // update main joint
+        JointDrive jointDrive = _mainJoint.slerpDrive;
+        jointDrive.positionSpring = _startSlerpPositionSpring;
+        _mainJoint.slerpDrive = jointDrive;
+
+        // update joints rotation and send them to clients
+        for (int i = 0; i < _activeRagdollMembers.Length; i++)
+        {
+            _activeRagdollMembers[i].MakeActiveRagdoll();
+        }
+
+        _isActiveRagdoll = true;
     }
 
     // spawner calls this then transmit info to host

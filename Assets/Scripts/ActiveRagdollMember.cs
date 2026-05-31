@@ -7,6 +7,7 @@ public class ActiveRagdollMember : MonoBehaviour
     Rigidbody _rb;
     ConfigurableJoint _joint;
     Quaternion _startLocalRotation; // keep track of starting rotation
+    float _startSlerpPositionSpring = 0.0f;
 
     private void Awake()
     {
@@ -15,6 +16,7 @@ public class ActiveRagdollMember : MonoBehaviour
 
 
         _startLocalRotation = transform.localRotation;
+        _startSlerpPositionSpring = _joint.slerpDrive.positionSpring;
     }
 
     public void UpdateJointFromAnimation()
@@ -23,5 +25,19 @@ public class ActiveRagdollMember : MonoBehaviour
             return;
 
         ConfigurableJointExtensions.SetTargetRotationLocal(_joint, _animatedRb.transform.localRotation, _startLocalRotation);
+    }
+
+    public void MakeRagdoll()
+    {
+        JointDrive jointDrive = _joint.slerpDrive;
+        jointDrive.positionSpring = 1;
+        _joint.slerpDrive = jointDrive;
+    }
+
+    public void MakeActiveRagdoll()
+    {
+        JointDrive jointDrive = _joint.slerpDrive;
+        jointDrive.positionSpring = _startSlerpPositionSpring;
+        _joint.slerpDrive = jointDrive;
     }
 }
