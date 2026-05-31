@@ -47,8 +47,30 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
     // input is being collected by network player which is then sent to the host thru this fn
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        if (NetworkPlayerController.Local != null)
-            input.Set(NetworkPlayerController.Local.GetNetworkInput());
+        NetworkInputData inputData = new NetworkInputData();
+
+        bool isCloneInstance = Application.dataPath.Contains("Clone");
+        if (!isCloneInstance)
+        {
+            if (NetworkPlayerController.Local != null)
+                inputData = NetworkPlayerController.Local.GetNetworkInput();
+        }
+        else
+        {
+            Vector2 arrowInput = Vector2.zero;
+            if (Input.GetKey(KeyCode.UpArrow)) arrowInput.y += 1f;
+            if (Input.GetKey(KeyCode.DownArrow)) arrowInput.y -= 1f;
+            if (Input.GetKey(KeyCode.RightArrow)) arrowInput.x += 1f;
+            if (Input.GetKey(KeyCode.LeftArrow)) arrowInput.x -= 1f;
+
+            inputData._movementInput = arrowInput.normalized;
+
+            // Map alternative Jump (Right Shift) and Sprint (Right Control) for Player 2
+            inputData._isJumpPressed = Input.GetKey(KeyCode.RightShift);
+            inputData._isSprintPressed = Input.GetKey(KeyCode.RightControl);
+        }
+
+        input.Set(inputData);
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)

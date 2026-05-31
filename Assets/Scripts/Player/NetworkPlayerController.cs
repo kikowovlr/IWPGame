@@ -41,12 +41,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private bool _isRunning;
 
     //Slope handling
-    [SerializeField] private float _slopeForceMultiplier = 1.5f;
     [SerializeField] private float _maxSlopeAngle = 55f;
+    [SerializeField] private float _slopeForceMultiplier = 1.5f;
+    [SerializeField] private float _stickForce = 40f;
+    [SerializeField] private float _brakeStrength = 18f;
+    [SerializeField] private float _rideHeight = 0.75f; // ideal dist from player center to ground
+    [SerializeField] private float _rideSpringStrength = 200f; // how forcefully it snaps back up to ride height
+    [SerializeField] private float _rideSpringDampener = 20f; // prevents character from bouncing
     private Vector3 _groundNormal = Vector3.up;
 
     //Raycasts
     private readonly RaycastHit[] _raycastHits = new RaycastHit[10];
+    private RaycastHit _groundHit;
 
     //Syncing of ragdoll parts
     ActiveRagdollMember[] _activeRagdollMembers;
@@ -87,17 +93,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     public override void FixedUpdateNetwork()
     {
-        //Vector3 localVelocityVsForward = Vector3.zero;
-        //float localForwardVelocity = 0;
-
         // only host can do this
         if (Object.HasStateAuthority) // means we are controlling object
         {
             CheckForGround();
             ApplyGravity();
-
-            //localVelocityVsForward = transform.forward * Vector3.Dot(transform.forward, _rb.linearVelocity);
-            //localForwardVelocity = localVelocityVsForward.magnitude;
         }
 
 
@@ -108,55 +108,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             // movement calculation
             // if not sprinting, clamp input
-            Vector2 finalInput = networkInputData._movementInput;
-            //if (!networkInputData._isSprintPressed && finalInput.magnitude > InputThreshold)
-            //    finalInput = finalInput.normalized * _walkInputScale;
-
-            float inputMagnitude = finalInput.magnitude;
+            float inputMagnitude = networkInputData._movementInput.magnitude;
 
             if (inputMagnitude > InputThreshold)
             {
                 // calculate the animation speed should be based entirely on input
-                if (networkInputData._isSprintPressed)
-                {
-                    targetAnimSpeed = 1.0f;
-                }
-                else
-                {
-                    targetAnimSpeed = _walkInputScale;
-                }
+                targetAnimSpeed = networkInputData._isSprintPressed ? 1.0f : _walkInputScale;
 
-                Vector3 moveDir = CalculateMoveDirection(networkInputData);
-                HandleRotation(moveDir);
-
-                if (_rb.linearVelocity.magnitude < _maxSpeed * inputMagnitude)
-                {
-                    // calculate how steep the current slope is
-                    float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
-                    float finalForce = _movementForce;
-
-                    if (_isGrounded && slopeAngle > 5f && slopeAngle <= _maxSlopeAngle)
-                    {
-                        // as slope gets steeper, scale forces
-                        float slopeFactor = slopeAngle / _maxSlopeAngle;
-                        finalForce += _movementForce * slopeFactor * _slopeForceMultiplier;
-                    }
-
-                    // move character in the dir they're facing
-                    _rb.AddForce(moveDir * finalForce);
-                }
+                ProcessInputMovement(networkInputData, inputMagnitude);
             }
             else
             {
-                Vector3 currentVelocity = _rb.linearVelocity;
-                Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
-
-                // brake
-                float brakeStrength = 18f;
-                horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, brakeStrength * Runner.DeltaTime);
-
-                _rb.linearVelocity = new Vector3(horizontalVelocity.x, currentVelocity.y, horizontalVelocity.z);
-                _rb.angularVelocity = Vector3.MoveTowards(_rb.angularVelocity, Vector3.zero, brakeStrength * Runner.DeltaTime);
+                ApplyIdleBrakes();
             }
 
             HandleJump(networkInputData);
@@ -173,6 +136,71 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             if (transform.position.y < -10)
                 _networkRb3D.Teleport(Vector3.zero, Quaternion.identity);
         }
+    }
+
+    private void ProcessInputMovement(NetworkInputData networkInputData, float inputMagnitude)
+    {
+        Vector3 moveDir = CalculateMoveDirection(networkInputData);
+        HandleRotation(moveDir);
+
+        if (_rb.linearVelocity.magnitude < _maxSpeed * inputMagnitude)
+        {
+            // calculate how steep the current slope is
+            float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
+            float finalForce = _movementForce;
+
+            // scale forces when climbing up hills
+            if (_isGrounded && slopeAngle > 5f && slopeAngle <= _maxSlopeAngle)
+            {
+                // as slope gets steeper, scale forces
+                float slopeFactor = slopeAngle / _maxSlopeAngle;
+                finalForce += _movementForce * slopeFactor * _slopeForceMultiplier;
+            }
+
+            // move character in the dir they're facing
+            _rb.AddForce(moveDir * finalForce, ForceMode.Force);
+            GlueToSlope(slopeAngle);
+        }
+    }   
+
+    private void GlueToSlope(float slopeAngle)
+    {
+        // if we are on a slope, add a downward force to keep us glued to it
+        if (_isGrounded && slopeAngle > 5f && _rb.linearVelocity.y > 0.1f)
+        {
+            _rb.AddForce(Vector3.down * _stickForce, ForceMode.Force);
+        }
+    }
+
+    private void ApplyIdleBrakes()
+    {
+        Vector3 currentVelocity = _rb.linearVelocity;
+
+        if (_isGrounded)
+        {
+            float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
+
+            // on slope
+            if (slopeAngle > 2f && slopeAngle <= _maxSlopeAngle)
+            {
+                // stop horizontal sliding on hills
+                _rb.linearVelocity = new Vector3(0f, _rb.linearVelocity.y, 0f);
+                _rb.angularVelocity = Vector3.zero;
+
+                // counteract gravity
+                _rb.AddForce(-Physics.gravity * _rb.mass, ForceMode.Force);
+            }
+            else
+            {
+                // deceleration on flat ground
+                Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
+                // brake
+                horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, _brakeStrength * Runner.DeltaTime);
+                _rb.linearVelocity = new Vector3(horizontalVelocity.x, currentVelocity.y, horizontalVelocity.z);
+            }
+        }
+
+        _rb.angularVelocity = Vector3.MoveTowards(_rb.angularVelocity, Vector3.zero, _brakeStrength * Runner.DeltaTime);
     }
 
     public override void Render()
@@ -209,6 +237,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         // check if we are grounded
         int numOfHits = Physics.SphereCastNonAlloc(castOrigin, _groundCheckRadius, transform.up * -1, _raycastHits, _groundCheckDist);
 
+        float closestDistance = float.MaxValue;
+        bool foundValidHit = false;
+
         // check for valid results
         for (int i = 0; i < numOfHits; i++)
         {
@@ -216,9 +247,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             if (_raycastHits[i].transform.root == transform)
                 continue;
 
+            if (_raycastHits[i].distance < closestDistance)
+            {
+                closestDistance = _raycastHits[i].distance;
+                _groundHit = _raycastHits[i];
+                foundValidHit = true;
+            }
+        }
+
+        if (foundValidHit)
+        {
             _isGrounded = true;
-            _groundNormal = _raycastHits[i].normal;
-            break;
+            _groundNormal = _groundHit.normal;
         }
     }
 
@@ -226,7 +266,31 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     {
         // apply more gravity to make character less floaty
         if (!_isGrounded)
+        {
             _rb.AddForce(Vector3.down * _gravity);
+            return;
+        }
+
+        // ground floating spring
+        RaycastHit hit = _raycastHits[0];
+
+        // calculate dir of velocity relative to world
+        Vector3 vel = _rb.linearVelocity;
+        Vector3 rayDir = transform.up * -1f;
+
+        // calculate how much ray is compressed compared to our target height
+        float rayDirVel = Vector3.Dot(rayDir, vel);
+        float relVel = rayDirVel;
+
+        float currentHeight = Vector3.Distance(_rb.position, hit.point);
+        float x = currentHeight - _rideHeight;
+
+        // Hooke's Law Spring Equation: Force = (Compression * Stiffness) - (Velocity * Dampening)
+        float springForce = (x * _rideSpringStrength) - (relVel * _rideSpringDampener);
+
+        if (springForce < 0f) springForce = 0f;
+
+        _rb.AddForce(transform.up * springForce, ForceMode.Force);
     }
 
     private Vector3 CalculateMoveDirection(NetworkInputData networkInputData)
@@ -320,25 +384,4 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         if (Object.InputAuthority == player)
             Runner.Despawn(Object);
     }
-
-    //private void OnDrawGizmos()
-    //{
-    //    Vector3 origin = _rb != null ? _rb.position : transform.position;
-
-    //    // Draw where the spherecast starts
-    //    Gizmos.color = _isGrounded ? Color.green : Color.red;
-    //    Gizmos.DrawWireSphere(origin, _groundCheckRadius);
-
-    //    // Draw where the spherecast ends
-    //    Vector3 endPoint = origin + (Vector3.down * _groundCheckDist);
-    //    Gizmos.DrawWireSphere(endPoint, _groundCheckRadius);
-    //    Gizmos.DrawLine(origin, endPoint);
-
-    //    if (_isGrounded)
-    //    {
-    //        // Draw the actual detected floor angle (Yellow)
-    //        Gizmos.color = Color.yellow;
-    //        Gizmos.DrawRay(origin, _groundNormal * 2f);
-    //    }
-    //}
 }
