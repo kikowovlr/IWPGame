@@ -39,7 +39,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     //States
     private bool _isGrounded;
     private bool _isRunning;
-    private bool _isActiveRagdoll;
+    private bool _isActiveRagdoll = true;
+    private bool _isGrabbingActive = false;
+    public bool IsGrabbingActive => _isGrabbingActive;
 
     //Slope handling
     [SerializeField] private float _maxSlopeAngle = 55f;
@@ -70,10 +72,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     float _startSlerpPositionSpring = 0.0f;
 
+    // Grabbing/Punching
+    private float _pressStartTime;
+    private bool _prevGrabPressed;
+    public float HoldThreshold = 0.2f; // how long before tap becomes a hold
+    private HandGrabHandler[] _handGrabHandlers;
+
+    // getters
+    public bool IsActiveRagdoll => _isActiveRagdoll;
+
     private void Awake()
     {
         _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
         _initialJointRotation = _mainJoint.transform.localRotation;
+        _handGrabHandlers = GetComponentsInChildren<HandGrabHandler>();
     }
 
     private void Start()
@@ -119,6 +131,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             // if not sprinting, clamp input
             float inputMagnitude = networkInputData._movementInput.magnitude;
 
+            ProcessGrabPunchLogic(networkInputData._isGrabPressed);
+
             if (inputMagnitude > InputThreshold)
             {
                 // calculate the animation speed should be based entirely on input
@@ -132,6 +146,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             }
 
             HandleJump(networkInputData);
+
+            _prevGrabPressed = networkInputData._isGrabPressed;
         }
 
         if (Object.HasStateAuthority)
@@ -144,6 +160,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             // check if it is falling too far below map
             if (transform.position.y < -10)
                 _networkRb3D.Teleport(Vector3.zero, Quaternion.identity);
+
+            foreach (HandGrabHandler handGrabHandler in _handGrabHandlers)
+            {
+                handGrabHandler.UpdateState();
+            }
         }
     }
 
@@ -171,6 +192,44 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             GlueToSlope(slopeAngle);
         }
     }   
+
+    private void ProcessGrabPunchLogic(bool isPressed)
+    {
+        // detect press start
+        if (isPressed && !_prevGrabPressed)
+        {
+            _pressStartTime = Runner.SimulationTime;
+        }
+
+        // detect release
+        if (!isPressed && _prevGrabPressed)
+        {
+            float pressDuration = Runner.SimulationTime - _pressStartTime;
+
+            // tap threshold
+            if (pressDuration < HoldThreshold)
+            {
+                // Handle tap (punch)
+                Utils.DebugLog("Punch!");
+            }
+            else
+            {
+                // Handle hold release (stop grabbing)
+                _isGrabbingActive = false;
+                Utils.DebugLog("Released Grab");
+            }
+        }
+
+        // detect continuous hold
+        if (isPressed && (Runner.SimulationTime - _pressStartTime) >= HoldThreshold)
+        {
+            if (!_isGrabbingActive)
+            {
+                _isGrabbingActive = true;
+                Utils.DebugLog("Started Grab");
+            }
+        }
+    }
 
     private void GlueToSlope(float slopeAngle)
     {
@@ -378,6 +437,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
 
         _isActiveRagdoll = false;
+        _isGrabbingActive = false;
     }
 
     void MakeActiveRagdoll()
@@ -397,6 +457,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
 
         _isActiveRagdoll = true;
+        _isGrabbingActive = false;
     }
 
     // spawner calls this then transmit info to host
@@ -408,6 +469,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         networkInputData._movementInput = _moveInputVector;
         networkInputData._isJumpPressed = _isJumpButtonPressed;
         networkInputData._isSprintPressed = _isRunning;
+        networkInputData._isGrabPressed = Input.GetMouseButton(0);
 
         // reset jump button 
         _isJumpButtonPressed = false;

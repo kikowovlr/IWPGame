@@ -7,5 +7,5 @@ public struct NetworkInputData : INetworkInput
     public Vector2 _movementInput;
     public NetworkBool _isJumpPressed;
     public NetworkBool _isSprintPressed;
-    public NetworkBool _useAlternativeKeyboardLayout;
+    public NetworkBool _isGrabPressed;
 }

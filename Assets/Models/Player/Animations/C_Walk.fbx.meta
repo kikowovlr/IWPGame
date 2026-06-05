@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a9ffd44a2dadb4547a97d3b90c13d840
+guid: a06410398cacb72438cfd6b1b069ef42
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -48,9 +48,9 @@ ModelImporter:
       loopBlendPositionY: 1
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 1
-      keepOriginalPositionY: 0
+      keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
-      heightFromFeet: 1
+      heightFromFeet: 0
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
@@ -943,12 +943,12 @@ ModelImporter:
     - name: L_UpperArm_jnt
       parentName: L_Clavicle_jnt
       position: {x: 5.684342e-16, y: 0.12551025, z: 8.881784e-18}
-      rotation: {x: -0.062116727, y: 0.0024963503, z: -0.04007821, w: 0.99726075}
+      rotation: {x: -0.062116727, y: 0.0024963496, z: -0.040078156, w: 0.9972608}
       scale: {x: 1, y: 1, z: 1}
     - name: L_LowerArm_jnt
       parentName: L_UpperArm_jnt
       position: {x: 5.684342e-16, y: 0.12551025, z: 8.881784e-18}
-      rotation: {x: 0.07237886, y: 0.00000001816079, z: 0.000000093317794, w: 0.9973772}
+      rotation: {x: 0.072378814, y: 0.000000033993267, z: 0.00000007590641, w: 0.9973772}
       scale: {x: 1, y: 1, z: 1}
     - name: L_Wrist_jnt
       parentName: L_LowerArm_jnt
@@ -988,12 +988,12 @@ ModelImporter:
     - name: R_UpperArm_jnt
       parentName: R_Clavicle_jnt
       position: {x: 0.0000004527121, y: -0.14831144, z: 0.00000003414525}
-      rotation: {x: -0.0613001, y: 0.0024635622, z: -0.040080424, w: 0.99731135}
+      rotation: {x: -0.0613001, y: 0.0024635603, z: -0.040080424, w: 0.99731135}
       scale: {x: 1, y: 1, z: 1}
     - name: R_LowerArm_jnt
       parentName: R_UpperArm_jnt
       position: {x: -4.8316907e-15, y: -0.12550959, z: 0.000000089590536}
-      rotation: {x: 0.072338544, y: -0.000000015366819, z: 0.00000027838354, w: 0.99738014}
+      rotation: {x: 0.07233854, y: -0.000000013504174, z: 0.00000027838354, w: 0.99738014}
       scale: {x: 1, y: 1, z: 1}
     - name: R_Wrist_jnt
       parentName: R_LowerArm_jnt
