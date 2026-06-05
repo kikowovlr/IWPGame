@@ -32,6 +32,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     [SerializeField] private float _groundCheckRadius = 0.1f;
     [SerializeField] private float _groundCheckDist = 0.5f;
 
+    [Header("Ragdoll Settings")]
+    [Range(0.1f, 1.0f)]
+    [SerializeField] private float _consciousMass = 1f;
+    [Range(0.1f, 1.0f)]
+    [SerializeField] private float _unconsciousMass = 0.2f;
+
     //Input
     Vector2 _moveInputVector = Vector2.zero;
     bool _isJumpButtonPressed = false;
@@ -39,7 +45,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     //States
     private bool _isGrounded;
     private bool _isRunning;
-    private bool _isActiveRagdoll = true;
+    private bool _isKnockedOut = false; // == non-active ragdoll
     private bool _isGrabbingActive = false;
     public bool IsGrabbingActive => _isGrabbingActive;
 
@@ -79,7 +85,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private HandGrabHandler[] _handGrabHandlers;
 
     // getters
-    public bool IsActiveRagdoll => _isActiveRagdoll;
+    public bool IsKnockedOut => _isKnockedOut;
 
     private void Awake()
     {
@@ -118,7 +124,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         if (Object.HasStateAuthority) // means we are controlling object
         {
             CheckForGround();
-            ApplyGravity();
+
+            if (!IsKnockedOut)
+                ApplyGravity();
+            else
+                // apply downward gravity when unconscious so their dead weight falls naturally
+                _rb.AddForce(Vector3.down * _gravity, ForceMode.Force);
         }
 
 
@@ -127,31 +138,54 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
         if (GetInput(out NetworkInputData networkInputData))
         {
-            // movement calculation
-            // if not sprinting, clamp input
-            float inputMagnitude = networkInputData._movementInput.magnitude;
-
-            ProcessGrabPunchLogic(networkInputData._isGrabPressed);
-
-            if (inputMagnitude > InputThreshold)
+            // testing
+            if (networkInputData._isRagdollPressed)
             {
-                // calculate the animation speed should be based entirely on input
-                targetAnimSpeed = networkInputData._isSprintPressed ? 1.0f : _walkInputScale;
-
-                ProcessInputMovement(networkInputData, inputMagnitude);
-            }
-            else
-            {
-                ApplyIdleBrakes();
+                if (!IsKnockedOut)
+                    Knockout();
+                else
+                    RecoverActiveRagdoll();
             }
 
-            HandleJump(networkInputData);
+            if (!_isKnockedOut)
+            {
+                // movement calculation
+                // if not sprinting, clamp input
+                float inputMagnitude = networkInputData._movementInput.magnitude;
 
-            _prevGrabPressed = networkInputData._isGrabPressed;
+                ProcessGrabPunchLogic(networkInputData._isGrabPressed);
+
+                if (inputMagnitude > InputThreshold)
+                {
+                    // calculate the animation speed should be based entirely on input
+                    targetAnimSpeed = networkInputData._isSprintPressed ? 1.0f : _walkInputScale;
+
+                    ProcessInputMovement(networkInputData, inputMagnitude);
+                }
+                else
+                {
+                    ApplyIdleBrakes();
+                }
+
+                HandleJump(networkInputData);
+                _prevGrabPressed = networkInputData._isGrabPressed;
+            }
+
+            // pass right click input data
+            if (Object.HasStateAuthority)
+            {
+                foreach (HandGrabHandler handGrabHandler in _handGrabHandlers)
+                {
+                    handGrabHandler.ProcessThrowInputUpdate(networkInputData._isThrowPressed);
+                }
+            }
         }
 
         if (Object.HasStateAuthority)
         {
+            if (_isKnockedOut) 
+                targetAnimSpeed = 0f;
+
             _smoothedInputSpeed = Mathf.MoveTowards(_smoothedInputSpeed, targetAnimSpeed, Runner.DeltaTime * _animationSpeedDamp);
 
             UpdateAnimations(_smoothedInputSpeed);
@@ -215,8 +249,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             else
             {
                 // Handle hold release (stop grabbing)
-                _isGrabbingActive = false;
-                Utils.DebugLog("Released Grab");
+                _isGrabbingActive = false; 
             }
         }
 
@@ -226,7 +259,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             if (!_isGrabbingActive)
             {
                 _isGrabbingActive = true;
-                Utils.DebugLog("Started Grab");
             }
         }
     }
@@ -415,10 +447,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
-    void MakeRagdoll()
+    void Knockout()
     {
         if (!Object.HasStateAuthority)
             return;
+
+        _isKnockedOut = true;
+        _isGrabbingActive = false;
+
+        SetCharacterMass(_unconsciousMass);
 
         // update main joint
         JointDrive jointDrive = _mainJoint.slerpDrive;
@@ -430,15 +467,17 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             _activeRagdollMembers[i].MakeRagdoll();
         }
-
-        _isActiveRagdoll = false;
-        _isGrabbingActive = false;
     }
 
-    void MakeActiveRagdoll()
+    void RecoverActiveRagdoll()
     {
         if (!Object.HasStateAuthority)
             return;
+
+        _isKnockedOut = false;
+        _isGrabbingActive = false;
+
+        SetCharacterMass(_consciousMass);
 
         // update main joint
         JointDrive jointDrive = _mainJoint.slerpDrive;
@@ -450,9 +489,29 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             _activeRagdollMembers[i].MakeActiveRagdoll();
         }
+    }
 
-        _isActiveRagdoll = true;
-        _isGrabbingActive = false;
+    void SetCharacterMass(float targetMass)
+    {
+        if (_rb == null) return;
+
+        _rb.mass = targetMass;
+    }
+
+    /// <summary>
+    /// checks if a specific Rigidbody is securely held by BOTH of player's hands
+    /// </summary>
+    public bool IsObjectHeldByBothHands(Rigidbody targetRb)
+    {
+        int holdCount = 0;
+        foreach (HandGrabHandler handGrabHandler in _handGrabHandlers)
+        {
+            if (handGrabHandler.IsHoldingObject(targetRb))
+            {
+                holdCount++;
+            }
+        }
+        return holdCount >= 2;
     }
 
     // spawner calls this then transmit info to host
@@ -461,10 +520,24 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         NetworkInputData networkInputData = new NetworkInputData();
 
         // move data
-        networkInputData._movementInput = _moveInputVector;
-        networkInputData._isJumpPressed = _isJumpButtonPressed;
-        networkInputData._isSprintPressed = _isRunning;
-        networkInputData._isGrabPressed = Input.GetMouseButton(0);
+        if (_isKnockedOut)
+        {
+           networkInputData._movementInput = Vector2.zero;
+            networkInputData._isJumpPressed = false;
+            networkInputData._isSprintPressed = false;
+            networkInputData._isGrabPressed = false;
+            networkInputData._isThrowPressed = false;
+        }
+        else
+        {
+            networkInputData._movementInput = _moveInputVector;
+            networkInputData._isJumpPressed = _isJumpButtonPressed;
+            networkInputData._isSprintPressed = _isRunning;
+            networkInputData._isGrabPressed = Input.GetMouseButton(0);
+            networkInputData._isThrowPressed = Input.GetMouseButtonDown(1);
+        }
+
+        networkInputData._isRagdollPressed = Input.GetKey(KeyCode.R);
 
         // reset jump button 
         _isJumpButtonPressed = false;

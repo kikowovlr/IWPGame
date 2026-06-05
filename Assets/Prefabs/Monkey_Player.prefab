@@ -2185,10 +2185,14 @@ MonoBehaviour:
   _ikBlendSpeed: 5
   _armJoint: {fileID: 5598611311335599213}
   _relaxedArmSpring: 20
+  _objThrowForceMultiplier: 0.2
+  _playerThrowForceMultiplier: 1
+  _throwCooldown: 0.5
   _handIKConstraint: {fileID: 7896351572196759224}
   _handIKTarget: {fileID: 6671994331130640117}
   _shoulderPivot: {fileID: 1822612422411763238}
   _maxArmReach: 1
+  _grabLatchDistance: 0.1
 --- !u!1 &1655666544152920499
 GameObject:
   m_ObjectHideFlags: 0
@@ -2617,7 +2621,7 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 5
+    positionSpring: 50
     positionDamper: 2
     maximumForce: 3.4028233e+38
     useAcceleration: 0
@@ -6082,7 +6086,7 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 5
+    positionSpring: 50
     positionDamper: 2
     maximumForce: 3.4028233e+38
     useAcceleration: 0
@@ -9573,7 +9577,7 @@ GameObject:
   - component: {fileID: 1357966978301788564}
   m_Layer: 0
   m_Name: Monkey_Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9819,6 +9823,8 @@ MonoBehaviour:
   _gravity: 10
   _groundCheckRadius: 0.05
   _groundCheckDist: 0.5
+  _consciousMass: 1
+  _unconsciousMass: 0.2
   _maxSlopeAngle: 55
   _slopeForceMultiplier: 4
   _stickForce: 40
@@ -10369,7 +10375,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.52
+  m_Radius: 0.58
   m_Height: 1.26
   m_Direction: 0
   m_Center: {x: 0, y: 0.46, z: 0.02}
@@ -10958,7 +10964,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandGrabHandler
   _animator: {fileID: 538110036522933493}
-  _handSide: 0
+  _handSide: 1
   _enterSearchRadius: 0.4
   _exitSearchRadius: 0.55
   _grabbableLayer:
@@ -10967,10 +10973,14 @@ MonoBehaviour:
   _ikBlendSpeed: 5
   _armJoint: {fileID: 3014451950804821991}
   _relaxedArmSpring: 20
+  _objThrowForceMultiplier: 0.2
+  _playerThrowForceMultiplier: 1
+  _throwCooldown: 0.5
   _handIKConstraint: {fileID: 1826030218811482715}
   _handIKTarget: {fileID: 4927709256630746176}
   _shoulderPivot: {fileID: 3787412626427263284}
   _maxArmReach: 1
+  _grabLatchDistance: 0.1
 --- !u!1 &8284126838233124995
 GameObject:
   m_ObjectHideFlags: 0
