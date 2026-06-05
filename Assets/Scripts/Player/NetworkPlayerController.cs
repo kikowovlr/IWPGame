@@ -415,11 +415,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
-    //void OnCollisionEnter(Collision other)
-    //{
-    //    MakeRagdoll();
-    //}
-
     void MakeRagdoll()
     {
         if (!Object.HasStateAuthority)
