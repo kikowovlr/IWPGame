@@ -33,9 +33,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     [SerializeField] private float _groundCheckDist = 0.5f;
 
     [Header("Ragdoll Settings")]
-    [Range(0.1f, 1.0f)]
-    [SerializeField] private float _consciousMass = 1f;
-    [Range(0.1f, 1.0f)]
     [SerializeField] private float _unconsciousMass = 0.2f;
 
     //Input
@@ -83,6 +80,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private bool _prevGrabPressed;
     public float HoldThreshold = 0.2f; // how long before tap becomes a hold
     private HandGrabHandler[] _handGrabHandlers;
+    private Rigidbody[] _allChildRigidbodies;
+    private float[] _originalMasses;
 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
@@ -92,6 +91,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
         _initialJointRotation = _mainJoint.transform.localRotation;
         _handGrabHandlers = GetComponentsInChildren<HandGrabHandler>();
+
+        // save rbs and mass for ragdoll
+        _allChildRigidbodies = GetComponentsInChildren<Rigidbody>();
+        _originalMasses = new float[_allChildRigidbodies.Length];
+        for (int i = 0; i < _allChildRigidbodies.Length; i++)
+        {
+            _originalMasses[i] = _allChildRigidbodies[i].mass;
+        }
     }
 
     private void Start()
@@ -144,7 +151,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 if (!IsKnockedOut)
                     Knockout();
                 else
-                    RecoverActiveRagdoll();
+                    Recover();
             }
 
             if (!_isKnockedOut)
@@ -447,7 +454,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
-    void Knockout()
+    public void Knockout()
     {
         if (!Object.HasStateAuthority)
             return;
@@ -455,7 +462,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         _isKnockedOut = true;
         _isGrabbingActive = false;
 
-        SetCharacterMass(_unconsciousMass);
+        SetCharacterMass(true);
 
         // update main joint
         JointDrive jointDrive = _mainJoint.slerpDrive;
@@ -469,7 +476,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
-    void RecoverActiveRagdoll()
+    public void Recover()
     {
         if (!Object.HasStateAuthority)
             return;
@@ -477,7 +484,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         _isKnockedOut = false;
         _isGrabbingActive = false;
 
-        SetCharacterMass(_consciousMass);
+        SetCharacterMass(false);
 
         // update main joint
         JointDrive jointDrive = _mainJoint.slerpDrive;
@@ -491,11 +498,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
-    void SetCharacterMass(float targetMass)
+    void SetCharacterMass(bool isKnockedOut)
     {
-        if (_rb == null) return;
+        if (_allChildRigidbodies == null || _allChildRigidbodies.Length == 0) return;
 
-        _rb.mass = targetMass;
+        for (int i = 0; i < _allChildRigidbodies.Length; i++)
+        {
+            if (_allChildRigidbodies[i] != null)
+            {
+                // if knocked out, make them weightless
+                _allChildRigidbodies[i].mass = isKnockedOut ? _unconsciousMass : _originalMasses[i];
+            }
+        }
     }
 
     /// <summary>

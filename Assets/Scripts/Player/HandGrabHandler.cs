@@ -61,7 +61,12 @@ public class HandGrabHandler : NetworkBehaviour
 
     private void Awake()
     {
-        _networkPlayer = transform.root.GetComponent<NetworkPlayerController>();
+        PlayerComponentRegistry registry = transform.root.GetComponent<PlayerComponentRegistry>();
+        if (registry != null)
+            _networkPlayer = registry.Controller;
+        else
+            _networkPlayer = transform.root.GetComponent<NetworkPlayerController>();
+
         _rb = GetComponent<Rigidbody>();
         _handCollider = GetComponent<Collider>();
         _originalHandMass = _rb.mass;
@@ -203,9 +208,6 @@ public class HandGrabHandler : NetworkBehaviour
 
         // connect joint to other rigidbody
         _grabJoint.connectedBody = otherRb;
-        //_grabJoint.xMotion = ConfigurableJointMotion.Locked;
-        //_grabJoint.yMotion = ConfigurableJointMotion.Locked;
-        //_grabJoint.zMotion = ConfigurableJointMotion.Locked;
 
         // use soft limits so the first hand connection doesn't yank the second hand away
         _grabJoint.xMotion = ConfigurableJointMotion.Limited;
@@ -354,7 +356,7 @@ public class HandGrabHandler : NetworkBehaviour
         if (targetRb == null || _grabJoint == null)
             return false;
 
-        return _grabJoint.connectedBody == targetRb;
+        return _grabJoint.connectedBody.transform.root == targetRb.transform.root;
     }
 
     /// <summary>
