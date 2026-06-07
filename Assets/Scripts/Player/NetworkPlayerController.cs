@@ -77,11 +77,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     // Grabbing/Punching
     private float _pressStartTime;
-    private bool _prevGrabPressed;
+    private bool _prevPunchOrGrabPressed;
     public float HoldThreshold = 0.2f; // how long before tap becomes a hold
     private HandGrabHandler[] _handGrabHandlers;
     private Rigidbody[] _allChildRigidbodies;
     private float[] _originalMasses;
+    private PunchHandler _punchHandler;
 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
@@ -91,6 +92,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
         _initialJointRotation = _mainJoint.transform.localRotation;
         _handGrabHandlers = GetComponentsInChildren<HandGrabHandler>();
+
+        PlayerComponentRegistry registry = GetComponent<PlayerComponentRegistry>();
+        if (registry != null)
+        {
+            _punchHandler = registry.Punch;
+        }
 
         // save rbs and mass for ragdoll
         _allChildRigidbodies = GetComponentsInChildren<Rigidbody>();
@@ -139,9 +146,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 _rb.AddForce(Vector3.down * _gravity, ForceMode.Force);
         }
 
-
         // holds the target anim float
         float targetAnimSpeed = 0f;
+
+        // always update active combat states
+        // -> ensures that this is updated on clients since punch timer is not networked
+        if (_punchHandler != null && _punchHandler.IsPunching)
+        {
+            _punchHandler.UpdatePunchState();
+        }
 
         if (GetInput(out NetworkInputData networkInputData))
         {
@@ -160,7 +173,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 // if not sprinting, clamp input
                 float inputMagnitude = networkInputData._movementInput.magnitude;
 
-                ProcessGrabPunchLogic(networkInputData._isGrabPressed);
+                ProcessGrabPunchLogic(networkInputData._isPunchOrGrabPressed, inputMagnitude, networkInputData._isSprintPressed);
 
                 if (inputMagnitude > InputThreshold)
                 {
@@ -175,7 +188,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 }
 
                 HandleJump(networkInputData);
-                _prevGrabPressed = networkInputData._isGrabPressed;
+                _prevPunchOrGrabPressed = networkInputData._isPunchOrGrabPressed;
             }
 
             // pass right click input data
@@ -234,24 +247,36 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }   
 
-    private void ProcessGrabPunchLogic(bool isPressed)
+    private void ProcessGrabPunchLogic(bool isPressed, float inputMagnitude, bool isSprintPressed)
     {
         // detect press start
-        if (isPressed && !_prevGrabPressed)
+        if (isPressed && !_prevPunchOrGrabPressed)
         {
             _pressStartTime = Runner.SimulationTime;
         }
 
         // detect release
-        if (!isPressed && _prevGrabPressed)
+        if (!isPressed && _prevPunchOrGrabPressed)
         {
             float pressDuration = Runner.SimulationTime - _pressStartTime;
 
             // tap threshold
             if (pressDuration < HoldThreshold)
             {
+                // evaluate movement context at the moment of tap release
+                bool isSprinting = isSprintPressed && inputMagnitude > InputThreshold;
+
                 // Handle tap (punch)
-                Utils.DebugLog("Punch!");
+                if (isSprinting && !_punchHandler.IsStrongPunchReady)
+                {
+                    // strong punch on cooldown
+                    _punchHandler.TriggerPunch(true);
+                }
+                else
+                {
+                    // handles both weak and strong punch
+                    _punchHandler.TriggerPunch(isSprinting);
+                }
             }
             else
             {
@@ -539,7 +564,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
            networkInputData._movementInput = Vector2.zero;
             networkInputData._isJumpPressed = false;
             networkInputData._isSprintPressed = false;
-            networkInputData._isGrabPressed = false;
+            networkInputData._isPunchOrGrabPressed = false;
             networkInputData._isThrowPressed = false;
         }
         else
@@ -547,7 +572,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._movementInput = _moveInputVector;
             networkInputData._isJumpPressed = _isJumpButtonPressed;
             networkInputData._isSprintPressed = _isRunning;
-            networkInputData._isGrabPressed = Input.GetMouseButton(0);
+            networkInputData._isPunchOrGrabPressed = Input.GetMouseButton(0);
             networkInputData._isThrowPressed = Input.GetMouseButtonDown(1);
         }
 

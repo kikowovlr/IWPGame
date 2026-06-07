@@ -7,7 +7,7 @@ public struct NetworkInputData : INetworkInput
     public Vector2 _movementInput;
     public NetworkBool _isJumpPressed;
     public NetworkBool _isSprintPressed;
-    public NetworkBool _isGrabPressed;
+    public NetworkBool _isPunchOrGrabPressed;
     public NetworkBool _isThrowPressed;
     public NetworkBool _isRagdollPressed; // for testing ragdoll state sync
 }

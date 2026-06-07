@@ -6,8 +6,10 @@ public class PlayerComponentRegistry : MonoBehaviour
     [SerializeField] private NetworkPlayerController _playerController;
     [SerializeField] private PlayerHealthHandler _healthHandler;
     [SerializeField] private PlayerEliminationHandler _eliminationHandler;
+    [SerializeField] private PunchHandler _punchHandler;
 
     public NetworkPlayerController Controller => _playerController;
     public PlayerHealthHandler Health => _healthHandler;
     public PlayerEliminationHandler Elimination => _eliminationHandler;
+    public PunchHandler Punch => _punchHandler;
 }

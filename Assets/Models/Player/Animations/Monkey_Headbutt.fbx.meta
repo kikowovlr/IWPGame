@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 5cfe30ef4e136be49a8e845dab8bd382
+guid: e71370de16f085442a2c4182512aa802
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Temp Strong Right Punch
+      name: Headbutt
       takeName: Take 001
       internalID: 1827226128182048838
       firstFrame: 0
@@ -42,7 +42,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 1
       loopBlendPositionY: 1
@@ -258,6 +258,14 @@ ModelImporter:
         modified: 0
     - boneName: R_Ear1_jnt
       humanName: RightEye
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Spine2
+      humanName: Chest
       limit:
         min: {x: 0, y: 0, z: 0}
         max: {x: 0, y: 0, z: 0}

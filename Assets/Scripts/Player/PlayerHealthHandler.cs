@@ -41,12 +41,13 @@ public class PlayerHealthHandler : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     public void Rpc_TakeDamage(float damageAmount, Vector3 impactForce, Vector3 impactPoint, NetworkRigidbody3D hitLimb)
     {
-        Utils.DebugLog("Damage taken: " + damageAmount);
-
         if (_playerController.IsKnockedOut)
         {
             // getting hit while knocked down deals damage (health goes into -ve) -> stay knocked out longer
-            CurrentHealth -= damageAmount * _knockedDownDamageMultiplier;
+            float finalDamage = damageAmount * _knockedDownDamageMultiplier;
+            CurrentHealth -= finalDamage;
+            Utils.DebugLog("Damage taken: " + finalDamage);
+            Utils.DebugLog("Health Left: " + CurrentHealth);
 
             // apply force to hit point
             if (hitLimb != null)
@@ -57,6 +58,8 @@ public class PlayerHealthHandler : NetworkBehaviour
 
         // reduce health
         CurrentHealth -= damageAmount;
+        Utils.DebugLog("Damage taken: " + damageAmount);
+        Utils.DebugLog("Health Left: " + CurrentHealth);
 
         // apply force to hit point
         if (hitLimb != null)
@@ -71,6 +74,8 @@ public class PlayerHealthHandler : NetworkBehaviour
 
     private void Knockout()
     {
+        // TODO darken screen (grayscale)
+
         // calculate dynamic duration -> negative health, longer knockedout time
         float overkill = Mathf.Abs(CurrentHealth);
         float extraTime = overkill * 0.05f; // adds 1 sec per 20 points of overkill
