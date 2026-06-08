@@ -25,9 +25,9 @@ public class PunchHandler : NetworkBehaviour
     [SerializeField] private float _strongHandThrustImpulse = 4f;
 
     [Header("Ragdoll Physics Setup")]
-    [SerializeField] private Rigidbody _masterRootRb; 
     [SerializeField] private Rigidbody _leftHandRb;   
     [SerializeField] private Rigidbody _rightHandRb;
+    private Rigidbody _masterRootRb;
 
     private NetworkPlayerController _playerController;
     private DamageDealer _activeDamageDealer;
@@ -51,6 +51,7 @@ public class PunchHandler : NetworkBehaviour
         {
             _playerController = registry.Controller;
             _animator = _playerController.Animator;
+            _masterRootRb = _playerController.NetworkedRb.Rigidbody;
         }
 
         if (_leftHandDamageDealer != null)

@@ -84,6 +84,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     // kicking
     private KickHandler _kickHandler;
 
+    // headbutt
+    private HeadbuttHandler _headbuttHandler;
+
     // getters
     public bool IsKnockedOut => _isKnockedOut;
     public bool IsGrabbingActive => _isGrabbingActive;
@@ -107,6 +110,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             _punchHandler = registry.Punch;
             _kickHandler = registry.Kick;
+            _headbuttHandler = registry.Headbutt;
         }
 
         // save rbs and mass for ragdoll
@@ -166,6 +170,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             _punchHandler.UpdatePunchState();
         }
 
+        if (_headbuttHandler != null && _headbuttHandler.IsHeadbutting)
+        {
+            _headbuttHandler.UpdateHeadbuttState();
+        }
+
         if (GetInput(out NetworkInputData networkInputData))
         {
             // testing
@@ -197,6 +206,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 }
 
                 ProcessKickInput(networkInputData);
+                ProcessHeadbuttInput(networkInputData);
 
                 HandleJump(networkInputData);
                 _prevPunchOrGrabPressed = networkInputData._isPunchOrGrabPressed;
@@ -315,6 +325,16 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             // calculate exact move dir of input
             Vector3 inputDir = CalculateMoveDirection(networkInputData);
             _kickHandler.TriggerAirKick(inputDir, networkInputData._isSprintPressed);
+        }
+    }
+
+    private void ProcessHeadbuttInput(NetworkInputData networkInputData)
+    {
+        if (_headbuttHandler == null || _headbuttHandler.IsHeadbutting) return;
+
+        if (networkInputData._isHeadbuttPressed)
+        {
+            _headbuttHandler.TriggerHeadbutt();
         }
     }
 
@@ -486,6 +506,38 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         // rotate towards target dir
         _mainJoint.targetRotation = Quaternion.RotateTowards(_mainJoint.targetRotation, jointSpaceRotation, Runner.DeltaTime * _rotationSpeed);
     }
+    //private void HandleRotation(Vector3 moveDir)
+    //{
+    //    Quaternion desiredWorldRotation;
+
+    //    // based on camera dir
+    //    if (moveDir.sqrMagnitude > 0.001f)
+    //    {
+    //        // 1. Calculate world rotation based on input direction
+    //        desiredWorldRotation = Quaternion.LookRotation(moveDir, transform.up);
+    //    }
+    //    else
+    //    {
+    //        Vector3 flatForward = transform.forward;
+    //        flatForward.y = 0f; // Completely kill any vertical tilt pitch/roll tracking
+
+    //        if (flatForward.sqrMagnitude > 0.001f)
+    //        {
+    //            flatForward.Normalize();
+    //            // Force the target rotation to use absolute world Vector3.up (0 tilt on X and Z)
+    //            desiredWorldRotation = Quaternion.LookRotation(flatForward, Vector3.up);
+    //        }
+    //        else
+    //        {
+    //            desiredWorldRotation = Quaternion.identity;
+    //        }
+    //    }
+
+    //    Quaternion jointSpaceRotation = Quaternion.Inverse(desiredWorldRotation) * _initialJointRotation;
+
+    //    // rotate towards target dir
+    //    _mainJoint.targetRotation = Quaternion.RotateTowards(_mainJoint.targetRotation, jointSpaceRotation, Runner.DeltaTime * _rotationSpeed);
+    //}
 
     private void HandleJump(NetworkInputData networkInputData)
     {
@@ -624,6 +676,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._isPunchOrGrabPressed = false;
             networkInputData._isThrowPressed = false;
             networkInputData._isKickPressed = false;
+            networkInputData._isHeadbuttPressed = false;
         }
         else
         {
@@ -631,6 +684,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._isJumpPressed = _isJumpButtonPressed;
             networkInputData._isSprintPressed = _isRunning;
             networkInputData._isPunchOrGrabPressed = Input.GetMouseButton(0);
+            networkInputData._isHeadbuttPressed = Input.GetMouseButtonDown(2);
 
             bool isRightClickPressed = Input.GetMouseButtonDown(1);
 

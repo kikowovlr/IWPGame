@@ -80,10 +80,10 @@ public class DamageDealer : NetworkBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        //if (_hitCheckPoint != null)
-        //{
-        //    Gizmos.color = Color.red;
-        //    Gizmos.DrawWireSphere(_hitCheckPoint.position, _hitCheckRadius);
-        //}
+        if (_hitCheckPoint != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(_hitCheckPoint.position, _hitCheckRadius);
+        }
     }
 }
