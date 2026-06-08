@@ -27,6 +27,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     [Header("Jump Settings")]
     [SerializeField] private float _jumpForce = 10f;
     [SerializeField] private float _gravity = 10f;
+    [SerializeField] private float _jumpCooldown = 0.15f;
+    [Networked] private float _lastJumpTime { get; set; }
 
     [Header("Ground Check Settings")]
     [SerializeField] private float _groundCheckRadius = 0.1f;
@@ -44,7 +46,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private bool _isRunning;
     private bool _isKnockedOut = false; // == non-active ragdoll
     private bool _isGrabbingActive = false;
-    public bool IsGrabbingActive => _isGrabbingActive;
 
     //Slope handling
     [SerializeField] private float _maxSlopeAngle = 55f;
@@ -64,10 +65,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     ActiveRagdollMember[] _activeRagdollMembers;
     private Quaternion _initialJointRotation;
 
-    //Syncing client ragdolls
-    // TODO: change to sending bytes instead of Quaternion and limite how much the joints can rotate
-    [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
-
     private const float InputThreshold = 0.01f;
 
     [SerializeField] private float _animationSpeedDamp = 10f; // how fast animation blends
@@ -84,8 +81,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private float[] _originalMasses;
     private PunchHandler _punchHandler;
 
+    // kicking
+    private KickHandler _kickHandler;
+
     // getters
     public bool IsKnockedOut => _isKnockedOut;
+    public bool IsGrabbingActive => _isGrabbingActive;
+    public NetworkRigidbody3D NetworkedRb => _networkRb3D;
+    public Animator Animator => _animator;
+    public Quaternion InitialJointRotation => _initialJointRotation;
+
+    //Syncing client ragdolls
+    // TODO: change to sending bytes instead of Quaternion and limite how much the joints can rotate
+    [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
+
 
     private void Awake()
     {
@@ -97,6 +106,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         if (registry != null)
         {
             _punchHandler = registry.Punch;
+            _kickHandler = registry.Kick;
         }
 
         // save rbs and mass for ragdoll
@@ -179,13 +189,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 {
                     // calculate the animation speed should be based entirely on input
                     targetAnimSpeed = networkInputData._isSprintPressed ? 1.0f : _walkInputScale;
-
                     ProcessInputMovement(networkInputData, inputMagnitude);
                 }
                 else
                 {
                     ApplyIdleBrakes();
                 }
+
+                ProcessKickInput(networkInputData);
 
                 HandleJump(networkInputData);
                 _prevPunchOrGrabPressed = networkInputData._isPunchOrGrabPressed;
@@ -203,7 +214,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
         if (Object.HasStateAuthority)
         {
-            if (_isKnockedOut) 
+            if (_isKnockedOut)
                 targetAnimSpeed = 0f;
 
             _smoothedInputSpeed = Mathf.MoveTowards(_smoothedInputSpeed, targetAnimSpeed, Runner.DeltaTime * _animationSpeedDamp);
@@ -245,7 +256,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             _rb.AddForce(moveDir * finalForce, ForceMode.Force);
             GlueToSlope(slopeAngle);
         }
-    }   
+    }
 
     private void ProcessGrabPunchLogic(bool isPressed, float inputMagnitude, bool isSprintPressed)
     {
@@ -281,7 +292,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             else
             {
                 // Handle hold release (stop grabbing)
-                _isGrabbingActive = false; 
+                _isGrabbingActive = false;
             }
         }
 
@@ -292,6 +303,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             {
                 _isGrabbingActive = true;
             }
+        }
+    }
+
+    private void ProcessKickInput(NetworkInputData networkInputData)
+    {
+        if (_kickHandler == null || _kickHandler.IsKicking) return;
+
+        if (networkInputData._isKickPressed)
+        {
+            // calculate exact move dir of input
+            Vector3 inputDir = CalculateMoveDirection(networkInputData);
+            _kickHandler.TriggerAirKick(inputDir, networkInputData._isSprintPressed);
         }
     }
 
@@ -378,6 +401,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             //ignore self hits
             if (_raycastHits[i].transform.root == transform)
                 continue;
+            if (_raycastHits[i].transform.root.TryGetComponent(out NetworkPlayerController otherPlayer))
+                continue;
 
             if (_raycastHits[i].distance < closestDistance)
             {
@@ -396,6 +421,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     private void ApplyGravity()
     {
+        // just jumped, dont apply gravity
+        if (Runner.SimulationTime - _lastJumpTime < 0.05f)
+            return;
+
         // apply more gravity to make character less floaty
         if (!_isGrounded)
         {
@@ -404,7 +433,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
 
         // ground floating spring
-        RaycastHit hit = _raycastHits[0];
+        RaycastHit hit = _groundHit;
 
         // calculate dir of velocity relative to world
         Vector3 vel = _rb.linearVelocity;
@@ -414,7 +443,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         float rayDirVel = Vector3.Dot(rayDir, vel);
         float relVel = rayDirVel;
 
-        float currentHeight = Vector3.Distance(_rb.position, hit.point);
+        float currentHeight = hit.distance;
         float x = currentHeight - _rideHeight;
 
         // Hooke's Law Spring Equation: Force = (Compression * Stiffness) - (Velocity * Dampening)
@@ -460,16 +489,27 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     private void HandleJump(NetworkInputData networkInputData)
     {
+        // prevent re-simulation steps from spamming multiple forces
+        if (Runner.SimulationTime - _lastJumpTime < _jumpCooldown) return;
+
         if (_isGrounded && networkInputData._isJumpPressed)
         {
+            _lastJumpTime = Runner.SimulationTime;
+
+            Vector3 currentVel = _rb.linearVelocity;
+            _rb.linearVelocity = new Vector3(currentVel.x, 0f, currentVel.z);
+
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+
             _isJumpButtonPressed = false; //reset immediately
+            _isGrounded = false;
         }
     }
 
     private void UpdateAnimations(float animationValue)
     {
         _animator.SetFloat("MovementSpeed", animationValue);
+        _animator.SetBool("IsKnockedOut", _isKnockedOut);
 
         // update joints rotation based on animation
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
@@ -505,6 +545,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     {
         if (!Object.HasStateAuthority)
             return;
+
+        // TODO play recovery anim
 
         _isKnockedOut = false;
         _isGrabbingActive = false;
@@ -553,6 +595,21 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         return holdCount >= 2;
     }
 
+    public bool IsCurrentlyGrabbingObject()
+    {
+        if (_handGrabHandlers == null) return false;
+
+        foreach (HandGrabHandler handler in _handGrabHandlers)
+        {
+            if (handler != null && handler.IsGrabbingSomething)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // spawner calls this then transmit info to host
     public NetworkInputData GetNetworkInput()
     {
@@ -566,6 +623,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._isSprintPressed = false;
             networkInputData._isPunchOrGrabPressed = false;
             networkInputData._isThrowPressed = false;
+            networkInputData._isKickPressed = false;
         }
         else
         {
@@ -573,10 +631,39 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._isJumpPressed = _isJumpButtonPressed;
             networkInputData._isSprintPressed = _isRunning;
             networkInputData._isPunchOrGrabPressed = Input.GetMouseButton(0);
-            networkInputData._isThrowPressed = Input.GetMouseButtonDown(1);
+
+            bool isRightClickPressed = Input.GetMouseButtonDown(1);
+
+            if (isRightClickPressed)
+            {
+                // holding object == throw
+                if (IsCurrentlyGrabbingObject())
+                {
+                    networkInputData._isThrowPressed = true;
+                    networkInputData._isKickPressed = false;
+                }
+                // not grounded and not holding anything == kick
+                else if (!_isGrounded)
+                {
+                    networkInputData._isThrowPressed = false;
+                    networkInputData._isKickPressed = true;
+                }
+                else
+                {
+                    // default
+                    networkInputData._isThrowPressed = true;
+                    networkInputData._isKickPressed = false;
+                }
+            }
+            else
+            {
+                // No right click interaction this frame
+                networkInputData._isThrowPressed = false;
+                networkInputData._isKickPressed = false;
+            }
         }
 
-        networkInputData._isRagdollPressed = Input.GetKey(KeyCode.R);
+        networkInputData._isRagdollPressed = Input.GetKeyDown(KeyCode.R);
 
         // reset jump button 
         _isJumpButtonPressed = false;

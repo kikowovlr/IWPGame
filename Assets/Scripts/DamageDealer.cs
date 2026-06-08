@@ -57,10 +57,11 @@ public class DamageDealer : NetworkBehaviour
             PlayerComponentRegistry victimRegistry = other.transform.root.GetComponent<PlayerComponentRegistry>();
             if (victimRegistry != null)
             {
-                Utils.DebugLog("Dealing damage");
-
+                string hitBoneName = "";
                 // get exact rigidbody we struck 
-                NetworkRigidbody3D victimLimb = other.gameObject.GetComponent<NetworkRigidbody3D>();
+                Rigidbody hitRb = other.gameObject.GetComponent<Rigidbody>();
+                if (hitRb != null)
+                    hitBoneName = hitRb.gameObject.name;
 
                 // calculate intended force
                 Vector3 forceDirection = (_ownerController.transform.forward + Vector3.up * 0.2f).normalized;
@@ -68,9 +69,9 @@ public class DamageDealer : NetworkBehaviour
 
                 // send data to health script 
                 Vector3 contactPoint = other.ClosestPoint(_hitCheckPoint.position);
-                victimRegistry.Health.Rpc_TakeDamage(_currentDamage, intendedForce, contactPoint, victimLimb);
+                victimRegistry.Health.Rpc_TakeDamage(_currentDamage, intendedForce, contactPoint, hitBoneName);
 
-                // TODO - idk if shld js deactivate it here, maybe use coroutine instead to deactivate
+                // deactivate attack after hitting
                 _isAttackActive = false;
                 break;
             }
@@ -79,10 +80,10 @@ public class DamageDealer : NetworkBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        //if (_punchCheckPoint != null)
+        //if (_hitCheckPoint != null)
         //{
         //    Gizmos.color = Color.red;
-        //    Gizmos.DrawWireSphere(_punchCheckPoint.position, _hitCheckRadius);
+        //    Gizmos.DrawWireSphere(_hitCheckPoint.position, _hitCheckRadius);
         //}
     }
 }

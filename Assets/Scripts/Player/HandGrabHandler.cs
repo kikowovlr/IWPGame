@@ -59,6 +59,9 @@ public class HandGrabHandler : NetworkBehaviour
     // references
     NetworkPlayerController _networkPlayer;
 
+    // getters
+    public bool IsGrabbingSomething => _grabJoint != null;
+
     private void Awake()
     {
         PlayerComponentRegistry registry = transform.root.GetComponent<PlayerComponentRegistry>();
@@ -373,13 +376,20 @@ public class HandGrabHandler : NetworkBehaviour
         if (_networkPlayer.IsObjectHeldByBothHands(targetRb))
         {
             float currentForceMultiplier = _objThrowForceMultiplier;
+            Vector3 throwDirection;
 
             // check if is another player
             if (targetRb.TryGetComponent(out NetworkPlayerController otherPlayer))
-                currentForceMultiplier = otherPlayer.IsKnockedOut ? _playerThrowForceMultiplier : _playerThrowForceMultiplier * 0.5f;
+            {
+                currentForceMultiplier = _playerThrowForceMultiplier;
+                throwDirection = (_networkPlayer.transform.forward + Vector3.up * 1.2f).normalized;
+            }
+            else
+            {
+                // fire obj forward
+                throwDirection = _networkPlayer.transform.forward + Vector3.up * 0.3f * currentForceMultiplier;
+            }
 
-            // fire obj forward
-            Vector3 throwDirection = _networkPlayer.transform.forward + Vector3.up * 0.3f;
             targetRb.AddForce(throwDirection * currentForceMultiplier, ForceMode.Impulse);
 
             // add recoil after throwing
@@ -392,10 +402,6 @@ public class HandGrabHandler : NetworkBehaviour
             _throwCooldownTimer = TickTimer.CreateFromSeconds(Runner, _throwCooldown);
 
             ReleaseGrab(true);
-        }
-        else
-        {
-            Utils.DebugLog("Throw blocked: Object is not held by both hands!");
         }
     }
 

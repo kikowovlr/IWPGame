@@ -9,5 +9,6 @@ public struct NetworkInputData : INetworkInput
     public NetworkBool _isSprintPressed;
     public NetworkBool _isPunchOrGrabPressed;
     public NetworkBool _isThrowPressed;
+    public NetworkBool _isKickPressed;
     public NetworkBool _isRagdollPressed; // for testing ragdoll state sync
 }

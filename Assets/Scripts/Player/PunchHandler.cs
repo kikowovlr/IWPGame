@@ -4,10 +4,10 @@ using UnityEngine;
 public class PunchHandler : NetworkBehaviour
 {
     [Header("Punch Settings")]
-    [SerializeField] private Animator _animator;
     [SerializeField] private DamageDealer _leftHandDamageDealer;
     [SerializeField] private DamageDealer _rightHandDamageDealer;
     [SerializeField] private LayerMask _hitLayer;
+    private Animator _animator;
 
     [Header("Weak Punch Settings")]
     [SerializeField] private float _weakDamage = 12f;
@@ -50,6 +50,19 @@ public class PunchHandler : NetworkBehaviour
         if (registry != null )
         {
             _playerController = registry.Controller;
+            _animator = _playerController.Animator;
+        }
+
+        if (_leftHandDamageDealer != null)
+        {
+            _leftHandDamageDealer.GetComponent<Collider>().enabled = false;
+            _leftHandDamageDealer.SetAttackActive(false);
+        }
+
+        if (_rightHandDamageDealer != null)
+        {
+            _rightHandDamageDealer.GetComponent<Collider>().enabled = false;
+            _rightHandDamageDealer.SetAttackActive(false);
         }
     }
 

@@ -19,4 +19,7 @@ public class PlayerEliminationHandler : NetworkBehaviour
             _playerController = registry.Controller;
         }
     }
+
+    // TODO darken screen (grayscale) when elminated
+
 }

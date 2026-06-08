@@ -2120,7 +2120,7 @@ MonoBehaviour:
   _armJoint: {fileID: 5598611311335599213}
   _relaxedArmSpring: 20
   _objThrowForceMultiplier: 0.2
-  _playerThrowForceMultiplier: 10
+  _playerThrowForceMultiplier: 200
   _throwCooldown: 0.5
   _handIKConstraint: {fileID: 7896351572196759224}
   _handIKTarget: {fileID: 6671994331130640117}
@@ -5286,6 +5286,74 @@ Transform:
   - {fileID: 7260247715842074620}
   m_Father: {fileID: 432547520127080003}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4274522591897791142
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2857792634514170734}
+  - component: {fileID: 9129295674661642206}
+  - component: {fileID: 3288716624203677526}
+  m_Layer: 8
+  m_Name: R_KickPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2857792634514170734
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4274522591897791142}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1134023283795309433}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &9129295674661642206
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4274522591897791142}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Radius: 0.17
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3288716624203677526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4274522591897791142}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37363df5fa8334b4484b32b60b3d5919, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageDealer
+  _hitCheckPoint: {fileID: 2857792634514170734}
+  _hitCheckRadius: 0.09
 --- !u!1 &4287164679196277682
 GameObject:
   m_ObjectHideFlags: 0
@@ -5611,6 +5679,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5215686998620768830}
+  - {fileID: 2857792634514170734}
   m_Father: {fileID: 88165053360022601}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4692596606911903118
@@ -8449,6 +8518,7 @@ MonoBehaviour:
   _knockedDownDamageMultiplier: 0.3
   _baseKnockoutTime: 3
   _maxKnockoutTime: 8
+  _knockOutForceMultiplier: 1.8
   _CurrentHealth: 0
 --- !u!1 &6804179172905338192
 GameObject:
@@ -9752,9 +9822,9 @@ ConfigurableJoint:
   m_XMotion: 2
   m_YMotion: 2
   m_ZMotion: 2
-  m_AngularXMotion: 0
+  m_AngularXMotion: 2
   m_AngularYMotion: 2
-  m_AngularZMotion: 0
+  m_AngularZMotion: 2
   m_LinearLimitSpring:
     spring: 0
     damper: 0
@@ -9809,14 +9879,14 @@ ConfigurableJoint:
   m_RotationDriveMode: 1
   m_AngularXDrive:
     serializedVersion: 4
-    positionSpring: 0
-    positionDamper: 0
+    positionSpring: 100
+    positionDamper: 2
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_AngularYZDrive:
     serializedVersion: 4
-    positionSpring: 0
-    positionDamper: 0
+    positionSpring: 70
+    positionDamper: 2
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_SlerpDrive:
@@ -9908,9 +9978,10 @@ MonoBehaviour:
   _walkInputScale: 0.5
   _jumpForce: 15
   _gravity: 10
+  _jumpCooldown: 0.15
   _groundCheckRadius: 0.05
-  _groundCheckDist: 0.5
-  _unconsciousMass: 0.2
+  _groundCheckDist: 0.2
+  _unconsciousMass: 0.1
   _maxSlopeAngle: 55
   _slopeForceMultiplier: 4
   _stickForce: 40
@@ -9918,9 +9989,9 @@ MonoBehaviour:
   _rideHeight: 0.75
   _rideSpringStrength: 200
   _rideSpringDampener: 20
-  _NetworkPhysicsSyncedRotation: []
   _animationSpeedDamp: 2
   HoldThreshold: 0.2
+  _NetworkPhysicsSyncedRotation: []
 --- !u!114 &7068219017547659723
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9940,6 +10011,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 1669231272701495415}
   - {fileID: 1357966978301788564}
+  - {fileID: 3288716624203677526}
   - {fileID: 2600132963044760710}
   - {fileID: 6290301023929865650}
   - {fileID: 4690249110726342614}
@@ -9947,6 +10019,7 @@ MonoBehaviour:
   - {fileID: 4085368449501140870}
   - {fileID: 2863021695991113393}
   - {fileID: 2550465603322912719}
+  - {fileID: 7131605853789366700}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1357966978301788564
 MonoBehaviour:
@@ -9987,6 +10060,7 @@ MonoBehaviour:
   _healthHandler: {fileID: 4085368449501140870}
   _eliminationHandler: {fileID: 2863021695991113393}
   _punchHandler: {fileID: 2550465603322912719}
+  _kickHandler: {fileID: 7131605853789366700}
 --- !u!1 &7763074222315281590
 GameObject:
   m_ObjectHideFlags: 0
@@ -11151,7 +11225,7 @@ MonoBehaviour:
   _armJoint: {fileID: 3014451950804821991}
   _relaxedArmSpring: 20
   _objThrowForceMultiplier: 0.2
-  _playerThrowForceMultiplier: 10
+  _playerThrowForceMultiplier: 200
   _throwCooldown: 0.5
   _handIKConstraint: {fileID: 1826030218811482715}
   _handIKTarget: {fileID: 4927709256630746176}
@@ -11869,6 +11943,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1419215942994533501}
   - component: {fileID: 2550465603322912719}
+  - component: {fileID: 7131605853789366700}
   m_Layer: 8
   m_Name: AttackHandler
   m_TagString: Untagged
@@ -11903,26 +11978,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8fc8a236b6a61244a458149f5b73fc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PunchHandler
-  _animator: {fileID: 538110036522933493}
   _leftHandDamageDealer: {fileID: 6290301023929865650}
   _rightHandDamageDealer: {fileID: 1294929156632450108}
   _hitLayer:
     serializedVersion: 2
     m_Bits: 768
   _weakDamage: 12
-  _weakForce: 10
+  _weakForce: 3
   _weakWindowDuration: 0.1
   _weakTotalCycleTime: 0.2
-  _strongDamage: 25
-  _strongForce: 38
+  _strongDamage: 22
+  _strongForce: 5
   _strongWindowDuration: 0.2
   _strongTotalCycleTime: 0.6
   _strongPunchCooldown: 1
-  _strongPunchDashImpulse: 6
+  _strongPunchDashImpulse: 3
   _strongHandThrustImpulse: 4
   _masterRootRb: {fileID: 2765911140363875912}
   _leftHandRb: {fileID: 4236987989336988176}
   _rightHandRb: {fileID: 6979750806120384195}
+--- !u!114 &7131605853789366700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9038141436151709232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 674949094165f0b468a3b0cff6b12a31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KickHandler
+  _rightFootDamageDealer: {fileID: 3288716624203677526}
+  _hitLayer:
+    serializedVersion: 2
+    m_Bits: 768
+  _kickDamage: 50
+  _kickKnockbackForce: 5
+  _baseForwardKickForce: 10
+  _sprintKickForceMultiplier: 1.5
+  _upwardKickForce: 3
+  _ragdollDelayDuration: 0.4
+  _ragdollDuration: 1.5
+  _IsKicking: 0
 --- !u!1 &9090990223848835053
 GameObject:
   m_ObjectHideFlags: 0
