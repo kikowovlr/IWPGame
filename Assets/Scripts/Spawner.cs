@@ -3,6 +3,8 @@ using Fusion;
 using Fusion.Sockets;
 using System.Collections.Generic;
 using System;
+using TMPro;
+using UnityEngine.UI;
 
 /// <summary>
 /// SimulationBehaviour
@@ -19,6 +21,29 @@ using System;
 public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] NetworkPlayerController _networkPlayerPrefab;
+
+    [Header("Connection UI Settings")]
+    [SerializeField] private GameObject _statusPanel;
+    [SerializeField] private TMP_Text _statusText;
+    private bool _isConnecting = false;
+
+    private void Start()
+    {
+        // Default UI to initializing state
+        ShowStatus("Initializing...");
+    }
+
+    public void ShowStatus(string message)
+    {
+        if (_statusPanel != null) _statusPanel.SetActive(true);
+        if (_statusText != null) _statusText.text = message;
+    }
+
+    public void OnStartConnecting()
+    {
+        _isConnecting = true;
+        ShowStatus("Connecting to Server...");
+    }
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
