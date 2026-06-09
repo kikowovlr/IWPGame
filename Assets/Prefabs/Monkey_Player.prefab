@@ -12125,9 +12125,9 @@ MonoBehaviour:
     m_Bits: 768
   _headRb: {fileID: 9159472800939500442}
   _damage: 12
-  _bodyForwardImpulse: 1.5
-  _headThrustImpulse: 4
-  _knockbackForce: 2
+  _bodyForwardImpulse: 2
+  _headThrustImpulse: 20
+  _knockbackForce: 4
   _attackWindowDuration: 0.2
   _totalCycleTime: 0.45
   _cooldown: 1
