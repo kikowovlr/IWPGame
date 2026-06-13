@@ -122,11 +122,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             _originalMasses[i] = _allChildRigidbodies[i].mass;
         }
-
-        //// Set vertical sync to off so frame rate isn't locked to your monitor
-        //QualitySettings.vSyncCount = 0;
-        //// Tell Unity to render as fast as humanly possible
-        //Application.targetFrameRate = 999;
     }
 
     private void Start()
