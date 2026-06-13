@@ -40,6 +40,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     //Input
     Vector2 _moveInputVector = Vector2.zero;
     bool _isJumpButtonPressed = false;
+    private bool _isHeadbuttButtonPressed = false;
+    private bool _isRightClickButtonPressed = false;
 
     //States
     private bool _isGrounded;
@@ -120,6 +122,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             _originalMasses[i] = _allChildRigidbodies[i].mass;
         }
+
+        //// Set vertical sync to off so frame rate isn't locked to your monitor
+        //QualitySettings.vSyncCount = 0;
+        //// Tell Unity to render as fast as humanly possible
+        //Application.targetFrameRate = 999;
     }
 
     private void Start()
@@ -144,6 +151,22 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     public void OnSprint(InputValue value)
     {
         _isRunning = value.Get<float>() > 0f;
+    }
+
+    public void OnHeadbutt(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            _isHeadbuttButtonPressed = true;
+        }
+    }
+
+    public void OnRightClickAction(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            _isRightClickButtonPressed = true;
+        }
     }
 
     public override void FixedUpdateNetwork()
@@ -670,13 +693,17 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         // move data
         if (_isKnockedOut)
         {
-           networkInputData._movementInput = Vector2.zero;
+            networkInputData._movementInput = Vector2.zero;
             networkInputData._isJumpPressed = false;
             networkInputData._isSprintPressed = false;
             networkInputData._isPunchOrGrabPressed = false;
             networkInputData._isThrowPressed = false;
             networkInputData._isKickPressed = false;
             networkInputData._isHeadbuttPressed = false;
+
+            // consume and clear the buffered flags even while knocked out
+            _isHeadbuttButtonPressed = false;
+            _isRightClickButtonPressed = false;
         }
         else
         {
@@ -684,9 +711,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._isJumpPressed = _isJumpButtonPressed;
             networkInputData._isSprintPressed = _isRunning;
             networkInputData._isPunchOrGrabPressed = Input.GetMouseButton(0);
-            networkInputData._isHeadbuttPressed = Input.GetMouseButtonDown(2);
+            networkInputData._isHeadbuttPressed = _isHeadbuttButtonPressed;
+            _isHeadbuttButtonPressed = false; // reset immediately after packing
 
-            bool isRightClickPressed = Input.GetMouseButtonDown(1);
+            bool isRightClickPressed = _isRightClickButtonPressed;
+            _isRightClickButtonPressed = false; // reset immediately after packing
 
             if (isRightClickPressed)
             {
