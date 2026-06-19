@@ -10068,9 +10068,10 @@ MonoBehaviour:
   _rideHeight: 0.75
   _rideSpringStrength: 200
   _rideSpringDampener: 20
+  _NetworkPhysicsSyncedRotation: []
   _animationSpeedDamp: 2
   HoldThreshold: 0.2
-  _NetworkPhysicsSyncedRotation: []
+  _equippedAbility: {fileID: 11400000, guid: 3121e942408c454479ccaf847b005335, type: 2}
 --- !u!114 &7068219017547659723
 MonoBehaviour:
   m_ObjectHideFlags: 0

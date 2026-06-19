@@ -67,6 +67,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     ActiveRagdollMember[] _activeRagdollMembers;
     private Quaternion _initialJointRotation;
 
+    // TODO: change to sending bytes instead of Quaternion and limite how much the joints can rotate
+    [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
+
     private const float InputThreshold = 0.01f;
 
     [SerializeField] private float _animationSpeedDamp = 10f; // how fast animation blends
@@ -89,16 +92,21 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     // headbutt
     private HeadbuttHandler _headbuttHandler;
 
+    // abilities
+    [Header("Ability Configuration")]
+    [SerializeField] private AbilitySO _equippedAbility;
+    private bool _isAbilityPressed;
+    private bool _isAbilityHeld;
+    private bool _isAbilityReleased;
+
+    [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
+
     // getters
     public bool IsKnockedOut => _isKnockedOut;
     public bool IsGrabbingActive => _isGrabbingActive;
     public NetworkRigidbody3D NetworkedRb => _networkRb3D;
     public Animator Animator => _animator;
     public Quaternion InitialJointRotation => _initialJointRotation;
-
-    //Syncing client ragdolls
-    // TODO: change to sending bytes instead of Quaternion and limite how much the joints can rotate
-    [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
 
 
     private void Awake()
@@ -164,6 +172,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
+    public void OnSkill(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            _isAbilityPressed = true;
+            _isAbilityHeld = true;
+        }
+        else
+        {
+            _isAbilityReleased = true;
+            _isAbilityHeld = false;
+        }
+    }
+
     public override void FixedUpdateNetwork()
     {
         // only host can do this
@@ -225,6 +247,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
                 ProcessKickInput(networkInputData);
                 ProcessHeadbuttInput(networkInputData);
+
+                if (_equippedAbility != null)
+                {
+                    UpdateAbility(networkInputData);
+                }
 
                 HandleJump(networkInputData);
                 _prevPunchOrGrabPressed = networkInputData._isPunchOrGrabPressed;
@@ -680,6 +707,29 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         return false;
     }
 
+    private void UpdateAbility(NetworkInputData inputData)
+    {
+        if (CurrentAbilityState._cooldownTimer > 0)
+            CurrentAbilityState._cooldownTimer -= Runner.DeltaTime;
+
+        // if ability on cooldown, block input events completely
+        if (CurrentAbilityState._cooldownTimer > 0) return;
+
+        if (inputData._abilityPressed)
+            _equippedAbility.OnTickPressed(this, ref CurrentAbilityState, inputData._abilityAimDirection);
+
+        if (inputData._abilityHeld)
+            _equippedAbility.OnTickHeld(this, ref CurrentAbilityState, inputData._abilityAimDirection);
+
+        if (inputData._abilityReleased)
+        {
+            _equippedAbility.OnTickReleased(this, ref CurrentAbilityState, inputData._abilityAimDirection);
+
+            // set CD
+            CurrentAbilityState._cooldownTimer = _equippedAbility._baseCooldown;
+        }
+    }
+
     // spawner calls this then transmit info to host
     public NetworkInputData GetNetworkInput()
     {
@@ -699,6 +749,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             // consume and clear the buffered flags even while knocked out
             _isHeadbuttButtonPressed = false;
             _isRightClickButtonPressed = false;
+
+            networkInputData._abilityPressed = false;
+            networkInputData._abilityReleased = false;
+            networkInputData._abilityHeld = false;
+            _isAbilityPressed = false;
+            _isAbilityReleased = false;
         }
         else
         {
@@ -710,7 +766,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             _isHeadbuttButtonPressed = false; // reset immediately after packing
 
             bool isRightClickPressed = _isRightClickButtonPressed;
-            _isRightClickButtonPressed = false; // reset immediately after packing
+            _isRightClickButtonPressed = false;
+
+            networkInputData._abilityPressed = _isAbilityPressed;
+            networkInputData._abilityHeld = _isAbilityHeld;
+            networkInputData._abilityReleased = _isAbilityReleased;
+            _isAbilityPressed = false;
+            _isAbilityReleased = false;
+            networkInputData._abilityAimDirection = new Vector2(transform.forward.x, transform.forward.z).normalized; // pass current forward look direction
 
             if (isRightClickPressed)
             {
