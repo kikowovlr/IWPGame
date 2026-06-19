@@ -177,4 +177,27 @@ public class PunchHandler : NetworkBehaviour
             _isPunching = false;
         }
     }
+
+    /// <summary>
+    /// called in player controller to swap character
+    /// </summary>
+    /// <param name="leftHand"></param>
+    /// <param name="rightHand"></param>
+    /// <param name="leftRb"></param>
+    /// <param name="rightRb"></param>
+    public void SetUpActiveLimbs(DamageDealer leftHand, DamageDealer rightHand, Rigidbody leftRb, Rigidbody rightRb)
+    {
+        // clean up old references
+        if (_leftHandDamageDealer != null) _leftHandDamageDealer.SetAttackActive(false);
+        if (_rightHandDamageDealer != null) _rightHandDamageDealer.SetAttackActive(false);
+
+        _leftHandDamageDealer = leftHand;
+        _rightHandDamageDealer = rightHand;
+        _leftHandRb = leftRb;
+        _rightHandRb = rightRb;
+
+        // set default state
+        if (_leftHandDamageDealer != null) _leftHandDamageDealer.GetComponent<Collider>().enabled = false;
+        if (_rightHandDamageDealer != null) _rightHandDamageDealer.GetComponent<Collider>().enabled = false;
+    }
 }

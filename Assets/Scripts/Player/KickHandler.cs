@@ -149,4 +149,15 @@ public class KickHandler : NetworkBehaviour
             _damageCollider.enabled = active;
         }
     }
+
+    public void SetUpActiveLimbs(DamageDealer rightFoot)
+    {
+        // clean up old references
+        if (_rightFootDamageDealer != null) _rightFootDamageDealer.SetAttackActive(false);
+
+        _rightFootDamageDealer = rightFoot;
+
+        // set default state
+        if (_rightFootDamageDealer != null) _rightFootDamageDealer.GetComponent<Collider>().enabled = false;
+    }
 }

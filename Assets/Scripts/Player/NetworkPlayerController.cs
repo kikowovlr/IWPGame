@@ -101,6 +101,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
 
+    // characters
+    [Header("Character Visuals")]
+    [SerializeField] private GameObject[] _characterPackages;
+
     // getters
     public bool IsKnockedOut => _isKnockedOut;
     public bool IsGrabbingActive => _isGrabbingActive;
@@ -113,7 +117,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     {
         _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
         _initialJointRotation = _mainJoint.transform.localRotation;
-        _handGrabHandlers = GetComponentsInChildren<HandGrabHandler>();
+        //_handGrabHandlers = GetComponentsInChildren<HandGrabHandler>();
 
         PlayerComponentRegistry registry = GetComponent<PlayerComponentRegistry>();
         if (registry != null)
@@ -727,6 +731,47 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
             // set CD
             CurrentAbilityState._cooldownTimer = _equippedAbility._baseCooldown;
+        }
+    }
+
+    /// <summary>
+    /// call this fn when swapping character
+    /// </summary>
+    /// <returns></returns>
+    public void ExecuteCharacterPackageSwap(int targetVariantIndex)
+    {
+        // loop through all packages, turn on chosen one
+        for (int i = 0; i < _characterPackages.Length; i++)
+        {
+            if (_characterPackages[i] != null)
+            {
+                // if matches target, set true
+                _characterPackages[i].SetActive(i == targetVariantIndex);
+            }
+        }
+
+        // extract references from new package
+        GameObject activePackage = _characterPackages[targetVariantIndex];
+
+        if (activePackage != null)
+        {
+            CharacterComponentLinker linker = activePackage.GetComponent<CharacterComponentLinker>();
+            if (linker != null)
+            {
+                if (_punchHandler != null)
+                    _punchHandler.SetUpActiveLimbs(linker._leftHandDamageDealer, linker._rightHandDamageDealer, linker._leftHandRb, linker._rightHandRb);
+
+                if (_kickHandler != null)
+                    _kickHandler.SetUpActiveLimbs(linker._rightFootDamageDealer);
+
+                if (_headbuttHandler != null)
+                    _headbuttHandler.SetUpActiveLimbs(linker._headDamageDealer);
+
+                _handGrabHandlers = linker._grabHandlers;
+
+                if (linker.characterAnimator != null)
+                    _animator = linker.characterAnimator;
+            }
         }
     }
 

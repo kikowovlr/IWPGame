@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: e71370de16f085442a2c4182512aa802
+guid: 6ac640bafd5d6a340aba77f1205dcc67
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,7 +31,7 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Headbutt
+      name: Monkey_Weak Right Punch
       takeName: Take 001
       internalID: 1827226128182048838
       firstFrame: 0

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a06410398cacb72438cfd6b1b069ef42
+guid: 105340dc1ab124448998593dbdc8268e
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: C_Walk
+      name: Monkey_Grab
       takeName: Take 001
       internalID: 1827226128182048838
       firstFrame: 0
-      lastFrame: 32
+      lastFrame: 5
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

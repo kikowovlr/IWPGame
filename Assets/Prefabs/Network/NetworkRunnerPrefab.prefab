@@ -58,7 +58,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cba27610077425409a2b525d16c3aa5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _networkPlayerPrefab: {fileID: 1669231272701495415, guid: 2b130cebb05b2f94caaef3ef9b081eb5, type: 3}
+  _networkPlayerPrefab: {fileID: 2596374727279256988, guid: 667473ee71f464e4897c7525be019fe0, type: 3}
+  _statusPanel: {fileID: 0}
+  _statusText: {fileID: 0}
 --- !u!114 &6956164726479374072
 MonoBehaviour:
   m_ObjectHideFlags: 0

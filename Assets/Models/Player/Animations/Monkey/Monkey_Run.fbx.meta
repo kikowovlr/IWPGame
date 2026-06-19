@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6ac640bafd5d6a340aba77f1205dcc67
+guid: 3bde6e4be68771242b8d7ebdbd54dc4f
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Weak Right Punch
+      name: Monkey_Run
       takeName: Take 001
       internalID: 1827226128182048838
       firstFrame: 0
-      lastFrame: 5
+      lastFrame: 18
       wrapMode: 0
       orientationOffsetY: 0
       level: 0

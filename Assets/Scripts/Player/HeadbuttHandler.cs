@@ -113,12 +113,23 @@ public class HeadbuttHandler : NetworkBehaviour
         }
     }
 
-private void SetHeadbuttAttack(bool active)
+    private void SetHeadbuttAttack(bool active)
     {
         if (_headDamageDealer != null)
         {
             _headDamageDealer.SetAttackActive(active);
             _headCollider.enabled = active;
         }
+    }
+
+    public void SetUpActiveLimbs(DamageDealer head)
+    {
+        // clean up old references
+        if (_headDamageDealer != null) _headDamageDealer.SetAttackActive(false);
+
+        _headDamageDealer = head;
+
+        // set default state
+        if (_headDamageDealer != null) _headDamageDealer.GetComponent<Collider>().enabled = false;
     }
 }

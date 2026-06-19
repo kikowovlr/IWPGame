@@ -9809,7 +9809,7 @@ GameObject:
   - component: {fileID: 1357966978301788564}
   - component: {fileID: 6826455429873361241}
   m_Layer: 8
-  m_Name: Monkey_Player
+  m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

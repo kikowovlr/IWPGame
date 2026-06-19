@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ae0c79a1ab072f64d9e21880b3d97a10
+guid: e71370de16f085442a2c4182512aa802
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: C_Run
+      name: Monkey_Headbutt
       takeName: Take 001
       internalID: 1827226128182048838
       firstFrame: 0
-      lastFrame: 18
+      lastFrame: 5
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
