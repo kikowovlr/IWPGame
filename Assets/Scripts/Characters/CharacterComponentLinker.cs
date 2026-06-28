@@ -5,6 +5,9 @@ using UnityEngine;
 /// </summary>
 public class CharacterComponentLinker : MonoBehaviour
 {
+    public GameObject animatedModelRoot;
+    public GameObject physicsPackageRoot;
+
     [Header("Punch Elements")]
     public DamageDealer _leftHandDamageDealer;
     public DamageDealer _rightHandDamageDealer;
@@ -23,4 +26,7 @@ public class CharacterComponentLinker : MonoBehaviour
 
     [Header("Animation")]
     public Animator characterAnimator;
+
+    [Header("Ability")]
+    public AbilitySO ability;
 }

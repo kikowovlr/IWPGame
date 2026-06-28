@@ -13,8 +13,13 @@ MonoBehaviour:
   m_Name: Intimidate
   m_EditorClassIdentifier: Assembly-CSharp::IntimidateAbilitySO
   _name: Intimidate
-  _baseCooldown: 0
+  _baseCooldown: 2
   _icon: {fileID: 0}
+  _skillTrigger: SkillTrigger
+  _releaseTrigger: SkillRelease
+  _chargingBool: IsCharging
+  _skillTypeString: SkillType
+  _skillType: 0
   _range: 5
   _coneAngle: 60
   _affectedLayer:

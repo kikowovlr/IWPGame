@@ -8,4 +8,6 @@ AnimatorOverrideController:
   m_PrefabAsset: {fileID: 0}
   m_Name: Monkey_Override
   m_Controller: {fileID: 9100000, guid: dbcdaeb1813b85a4a83a60094a4d0785, type: 2}
-  m_Clips: []
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 5c95d4aad3ca7f845a7bfbbd74d98b4c, type: 2}
+    m_OverrideClip: {fileID: 1827226128182048838, guid: c7730d21b0793db4d96358798d6b9dfb, type: 3}

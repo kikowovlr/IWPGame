@@ -92,18 +92,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     // headbutt
     private HeadbuttHandler _headbuttHandler;
 
+    // characters
+    [Header("Character Visuals")]
+    [SerializeField] private GameObject[] _characterPackages;
+    [SerializeField] private int _defaultCharacterIndex = 0; // TEMP - default character
+    [Networked, OnChangedRender(nameof(OnCharacterChanged))] public int CharacterIndex { get; set; }
+
     // abilities
     [Header("Ability Configuration")]
-    [SerializeField] private AbilitySO _equippedAbility;
+    private AbilitySO _equippedAbility;
     private bool _isAbilityPressed;
     private bool _isAbilityHeld;
     private bool _isAbilityReleased;
 
     [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
-
-    // characters
-    [Header("Character Visuals")]
-    [SerializeField] private GameObject[] _characterPackages;
 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
@@ -111,28 +113,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     public NetworkRigidbody3D NetworkedRb => _networkRb3D;
     public Animator Animator => _animator;
     public Quaternion InitialJointRotation => _initialJointRotation;
-
+    public PlayerComponentRegistry Registry { get; private set; }
+    public ref AbilityState AbilityStateRef => ref CurrentAbilityState;
+    public AbilitySO CurrentActiveAbilitySO { get; private set; }
 
     private void Awake()
     {
-        _activeRagdollMembers = GetComponentsInChildren<ActiveRagdollMember>();
         _initialJointRotation = _mainJoint.transform.localRotation;
-        //_handGrabHandlers = GetComponentsInChildren<HandGrabHandler>();
 
-        PlayerComponentRegistry registry = GetComponent<PlayerComponentRegistry>();
-        if (registry != null)
+        Registry = GetComponent<PlayerComponentRegistry>();
+        if (Registry != null)
         {
-            _punchHandler = registry.Punch;
-            _kickHandler = registry.Kick;
-            _headbuttHandler = registry.Headbutt;
-        }
-
-        // save rbs and mass for ragdoll
-        _allChildRigidbodies = GetComponentsInChildren<Rigidbody>();
-        _originalMasses = new float[_allChildRigidbodies.Length];
-        for (int i = 0; i < _allChildRigidbodies.Length; i++)
-        {
-            _originalMasses[i] = _allChildRigidbodies[i].mass;
+            _punchHandler = Registry.Punch;
+            _kickHandler = Registry.Kick;
+            _headbuttHandler = Registry.Headbutt;
         }
     }
 
@@ -187,6 +181,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             _isAbilityReleased = true;
             _isAbilityHeld = false;
+        }
+    }
+
+    private void Update()
+    {
+        // TEMP DEBUG SWITCH: Runs locally in standard frame updates to catch key strokes perfectly
+        if (Object != null && Object.HasStateAuthority)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+                ExecuteCharacterPackageSwap(0);
+            else if (Input.GetKeyDown(KeyCode.Alpha2))
+                ExecuteCharacterPackageSwap(1);
+            else if (Input.GetKeyDown(KeyCode.Alpha3))
+                ExecuteCharacterPackageSwap(2);
         }
     }
 
@@ -555,38 +563,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         // rotate towards target dir
         _mainJoint.targetRotation = Quaternion.RotateTowards(_mainJoint.targetRotation, jointSpaceRotation, Runner.DeltaTime * _rotationSpeed);
     }
-    //private void HandleRotation(Vector3 moveDir)
-    //{
-    //    Quaternion desiredWorldRotation;
-
-    //    // based on camera dir
-    //    if (moveDir.sqrMagnitude > 0.001f)
-    //    {
-    //        // 1. Calculate world rotation based on input direction
-    //        desiredWorldRotation = Quaternion.LookRotation(moveDir, transform.up);
-    //    }
-    //    else
-    //    {
-    //        Vector3 flatForward = transform.forward;
-    //        flatForward.y = 0f; // Completely kill any vertical tilt pitch/roll tracking
-
-    //        if (flatForward.sqrMagnitude > 0.001f)
-    //        {
-    //            flatForward.Normalize();
-    //            // Force the target rotation to use absolute world Vector3.up (0 tilt on X and Z)
-    //            desiredWorldRotation = Quaternion.LookRotation(flatForward, Vector3.up);
-    //        }
-    //        else
-    //        {
-    //            desiredWorldRotation = Quaternion.identity;
-    //        }
-    //    }
-
-    //    Quaternion jointSpaceRotation = Quaternion.Inverse(desiredWorldRotation) * _initialJointRotation;
-
-    //    // rotate towards target dir
-    //    _mainJoint.targetRotation = Quaternion.RotateTowards(_mainJoint.targetRotation, jointSpaceRotation, Runner.DeltaTime * _rotationSpeed);
-    //}
 
     private void HandleJump(NetworkInputData networkInputData)
     {
@@ -713,11 +689,16 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     private void UpdateAbility(NetworkInputData inputData)
     {
+        // only run on host
+        if (!Object.HasStateAuthority) return;
+
         if (CurrentAbilityState._cooldownTimer > 0)
             CurrentAbilityState._cooldownTimer -= Runner.DeltaTime;
 
-        // if ability on cooldown, block input events completely
-        if (CurrentAbilityState._cooldownTimer > 0) return;
+        // if ability on cooldown and is not being used currently, block input events completely
+        bool isOnCooldown = CurrentAbilityState._cooldownTimer > 0;
+        if (isOnCooldown && !CurrentAbilityState._isCharging)
+            return;
 
         if (inputData._abilityPressed)
             _equippedAbility.OnTickPressed(this, ref CurrentAbilityState, inputData._abilityAimDirection);
@@ -732,6 +713,24 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             // set CD
             CurrentAbilityState._cooldownTimer = _equippedAbility._baseCooldown;
         }
+    }
+
+    /// <summary>
+    /// animation event method for abilities
+    /// </summary>
+    public void UnityEvent_OnAbilityImpact()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        if (_equippedAbility != null)
+        {
+            _equippedAbility.OnAnimationImpactTriggered(this);
+        }
+    }
+
+    private void OnCharacterChanged()
+    {
+        ExecuteCharacterPackageSwap(CharacterIndex);
     }
 
     /// <summary>
@@ -752,12 +751,13 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
         // extract references from new package
         GameObject activePackage = _characterPackages[targetVariantIndex];
-
         if (activePackage != null)
         {
             CharacterComponentLinker linker = activePackage.GetComponent<CharacterComponentLinker>();
             if (linker != null)
             {
+                _equippedAbility = linker.ability;
+
                 if (_punchHandler != null)
                     _punchHandler.SetUpActiveLimbs(linker._leftHandDamageDealer, linker._rightHandDamageDealer, linker._leftHandRb, linker._rightHandRb);
 
@@ -768,9 +768,34 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                     _headbuttHandler.SetUpActiveLimbs(linker._headDamageDealer);
 
                 _handGrabHandlers = linker._grabHandlers;
-
+                 
                 if (linker.characterAnimator != null)
                     _animator = linker.characterAnimator;
+
+                _activeRagdollMembers = linker.physicsPackageRoot.GetComponentsInChildren<ActiveRagdollMember>(true);
+
+                for (int i = 0; i < _activeRagdollMembers.Length; i++)
+                {
+                    if (_activeRagdollMembers[i] != null)
+                    {
+                        _activeRagdollMembers[i]._animatedRoot = linker.animatedModelRoot.transform;
+                        _activeRagdollMembers[i]._physicalRoot = linker.physicsPackageRoot.transform;
+
+                        _activeRagdollMembers[i].InitializeIfNotDone();
+                        _activeRagdollMembers[i].ResetBoneToTarget();
+                    }
+                }
+
+                // regather rigidbodies belonging to new character
+                _allChildRigidbodies = linker.physicsPackageRoot.GetComponentsInChildren<Rigidbody>(true);
+                _originalMasses = new float[_allChildRigidbodies.Length];
+                for (int i = 0; i < _allChildRigidbodies.Length; i++)
+                {
+                    _originalMasses[i] = _allChildRigidbodies[i].mass;
+
+                    _allChildRigidbodies[i].linearVelocity = Vector3.zero;
+                    _allChildRigidbodies[i].angularVelocity = Vector3.zero;
+                }
             }
         }
     }
@@ -859,6 +884,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     public override void Spawned()
     {
+        base.Spawned();
+
         // check if this is the owner's player
         if (Object.HasInputAuthority)
         {
@@ -871,11 +898,29 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
         // make it easier to tell which player is which
         transform.name = $"P_{Object.Id}";
+
+        GameObject startingPackage = _characterPackages[_defaultCharacterIndex];
+        Animator startingAnimator = startingPackage.GetComponentInChildren<Animator>();
+        if (startingAnimator != null)
+        {
+            startingAnimator.Update(0f);
+        }
+
+        ExecuteCharacterPackageSwap(_defaultCharacterIndex);
     }
 
     public void PlayerLeft(PlayerRef player)
     {
         if (Object.InputAuthority == player)
             Runner.Despawn(Object);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (CurrentActiveAbilitySO != null && CurrentActiveAbilitySO is RamAbilitySO goatRam)
+        {
+            // Pass your runtime state reference structure inside to fetch active visual states
+            goatRam.DrawAbilityGizmos(this, ref this.CurrentAbilityState);
+        }
     }
 }

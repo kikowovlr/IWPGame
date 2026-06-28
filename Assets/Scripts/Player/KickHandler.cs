@@ -6,7 +6,7 @@ public class KickHandler : NetworkBehaviour
     [Header("References")]
     [SerializeField] private DamageDealer _rightFootDamageDealer;
     [SerializeField] private LayerMask _hitLayer;
-    private Animator _animator;
+    private Animator _animator => _playerController != null ? _playerController.Animator : null;
     private NetworkPlayerController _playerController;
     private Rigidbody _playerRb;
     private ConfigurableJoint _mainJoint;
@@ -33,7 +33,6 @@ public class KickHandler : NetworkBehaviour
         if (registry != null)
         {
             _playerController = registry.Controller;
-            _animator = _playerController.Animator;
             _playerRb = _playerController.NetworkedRb.Rigidbody;
         }
 

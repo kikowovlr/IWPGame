@@ -17,3 +17,4 @@ public class PlayerComponentRegistry : MonoBehaviour
     public KickHandler Kick => _kickHandler;
     public HeadbuttHandler Headbutt => _headbuttHandler;
 }
+ 

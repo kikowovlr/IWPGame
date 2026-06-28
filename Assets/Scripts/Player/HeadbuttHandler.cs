@@ -6,8 +6,8 @@ public class HeadbuttHandler : NetworkBehaviour
     [Header("References")]
     [SerializeField] private DamageDealer _headDamageDealer;
     [SerializeField] private LayerMask _hitLayer;
-    [SerializeField] private Rigidbody _headRb;
-    private Animator _animator;
+    private Rigidbody _headRb;
+    private Animator _animator => _playerController != null ? _playerController.Animator : null;
     private NetworkPlayerController _playerController;
     private Collider _headCollider;
     private Rigidbody _mainRootRb;
@@ -35,7 +35,6 @@ public class HeadbuttHandler : NetworkBehaviour
         if (registry != null)
         {
             _playerController = registry.Controller;
-            _animator = _playerController.Animator;
         }
 
         if (_headDamageDealer != null)

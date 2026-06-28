@@ -19,7 +19,7 @@ public enum HandSide
 public class HandGrabHandler : NetworkBehaviour
 {
     [Header("IK Settings")]
-    [SerializeField] private Animator _animator;
+    private Animator _animator => _networkPlayer != null ? _networkPlayer.Animator : null;
     [SerializeField] private HandSide _handSide;    
     [SerializeField] private float _enterSearchRadius = 2.5f; // enter grabbable obj detection range
     [SerializeField] private float _exitSearchRadius = 3f; // exit grabbable obj detection range (prevents jitter when on edge of radius)
@@ -82,6 +82,8 @@ public class HandGrabHandler : NetworkBehaviour
 
     public void UpdateState()
     {
+        if (_networkPlayer == null || _animator == null) return;
+
         // if player is knocked out, dont allow grabbing or reaching AND release any grab if currently grabbing
         if (_networkPlayer.IsKnockedOut)
         {

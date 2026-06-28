@@ -7,7 +7,9 @@ public class PunchHandler : NetworkBehaviour
     [SerializeField] private DamageDealer _leftHandDamageDealer;
     [SerializeField] private DamageDealer _rightHandDamageDealer;
     [SerializeField] private LayerMask _hitLayer;
-    private Animator _animator;
+
+    // dynamically fetch whatever animator is on the player controller now
+    private Animator _animator => _playerController != null ? _playerController.Animator : null;
 
     [Header("Weak Punch Settings")]
     [SerializeField] private float _weakDamage = 12f;
@@ -25,8 +27,8 @@ public class PunchHandler : NetworkBehaviour
     [SerializeField] private float _strongHandThrustImpulse = 4f;
 
     [Header("Ragdoll Physics Setup")]
-    [SerializeField] private Rigidbody _leftHandRb;   
-    [SerializeField] private Rigidbody _rightHandRb;
+    private Rigidbody _leftHandRb;   
+    private Rigidbody _rightHandRb;
     private Rigidbody _masterRootRb;
 
     private NetworkPlayerController _playerController;
@@ -50,7 +52,6 @@ public class PunchHandler : NetworkBehaviour
         if (registry != null )
         {
             _playerController = registry.Controller;
-            _animator = _playerController.Animator;
             _masterRootRb = _playerController.NetworkedRb.Rigidbody;
         }
 
@@ -75,6 +76,12 @@ public class PunchHandler : NetworkBehaviour
     {
         // ignore if player is unconscious or is alrdy punching
         if (_isPunching || (_playerController != null && _playerController.IsKnockedOut)) return;
+
+        if (_animator == null)
+        {
+            Debug.LogWarning("[PunchHandler] Cannot trigger punch—Active Animator is currently missing!");
+            return;
+        }
 
         // check for strong punch
         if (isSprinting)

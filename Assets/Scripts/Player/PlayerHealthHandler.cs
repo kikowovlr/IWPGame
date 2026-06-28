@@ -12,10 +12,17 @@ public class PlayerHealthHandler : NetworkBehaviour
     [SerializeField] private float _baseKnockoutTime = 3f;
     [SerializeField] private float _maxKnockoutTime = 8f;
     [SerializeField] private float _knockOutForceMultiplier = 1.8f; // boost physical punch force on the KO blow
-    [Networked] public float CurrentHealth {  get; private set; }
+    [Networked, OnChangedRender(nameof(OnHealthChanged))] public float CurrentHealth {  get; private set; }
+    [Networked] public float MaxHealth { get; private set; }
+
+    // keep track of accumulated dmg for goat skill
+    [Networked] private float AccumulatedDamageTaken { get; set; }
 
     private NetworkPlayerController _playerController;
     private Transform _characterRoot; // used to scan the rig hierarchy
+
+    // events
+    public System.Action<float, float> OnHealthChangedEvent;
 
     private void Awake()
     {
@@ -32,8 +39,11 @@ public class PlayerHealthHandler : NetworkBehaviour
         // init health on network when player spawns
         if (Object.HasStateAuthority)
         {
+            MaxHealth = _maxHealth;
             CurrentHealth = _maxHealth;
         }
+
+        OnHealthChanged(); // ensure Ui syncs for late joiners
     }
 
     /// <summary>
@@ -45,23 +55,30 @@ public class PlayerHealthHandler : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     public void Rpc_TakeDamage(float damageAmount, Vector3 impactForce, Vector3 impactPoint, string hitBoneName)
     {
+        float finalDamage = damageAmount;
+
         if (_playerController.IsKnockedOut)
         {
             // getting hit while knocked down deals damage (health goes into -ve) -> stay knocked out longer
-            float finalDamage = damageAmount * _knockedDownDamageMultiplier;
+            finalDamage = damageAmount * _knockedDownDamageMultiplier;
             CurrentHealth -= finalDamage;
-            Utils.DebugLog("Damage taken: " + finalDamage);
-            Utils.DebugLog("Health Left: " + CurrentHealth);
 
             // apply force to hit point
             ApplyForceToBone(impactForce, impactForce, hitBoneName);
             return;
         }
 
+        // get accumulated dmg if skill is charging rn
+        ref AbilityState abilityState = ref _playerController.AbilityStateRef;
+        if (abilityState._isCharging && _playerController.CurrentActiveAbilitySO != null)
+        {
+            finalDamage = _playerController.CurrentActiveAbilitySO.HandleIncomingDamageCheck(_playerController, ref abilityState, damageAmount);
+
+            AccumulatedDamageTaken += finalDamage;
+        }
+
         // reduce health
         CurrentHealth -= damageAmount;
-        Utils.DebugLog("Damage taken: " + damageAmount);
-        Utils.DebugLog("Health Left: " + CurrentHealth);
 
         // check for knockout
         if (CurrentHealth <= 0)
@@ -153,4 +170,13 @@ public class PlayerHealthHandler : NetworkBehaviour
         _playerController.Recover();
         CurrentHealth = _maxHealth;
     }
+
+    private void OnHealthChanged()
+    {
+        // runs on all clients when value updates
+        OnHealthChangedEvent?.Invoke(CurrentHealth, MaxHealth);
+    }
+
+    public void ResetAccumulatedDamageCounter() => AccumulatedDamageTaken = 0f;
+    public float GetAccumulatedDamage() => AccumulatedDamageTaken;
 }

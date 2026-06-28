@@ -1,6 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// stuns anyone in vision cone
+/// flash yellow cone as visual
+/// </summary>
 [CreateAssetMenu(fileName = "Ability_RedPandaIntimidate", menuName = "Abilities/Red Panda Intimidate")]
 public class IntimidateAbilitySO : AbilitySO
 {
@@ -14,10 +18,25 @@ public class IntimidateAbilitySO : AbilitySO
 
     public override void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
-        player.Animator.SetTrigger("Intimidate");
+        // only run on host
+        if (!player.Object.HasStateAuthority) return;
+
+        player.Animator.SetTrigger(_skillTrigger);
+        player.Animator.SetInteger(_skillType, _skillType);
+    }
+
+    /// <summary>
+    /// called explicitly via Unity Animation Event down on the player controller
+    /// </summary
+    public override void OnAnimationImpactTriggered(NetworkPlayerController player)
+    {
+        if (!player.Object.HasStateAuthority) return;
+
+        // prevent duplicate hits
+        HashSet<NetworkPlayerController> hitEnemiesThisFrame = new HashSet<NetworkPlayerController>();
 
         // query all players within radius
-        int hitCount =  player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, _hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
+        int hitCount = player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, _hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
         Vector3 forwardDir = player.transform.forward;
 
         for (int i = 0; i < hitCount; i++)
@@ -31,7 +50,12 @@ public class IntimidateAbilitySO : AbilitySO
             if (Vector3.Angle(forwardDir, dirToTarget) < _coneAngle * 0.5f)
             {
                 if (hit.transform.root.TryGetComponent(out NetworkPlayerController enemy))
-                    enemy.Knockout();
+                {
+                    if (hitEnemiesThisFrame.Contains(enemy)) continue;
+                    hitEnemiesThisFrame.Add(enemy);
+
+                    Utils.DebugLog($"[Intimidate] Stunned {enemy.name} exactly on the animation's impact frame!");
+                }
             }
         }
     }
