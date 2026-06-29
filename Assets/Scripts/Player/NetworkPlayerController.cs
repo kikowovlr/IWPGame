@@ -106,7 +106,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private bool _isAbilityReleased;
 
     [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
-
+    [Networked] public NetworkBool CanMove { get; set; } = true;
+    [Networked] public NetworkBool CanRotate { get; set; } = true;
     // getters
     public bool IsKnockedOut => _isKnockedOut;
     public bool IsGrabbingActive => _isGrabbingActive;
@@ -243,9 +244,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 // movement calculation
                 // if not sprinting, clamp input
                 float inputMagnitude = networkInputData._movementInput.magnitude;
-
                 ProcessGrabPunchLogic(networkInputData._isPunchOrGrabPressed, inputMagnitude, networkInputData._isSprintPressed);
 
+                // MOVEMENT GATE
+                // dont call ProcessInputMovement if cannot move
+                if (!CanMove)
+                {
+                    ApplyIdleBrakes();
+                    targetAnimSpeed = 0f;
+                }
                 if (inputMagnitude > InputThreshold)
                 {
                     // calculate the animation speed should be based entirely on input
@@ -255,6 +262,23 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 else
                 {
                     ApplyIdleBrakes();
+                }
+
+                // ROTATION GATE
+                if (!CanRotate)
+                {
+                    // repurpose WASD for rotating
+                    if (!CanMove && networkInputData._abilityAimDirection.sqrMagnitude > 0.01f)
+                    {
+                        Vector3 lookTarget = new Vector3(networkInputData._abilityAimDirection.x, 0, networkInputData._abilityAimDirection.y);
+                        Quaternion targetRot = Quaternion.LookRotation(lookTarget);
+
+                        transform.rotation = Quaternion.RotateTowards(
+                            transform.rotation,
+                            targetRot,
+                            _rotationSpeed * 0.3f * Runner.DeltaTime
+                        );
+                    }    
                 }
 
                 ProcessKickInput(networkInputData);

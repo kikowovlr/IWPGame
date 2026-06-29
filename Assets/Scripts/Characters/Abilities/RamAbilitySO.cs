@@ -137,6 +137,8 @@ public class RamAbilitySO : AbilitySO
 
         _hitTargetsThisDash.Clear();
 
+        player.Animator.SetTrigger(_releaseTrigger);
+
         // TODO - hide direction arrow
     }
 
