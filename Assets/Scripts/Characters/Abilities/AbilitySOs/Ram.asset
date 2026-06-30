@@ -17,9 +17,12 @@ MonoBehaviour:
   _icon: {fileID: 0}
   _skillTrigger: SkillTrigger
   _releaseTrigger: SkillRelease
-  _chargingBool: IsCharging
+  _activeBool: IsSkillActive
   _skillTypeString: SkillType
   _skillType: 1
+  BlockAllCombatInputs: 1
+  BlockJumping: 1
+  BlockSprinting: 1
   _maxChargeTime: 3
   _damageTakenMultiplier: 0.5
   _maxDamageBeforeCancel: 30

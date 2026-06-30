@@ -67,4 +67,8 @@ public class IntimidateAbilitySO : AbilitySO
     public override void OnTickReleased(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
     }
+
+    public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
+    {
+    }
 }

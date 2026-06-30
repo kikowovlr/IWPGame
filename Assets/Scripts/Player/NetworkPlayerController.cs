@@ -1,4 +1,4 @@
-using Fusion;
+﻿using Fusion;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Fusion.Addons.Physics;
@@ -117,6 +117,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     public PlayerComponentRegistry Registry { get; private set; }
     public ref AbilityState AbilityStateRef => ref CurrentAbilityState;
     public AbilitySO CurrentActiveAbilitySO { get; private set; }
+
+
+    private int _rotationLogCounter = 0;
 
     private void Awake()
     {
@@ -253,7 +256,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                     ApplyIdleBrakes();
                     targetAnimSpeed = 0f;
                 }
-                if (inputMagnitude > InputThreshold)
+                else if (inputMagnitude > InputThreshold)
                 {
                     // calculate the animation speed should be based entirely on input
                     targetAnimSpeed = networkInputData._isSprintPressed ? 1.0f : _walkInputScale;
@@ -265,20 +268,26 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 }
 
                 // ROTATION GATE
-                if (!CanRotate)
+                if (CanRotate)
                 {
                     // repurpose WASD for rotating
                     if (!CanMove && networkInputData._abilityAimDirection.sqrMagnitude > 0.01f)
                     {
-                        Vector3 lookTarget = new Vector3(networkInputData._abilityAimDirection.x, 0, networkInputData._abilityAimDirection.y);
+                        Vector3 lookTarget = new Vector3(networkInputData._abilityAimDirection.x, 0f, networkInputData._abilityAimDirection.y);
                         Quaternion targetRot = Quaternion.LookRotation(lookTarget);
+
+                        // eliminate spin resistance
+                        _rb.angularVelocity = Vector3.zero;
 
                         transform.rotation = Quaternion.RotateTowards(
                             transform.rotation,
                             targetRot,
-                            _rotationSpeed * 0.3f * Runner.DeltaTime
+                            _rotationSpeed * Runner.DeltaTime
                         );
-                    }    
+
+                        // need to tell joint to follow rotation!
+                        _mainJoint.targetRotation = Quaternion.Inverse(transform.rotation) * _initialJointRotation;
+                    }  
                 }
 
                 ProcessKickInput(networkInputData);
@@ -719,24 +728,29 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         if (CurrentAbilityState._cooldownTimer > 0)
             CurrentAbilityState._cooldownTimer -= Runner.DeltaTime;
 
+        _equippedAbility.UpdateAbilityState(this, ref CurrentAbilityState);
+
         // if ability on cooldown and is not being used currently, block input events completely
-        bool isOnCooldown = CurrentAbilityState._cooldownTimer > 0;
-        if (isOnCooldown && !CurrentAbilityState._isCharging)
-            return;
+        bool canStartAbility = CurrentAbilityState._cooldownTimer <= 0
+                           && !CurrentAbilityState._isCharging
+                           && !CurrentAbilityState._isDashing;
 
-        if (inputData._abilityPressed)
+        if (inputData._abilityPressed && canStartAbility)
             _equippedAbility.OnTickPressed(this, ref CurrentAbilityState, inputData._abilityAimDirection);
-
-        if (inputData._abilityHeld)
-            _equippedAbility.OnTickHeld(this, ref CurrentAbilityState, inputData._abilityAimDirection);
-
-        if (inputData._abilityReleased)
+        else if (CurrentAbilityState._isCharging)
         {
-            _equippedAbility.OnTickReleased(this, ref CurrentAbilityState, inputData._abilityAimDirection);
+            if (inputData._abilityReleased)
+            {
+                _equippedAbility.OnTickReleased(this, ref CurrentAbilityState, inputData._abilityAimDirection);
 
-            // set CD
-            CurrentAbilityState._cooldownTimer = _equippedAbility._baseCooldown;
+                // set CD
+                CurrentAbilityState._cooldownTimer = _equippedAbility._baseCooldown;
+            }
+            else if (inputData._abilityHeld)
+                _equippedAbility.OnTickHeld(this, ref CurrentAbilityState, inputData._abilityAimDirection);
         }
+
+
     }
 
     /// <summary>
@@ -750,6 +764,33 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             _equippedAbility.OnAnimationImpactTriggered(this);
         }
+    }
+
+    private Vector2 CalculateMouseAimDirection()
+    {
+        if (Camera.main == null) return Vector2.zero;
+
+        // project ray from camera lens through screen's cursor position
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        // create invisible plane flat on the ground whr player stands
+        Plane groundPlane = new Plane(Vector3.up, transform.position);
+
+        // find where ray intersects plane
+        if (groundPlane.Raycast(ray, out float rayDistance))
+        {
+            Vector3 mouseWorldPosition = ray.GetPoint(rayDistance);
+
+            Vector3 lookDirection3D = mouseWorldPosition - transform.position;
+            lookDirection3D.y = 0f;
+
+            if (lookDirection3D.sqrMagnitude > 0.001f)
+            {
+                return new Vector2(lookDirection3D.x, lookDirection3D.z).normalized;
+            }
+        }
+
+        return Vector2.zero;
     }
 
     private void OnCharacterChanged()
@@ -824,6 +865,34 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
+    private void ApplyAbilityInputMask(ref NetworkInputData inputData)
+    {
+        if (!_isAbilityHeld || _equippedAbility == null) return;
+
+        if (_equippedAbility.BlockAllCombatInputs)
+        {
+            inputData._isPunchOrGrabPressed = false;
+            inputData._isHeadbuttPressed = false;
+            inputData._isThrowPressed = false;
+            inputData._isKickPressed = false;
+
+            _isHeadbuttButtonPressed = false;
+            _isRightClickButtonPressed = false;
+        }
+
+        if (_equippedAbility.BlockJumping)
+        {
+            inputData._isJumpPressed = false;
+            _isJumpButtonPressed = false;
+        }
+
+        if (_equippedAbility.BlockSprinting)
+        {
+            inputData._isSprintPressed = false;
+            _isRunning = false;
+        }
+    }
+
     // spawner calls this then transmit info to host
     public NetworkInputData GetNetworkInput()
     {
@@ -867,7 +936,23 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._abilityReleased = _isAbilityReleased;
             _isAbilityPressed = false;
             _isAbilityReleased = false;
-            networkInputData._abilityAimDirection = new Vector2(transform.forward.x, transform.forward.z).normalized; // pass current forward look direction
+            if (networkInputData._abilityReleased)
+            {
+                _isAbilityHeld = false;
+            }
+
+            if (_isAbilityHeld)
+            {
+                // while charging, use mouse for aim dir
+                networkInputData._movementInput = Vector2.zero;
+                networkInputData._abilityAimDirection = CalculateMouseAimDirection();
+            }
+            else
+            {
+                // otherwise, wasd for normal movement
+                networkInputData._movementInput = _moveInputVector;
+                networkInputData._abilityAimDirection = Vector2.zero;
+            }
 
             if (isRightClickPressed)
             {
@@ -897,6 +982,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 networkInputData._isKickPressed = false;
             }
         }
+
+        ApplyAbilityInputMask(ref networkInputData);
 
         networkInputData._isRagdollPressed = Input.GetKeyDown(KeyCode.R);
 
