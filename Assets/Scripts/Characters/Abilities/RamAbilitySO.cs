@@ -55,8 +55,8 @@ public class RamAbilitySO : AbilitySO
         state._isDashing = false;
         state._chargeTime = 0f;
 
-        player.CanMove = false;
-        player.CanRotate = true;
+        player.RawCanMove = false;
+        player.RawCanRotate = true;
 
         player.Registry.Health.ResetAccumulatedDamageCounter();
 
@@ -95,8 +95,8 @@ public class RamAbilitySO : AbilitySO
         state._isDashing = true;
         state._dashDurationTimer = _maxRamDuration;
 
-        player.CanMove = false;
-        player.CanRotate = false;
+        player.RawCanMove = false;
+        player.RawCanRotate = false;
 
         _hitTargetIds.Clear();
 
@@ -113,7 +113,7 @@ public class RamAbilitySO : AbilitySO
 
         // use boxcast -> prvent teleporting or missing collision detection
         // start boxcast from players mouth
-        Vector3 castStart = player.transform.position + (Vector3.up * 1.0f);
+        Vector3 castStart = player.transform.position + (Vector3.up * 0.75f);
         Vector3 castDirection = player.transform.forward;
 
         // calculate how far we are sweeping this tick based on curr frame velocity
@@ -156,7 +156,9 @@ public class RamAbilitySO : AbilitySO
                 knockbackDir.y = 1.5f; // lift slightly
 
                 Utils.DebugLog($"[Goat Ram] Box Impact on {enemy.name}! Applied Force: {finalKnockback}");
-                // TODO: apply knockback
+
+                Vector3 finalForceVector = knockbackDir * finalKnockback;
+                enemy.ApplyKnockback(finalForceVector, ForceMode.Impulse);
 
                 hitSomething = true;
             }
@@ -170,8 +172,8 @@ public class RamAbilitySO : AbilitySO
         if (hitSomething)
         {
             state._isDashing = false;
-            player.CanMove = true;
-            player.CanRotate = true;
+            player.RawCanMove = true;
+            player.RawCanRotate = true;
             player.Animator.SetTrigger(_releaseTrigger);
             player.Animator.SetBool(_activeBool, false);
             Utils.DebugLog("[Goat Ram] Ram terminated via box target layer impact.");
@@ -192,8 +194,8 @@ public class RamAbilitySO : AbilitySO
             state._isCharging = false;
             state._isDashing = false;
 
-            player.CanMove = true;
-            player.CanRotate = true;
+            player.RawCanMove = true;
+            player.RawCanRotate = true;
 
             player.Animator.SetTrigger(_releaseTrigger);
             Utils.DebugLogWarning("[Goat Ram] STUN CANCEL! Stance broken by posture damage.");
@@ -288,8 +290,8 @@ public class RamAbilitySO : AbilitySO
             if (state._dashDurationTimer < 0f)
             {
                 state._isDashing = false;
-                player.CanMove = true;
-                player.CanRotate = true;
+                player.RawCanMove = true;
+                player.RawCanRotate = true;
                 // TODO - remove arrow
                 Utils.DebugLog("[Goat Ram] Dash finished organically.");
                 player.Animator.SetBool(_activeBool, false);

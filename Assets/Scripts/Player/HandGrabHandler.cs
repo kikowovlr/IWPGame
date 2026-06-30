@@ -385,14 +385,16 @@ public class HandGrabHandler : NetworkBehaviour
             {
                 currentForceMultiplier = _playerThrowForceMultiplier;
                 throwDirection = (_networkPlayer.transform.forward + Vector3.up * 1.2f).normalized;
+
+                Vector3 finalThrowForce = throwDirection * currentForceMultiplier;
+                otherPlayer.ApplyKnockback(finalThrowForce, ForceMode.Impulse);
             }
             else
             {
                 // fire obj forward
                 throwDirection = _networkPlayer.transform.forward + Vector3.up * 0.3f * currentForceMultiplier;
+                targetRb.AddForce(throwDirection * currentForceMultiplier, ForceMode.Impulse);
             }
-
-            targetRb.AddForce(throwDirection * currentForceMultiplier, ForceMode.Impulse);
 
             // add recoil after throwing
             if (transform.root.TryGetComponent(out Rigidbody playerRb))

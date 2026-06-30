@@ -106,8 +106,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private bool _isAbilityReleased;
 
     [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
-    [Networked] public NetworkBool CanMove { get; set; } = true;
-    [Networked] public NetworkBool CanRotate { get; set; } = true;
+    [Networked] public NetworkBool RawCanMove { get; set; } = true;
+    [Networked] public NetworkBool RawCanRotate { get; set; } = true;
+    public bool CanMove => RawCanMove && !IsInPhysicsRecovery;
+    public bool CanRotate => RawCanRotate && !IsInPhysicsRecovery; 
+
+    // time to recover after knockback, throw, etc
+    [Header("Physics Recovery")]
+    [Networked] private TickTimer _physicsControlLockTimer { get; set; }
+    [SerializeField] private float _maxKnockbackControlLockDuration = 0.5f;
+    public bool IsInPhysicsRecovery => !_physicsControlLockTimer.ExpiredOrNotRunning(Runner);
+
+    // 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
     public bool IsGrabbingActive => _isGrabbingActive;
@@ -249,9 +259,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 float inputMagnitude = networkInputData._movementInput.magnitude;
                 ProcessGrabPunchLogic(networkInputData._isPunchOrGrabPressed, inputMagnitude, networkInputData._isSprintPressed);
 
+                // DYNAMIC RECOVERY CLEANUP
+                // if player has slowed down enough or hit a wall, give control back
+                if (IsInPhysicsRecovery && _rb.linearVelocity.magnitude < 1.5f)
+                {
+                    _physicsControlLockTimer = TickTimer.None;
+                }
+
                 // MOVEMENT GATE
+                if (IsInPhysicsRecovery)
+                {
+                    targetAnimSpeed = 0f;
+                }
                 // dont call ProcessInputMovement if cannot move
-                if (!CanMove)
+                else if (!CanMove)
                 {
                     ApplyIdleBrakes();
                     targetAnimSpeed = 0f;
@@ -901,6 +922,23 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             inputData._isSprintPressed = false;
             _isRunning = false;
+        }
+    }
+
+    /// <summary>
+    /// modular method to knock this player away over the network
+    /// </summary>
+    public void ApplyKnockback(Vector3 forceVector, ForceMode mode = ForceMode.Impulse)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        // lock player from moving/rotating for a max safety window
+        _physicsControlLockTimer = TickTimer.CreateFromSeconds(Runner, _maxKnockbackControlLockDuration);
+
+        if (_rb != null)
+        {
+            _rb.linearVelocity = Vector3.zero;
+            _rb.AddForce(forceVector, mode);
         }
     }
 
