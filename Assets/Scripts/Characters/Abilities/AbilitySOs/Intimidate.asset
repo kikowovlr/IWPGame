@@ -17,12 +17,9 @@ MonoBehaviour:
   _icon: {fileID: 0}
   _skillTrigger: SkillTrigger
   _releaseTrigger: SkillRelease
-  _activeBool: IsSkillActive
+  _chargingBool: IsCharging
   _skillTypeString: SkillType
   _skillType: 0
-  BlockAllCombatInputs: 1
-  BlockJumping: 1
-  BlockSprinting: 1
   _range: 5
   _coneAngle: 60
   _affectedLayer:

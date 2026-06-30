@@ -16,15 +16,12 @@ public abstract class AbilitySO : ScriptableObject
     [SerializeField] protected string _activeBool = "IsSkillActive";
     [SerializeField] protected string _skillTypeString = "SkillType";
     [SerializeField] protected int _skillType = 0; // 0 = instant, 1 = charge
-    public bool BlockAllCombatInputs = true;
-    public bool BlockJumping = true;
-    public bool BlockSprinting = true;
+
 
     // called on server/host during FixedUpdateNetwork ticks
     public abstract void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir); // ref - pass by reference
     public abstract void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir); 
-    public abstract void OnTickReleased(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir);
-    public abstract void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state);
+    public abstract void OnTickReleased(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir); 
 
     /// <summary>
     /// override this in subclasses if ability needs to execute hit code when animation event triggers

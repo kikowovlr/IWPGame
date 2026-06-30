@@ -41,7 +41,6 @@ public class RamAbilitySO : AbilitySO
 
     private readonly Collider[] _hitBuffer = new Collider[20];
     private readonly HashSet<NetworkPlayerController> _hitTargetsThisDash = new HashSet<NetworkPlayerController>(); // ensure hits are not repeated
-    bool _isChargeReleased = false;
 
     /// <summary>
     /// start charging
@@ -54,9 +53,6 @@ public class RamAbilitySO : AbilitySO
         state._isCharging = true;
         state._isDashing = false;
         state._chargeTime = 0f;
-
-        player.CanMove = false;
-        player.CanRotate = true;
 
         player.Registry.Health.ResetAccumulatedDamageCounter();
 
@@ -78,10 +74,53 @@ public class RamAbilitySO : AbilitySO
             // increment charge time
             state._chargeTime = Mathf.Min(state._chargeTime + player.Runner.DeltaTime, _maxChargeTime);
 
+            // handle aiming rotations - just aim if no input
+            Vector3 targetDirection = player.transform.forward;
+            if (aimDir.sqrMagnitude > 0.01f)
+                targetDirection = new Vector3(aimDir.x, 0f, aimDir.y).normalized;
+
+            player.transform.rotation = Quaternion.LookRotation(targetDirection);
+
+            // todo - disable moving in player controller script
             // TODO - can add jittering??
 
-            //if 
             return;
+        }
+
+        // ramming
+        if (state._isDashing)
+        {
+            state._dashDurationTimer -= player.Runner.DeltaTime;
+
+            // braking system
+            Vector3 rayOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.2f); // move up a bit to ensure not always colliding with floor below fit
+            bool isFloorAhead = player.Runner.GetPhysicsScene().Raycast(rayOrigin, Vector3.down, 2.0f, _floorLayer);
+
+            // calculate ram power
+            float chargePercent = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
+            float targetMoveSpeed = _baseRamSpeed * Mathf.Lerp(1f, _maxRamSpeedMultiplier, chargePercent);
+
+            // no floor ahead - try halting
+            if (!isFloorAhead)
+            {
+                Utils.DebugLogWarning("[Goat Ram] LEDGE DETECTED! Deploying safety skids!");
+                state._dashDurationTimer -= player.Runner.DeltaTime * 3f; // expire dash faster 
+                targetMoveSpeed *= 0.1f; // force velocity drop
+                                         // TODO - apply this move speed
+
+                // todo - add audio & visual
+                player.Animator.SetBool(_activeBool, false);
+            }
+
+            if (state._dashDurationTimer < 0f)
+            {
+                state._isDashing = false;
+                // TODO - remove arrow
+                Utils.DebugLog("[Goat Ram] Dash finished organically.");
+                return;
+            }
+
+            ProcessCollisionCheck(player, ref state);
         }
     }
 
@@ -93,12 +132,12 @@ public class RamAbilitySO : AbilitySO
         // start ramming
         state._isCharging = false;
         state._isDashing = true;
+
         state._dashDurationTimer = _maxRamDuration;
 
-        player.CanMove = false;
-        player.CanRotate = false;
-
         _hitTargetsThisDash.Clear();
+
+        player.Animator.SetTrigger(_releaseTrigger);
 
         // TODO - hide direction arrow
     }
@@ -160,8 +199,6 @@ public class RamAbilitySO : AbilitySO
         if (hitSomething)
         {
             state._isDashing = false;
-            player.CanMove = true;
-            player.CanRotate = true;
             player.Animator.SetTrigger(_releaseTrigger);
             player.Animator.SetBool(_activeBool, false);
             Utils.DebugLog("[Goat Ram] Ram terminated via box target layer impact.");
@@ -181,9 +218,6 @@ public class RamAbilitySO : AbilitySO
         {
             state._isCharging = false;
             state._isDashing = false;
-
-            player.CanMove = true;
-            player.CanRotate = true;
 
             player.Animator.SetTrigger(_releaseTrigger);
             Utils.DebugLogWarning("[Goat Ram] STUN CANCEL! Stance broken by posture damage.");
@@ -231,59 +265,5 @@ public class RamAbilitySO : AbilitySO
 
         // Restore the scene gizmo matrix state back to standard defaults
         Gizmos.matrix = oldMatrix;
-    }
-
-    /// <summary>
-    /// runs every tick from controller, manages active states automatically
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="state"></param>
-    public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
-    {
-        if (!player.Object.HasStateAuthority) return;
-
-        // ramming
-        if (state._isDashing)
-        {
-            state._dashDurationTimer -= player.Runner.DeltaTime;
-
-            // braking system
-            Vector3 rayOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.2f); // move up a bit to ensure not always colliding with floor below fit
-            bool isFloorAhead = player.Runner.GetPhysicsScene().Raycast(rayOrigin, Vector3.down, 2.0f, _floorLayer);
-
-            // calculate ram power
-            float chargePercent = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
-            float targetMoveSpeed = _baseRamSpeed * Mathf.Lerp(1f, _maxRamSpeedMultiplier, chargePercent);
-
-            // no floor ahead - try halting
-            if (!isFloorAhead)
-            {
-                Utils.DebugLogWarning("[Goat Ram] LEDGE DETECTED! Deploying safety skids!");
-                state._dashDurationTimer -= player.Runner.DeltaTime * 3f; // expire dash faster 
-                targetMoveSpeed *= 0.1f; // force velocity drop
-                                         // TODO - apply this move speed
-
-                // todo - add audio & visual
-                player.Animator.SetBool(_activeBool, false);
-            }
-
-            // apply velocity
-            Vector3 dashVelocity = player.transform.forward * targetMoveSpeed;
-            // retain vertical velocity
-            dashVelocity.y = player.NetworkedRb.Rigidbody.linearVelocity.y;
-            player.NetworkedRb.Rigidbody.linearVelocity = dashVelocity;
-
-            if (state._dashDurationTimer < 0f)
-            {
-                state._isDashing = false;
-                player.CanMove = true;
-                player.CanRotate = true;
-                // TODO - remove arrow
-                Utils.DebugLog("[Goat Ram] Dash finished organically.");
-                return;
-            }
-
-            ProcessCollisionCheck(player, ref state);
-        }
     }
 }
