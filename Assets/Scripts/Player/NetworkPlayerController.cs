@@ -296,6 +296,17 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 if (_equippedAbility != null)
                 {
                     UpdateAbility(networkInputData);
+
+                    // if current ability is requesting for movement
+                    if (CurrentAbilityState._isDashing)
+                    {
+                        // keep current y vel
+                        float currentVerticalY = _rb.linearVelocity.y;
+                        Vector3 finalVelocity = CurrentAbilityState._customVelocity;
+                        finalVelocity.y = currentVerticalY;
+
+                        _rb.linearVelocity = finalVelocity;
+                    }
                 }
 
                 HandleJump(networkInputData);
@@ -1026,9 +1037,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             Runner.Despawn(Object);
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
-        if (CurrentActiveAbilitySO != null && CurrentActiveAbilitySO is RamAbilitySO goatRam)
+        if (_equippedAbility != null && _equippedAbility is RamAbilitySO goatRam)
         {
             // Pass your runtime state reference structure inside to fetch active visual states
             goatRam.DrawAbilityGizmos(this, ref this.CurrentAbilityState);

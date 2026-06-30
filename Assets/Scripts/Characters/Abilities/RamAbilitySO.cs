@@ -1,5 +1,6 @@
-using Fusion.LagCompensation;
 using System.Collections.Generic;
+using Fusion;
+using Fusion.LagCompensation;
 using UnityEngine;
 
 /// <summary>
@@ -39,9 +40,8 @@ public class RamAbilitySO : AbilitySO
     [SerializeField] private float _boxHeight = 1.0f;
     [SerializeField] private float _boxDepth = 0.6f;
 
-    private readonly Collider[] _hitBuffer = new Collider[20];
-    private readonly HashSet<NetworkPlayerController> _hitTargetsThisDash = new HashSet<NetworkPlayerController>(); // ensure hits are not repeated
-    bool _isChargeReleased = false;
+    private readonly RaycastHit[] _hitBuffer = new RaycastHit[20];
+    private readonly List<NetworkId> _hitTargetIds = new List<NetworkId>(20);
 
     /// <summary>
     /// start charging
@@ -98,7 +98,7 @@ public class RamAbilitySO : AbilitySO
         player.CanMove = false;
         player.CanRotate = false;
 
-        _hitTargetsThisDash.Clear();
+        _hitTargetIds.Clear();
 
         // TODO - hide direction arrow
     }
@@ -107,21 +107,29 @@ public class RamAbilitySO : AbilitySO
     {
         Vector3 boxHalfExtents = new Vector3(
             _range * 0.5f,
-            _boxHeight,
-            _boxDepth
+            _boxHeight * 0.5f,
+            _boxDepth * 0.5f
         );
 
-        // position center of box so its right infront of player's face
-        Vector3 boxCenter = player.transform.position + (player.transform.forward * boxHalfExtents.z) + (Vector3.up * 1.0f);
+        // use boxcast -> prvent teleporting or missing collision detection
+        // start boxcast from players mouth
+        Vector3 castStart = player.transform.position + (Vector3.up * 1.0f);
+        Vector3 castDirection = player.transform.forward;
+
+        // calculate how far we are sweeping this tick based on curr frame velocity
+        float currentFrameSpeed = _baseRamSpeed * Mathf.Lerp(1f, _maxRamSpeedMultiplier, state._chargeTime / _maxChargeTime);
+        float castDistance = (currentFrameSpeed * player.Runner.DeltaTime) + 0.2f; // margin buffer in case of gaps
 
         Quaternion boxRotation = player.transform.rotation;
 
         // fire box overlap
-        int hitCount = player.Runner.GetPhysicsScene().OverlapBox(
-            boxCenter,
+        int hitCount = player.Runner.GetPhysicsScene().BoxCast(
+            castStart,
             boxHalfExtents,
+            castDirection,
             _hitBuffer,
             boxRotation,
+            castDistance,
             _hitLayer,
             QueryTriggerInteraction.Ignore
         );
@@ -130,13 +138,15 @@ public class RamAbilitySO : AbilitySO
 
         for ( int i = 0; i < hitCount; i++ )
         {
-            Collider hit = _hitBuffer[i];
-            if (hit.transform.root == player.transform) continue; // Skip self
-
-            if (hit.transform.root.TryGetComponent(out NetworkPlayerController enemy))
+            RaycastHit hitInfo = _hitBuffer[i];
+            Collider hitCollider = hitInfo.collider;
+            if (hitCollider == null) return;
+            if (hitCollider.transform.root == player.transform) continue; // Skip self
+            if (hitCollider.transform.root.TryGetComponent(out NetworkPlayerController enemy))
             {
-                if (_hitTargetsThisDash.Contains(enemy)) continue;
-                _hitTargetsThisDash.Add(enemy);
+                NetworkId enemyId = enemy.Object.Id;
+                if (_hitTargetIds.Contains(enemyId)) continue;
+                _hitTargetIds.Add(enemyId);
 
                 // apply knockback
                 float chargePercentage = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
@@ -199,38 +209,43 @@ public class RamAbilitySO : AbilitySO
     /// </summary>
     public void DrawAbilityGizmos(NetworkPlayerController player, ref AbilityState state)
     {
-        // Replicate the exact math used in your ProcessCollisionCheck method
-        Vector3 boxHalfExtents = new Vector3(
-            _range * 0.5f,
-            _boxHeight,
-            _boxDepth
-        );
+        Vector3 boxHalfExtents = new Vector3(_range * 0.5f, _boxHeight, _boxDepth);
+        Vector3 localCenterOffset = (Vector3.forward * boxHalfExtents.z) + (Vector3.up * 1.0f);
 
-        Vector3 boxCenter = player.transform.position + (player.transform.forward * boxHalfExtents.z) + (Vector3.up * 1.0f);
-
-        // Cache the old Gizmos matrix so we don't break other system visuals
         Matrix4x4 oldMatrix = Gizmos.matrix;
 
-        // Set the Gizmos matrix to match the player's rotation and position context
-        Gizmos.matrix = Matrix4x4.TRS(boxCenter, player.transform.rotation, Vector3.one);
+        // Bind the matrix root strictly to the real transform positions
+        Gizmos.matrix = Matrix4x4.TRS(player.transform.position, player.transform.rotation, Vector3.one);
 
-        // Color code based on state: Red/Orange for active ramming speed, green/white for idle setup
         if (state._isDashing)
         {
-            Gizmos.color = new Color(1f, 0.3f, 0f, 0.3f); // Semi-transparent Orange Fill
-            Gizmos.DrawCube(Vector3.zero, boxHalfExtents * 2f); // Draws using local space via matrix
+            Gizmos.color = new Color(1f, 0.3f, 0f, 0.4f);
+            Gizmos.DrawCube(localCenterOffset, boxHalfExtents * 2f); // Draw using the calculated offset
 
-            Gizmos.color = Color.red; // Solid Red Outline
-            Gizmos.DrawWireCube(Vector3.zero, boxHalfExtents * 2f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireCube(localCenterOffset, boxHalfExtents * 2f);
         }
         else
         {
-            Gizmos.color = new Color(1f, 1f, 1f, 0.1f); // Super faint white for setup visibility
-            Gizmos.DrawWireCube(Vector3.zero, boxHalfExtents * 2f);
+            Gizmos.color = new Color(1f, 1f, 1f, 0.2f);
+            Gizmos.DrawWireCube(localCenterOffset, boxHalfExtents * 2f);
         }
 
-        // Restore the scene gizmo matrix state back to standard defaults
         Gizmos.matrix = oldMatrix;
+
+        // ray
+        Vector3 rayOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.2f);
+        Vector3 rayDirection = Vector3.down * 2.0f;
+        if (state._isDashing)
+        {
+            Gizmos.color = Color.yellow; // High visibility neon yellow warning ray while active!
+        }
+        else
+        {
+            Gizmos.color = new Color(1f, 1f, 0f, 0.25f); // Soft, faded yellow when parked
+        }
+        Gizmos.DrawLine(rayOrigin, rayOrigin + rayDirection);
+        Gizmos.DrawWireSphere(rayOrigin + rayDirection, 0.05f);
     }
 
     /// <summary>
@@ -261,7 +276,6 @@ public class RamAbilitySO : AbilitySO
                 Utils.DebugLogWarning("[Goat Ram] LEDGE DETECTED! Deploying safety skids!");
                 state._dashDurationTimer -= player.Runner.DeltaTime * 3f; // expire dash faster 
                 targetMoveSpeed *= 0.1f; // force velocity drop
-                                         // TODO - apply this move speed
 
                 // todo - add audio & visual
                 player.Animator.SetBool(_activeBool, false);
@@ -269,9 +283,7 @@ public class RamAbilitySO : AbilitySO
 
             // apply velocity
             Vector3 dashVelocity = player.transform.forward * targetMoveSpeed;
-            // retain vertical velocity
-            dashVelocity.y = player.NetworkedRb.Rigidbody.linearVelocity.y;
-            player.NetworkedRb.Rigidbody.linearVelocity = dashVelocity;
+            state._customVelocity = dashVelocity;
 
             if (state._dashDurationTimer < 0f)
             {
@@ -280,6 +292,7 @@ public class RamAbilitySO : AbilitySO
                 player.CanRotate = true;
                 // TODO - remove arrow
                 Utils.DebugLog("[Goat Ram] Dash finished organically.");
+                player.Animator.SetBool(_activeBool, false);
                 return;
             }
 

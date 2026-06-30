@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
+using Fusion;
+using UnityEngine;
 
 /// <summary>
 /// stuns anyone in vision cone
@@ -15,6 +16,7 @@ public class IntimidateAbilitySO : AbilitySO
 
     // static reusable array buffer to hold up to 20 hits wihtout generating heap garbage
     private readonly Collider[] _hitBuffer = new Collider[20];
+    private readonly List<NetworkId> _hitTargetIds = new List<NetworkId>(20);
 
     public override void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
@@ -32,9 +34,6 @@ public class IntimidateAbilitySO : AbilitySO
     {
         if (!player.Object.HasStateAuthority) return;
 
-        // prevent duplicate hits
-        HashSet<NetworkPlayerController> hitEnemiesThisFrame = new HashSet<NetworkPlayerController>();
-
         // query all players within radius
         int hitCount = player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, _hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
         Vector3 forwardDir = player.transform.forward;
@@ -51,8 +50,9 @@ public class IntimidateAbilitySO : AbilitySO
             {
                 if (hit.transform.root.TryGetComponent(out NetworkPlayerController enemy))
                 {
-                    if (hitEnemiesThisFrame.Contains(enemy)) continue;
-                    hitEnemiesThisFrame.Add(enemy);
+                    NetworkId enemyId = enemy.Object.Id;
+                    if (_hitTargetIds.Contains(enemyId)) continue;
+                    _hitTargetIds.Add(enemyId);
 
                     Utils.DebugLog($"[Intimidate] Stunned {enemy.name} exactly on the animation's impact frame!");
                 }
@@ -66,6 +66,8 @@ public class IntimidateAbilitySO : AbilitySO
 
     public override void OnTickReleased(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
+        if (!player.Object.HasStateAuthority) return;
+        _hitTargetIds.Clear();
     }
 
     public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
