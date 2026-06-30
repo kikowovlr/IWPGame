@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e4928aeedd526449e235ccc30330e9, type: 3}
+  m_Name: Ram
+  m_EditorClassIdentifier: Assembly-CSharp::RamAbilitySO
+  _name: Ram
+  _baseCooldown: 2
+  _icon: {fileID: 0}
+  _skillTrigger: SkillTrigger
+  _releaseTrigger: SkillRelease
+  _activeBool: IsSkillActive
+  _skillTypeString: SkillType
+  _skillType: 1
+  BlockAllCombatInputs: 1
+  BlockJumping: 1
+  BlockSprinting: 1
+  _maxChargeTime: 3
+  _damageTakenMultiplier: 0.5
+  _maxDamageBeforeCancel: 30
+  _maxRamDuration: 2.5
+  _baseRamSpeed: 6
+  _maxRamSpeedMultiplier: 2.5
+  _baseKnockbackForce: 7
+  _hitLayer:
+    serializedVersion: 2
+    m_Bits: 896
+  _floorLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  _edgeCheckDistance: 2
+  _range: 2
+  _boxHeight: 1
+  _boxDepth: 0.6

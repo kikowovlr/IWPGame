@@ -1,0 +1,353 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: player_avatarMask
+  m_Mask: 00000000010000000100000000000000000000000100000001000000010000000100000000000000000000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: Monkey_mesh
+    m_Weight: 0
+  - m_Path: Monkey_mesh/C_main_body
+    m_Weight: 0
+  - m_Path: Monkey_mesh/C_nose
+    m_Weight: 0
+  - m_Path: Monkey_mesh/L_eye
+    m_Weight: 0
+  - m_Path: Monkey_mesh/L_eyebrow
+    m_Weight: 0
+  - m_Path: Monkey_mesh/R_eye
+    m_Weight: 0
+  - m_Path: Monkey_mesh/R_eyebrow
+    m_Weight: 0
+  - m_Path: RIG
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_Offset_UpperArm_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_Offset_UpperArm_loc/FK_L_UpperArm_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_Offset_UpperArm_loc/FK_L_UpperArm_CTRL/FK_L_Offset_LowerArm_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_Offset_UpperArm_loc/FK_L_UpperArm_CTRL/FK_L_Offset_LowerArm_loc/FK_L_LowerArm_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_Offset_UpperArm_loc/FK_L_UpperArm_CTRL/FK_L_Offset_LowerArm_loc/FK_L_LowerArm_CTRL/FK_L_Offset_Wrist_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_Offset_UpperArm_loc/FK_L_UpperArm_CTRL/FK_L_Offset_LowerArm_loc/FK_L_LowerArm_CTRL/FK_L_Offset_Wrist_loc/FK_L_Wrist_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_UpperArm_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_UpperArm_jnt/FK_L_LowerArm_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Arm_Loc/FK_L_UpperArm_jnt/FK_L_LowerArm_jnt/FK_L_Wrist_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_Offset_UpperLeg_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_Offset_UpperLeg_loc/FK_L_UpperLeg_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_Offset_UpperLeg_loc/FK_L_UpperLeg_CTRL/FK_L_Offset_LowerLeg_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_Offset_UpperLeg_loc/FK_L_UpperLeg_CTRL/FK_L_Offset_LowerLeg_loc/FK_L_LowerLeg_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_Offset_UpperLeg_loc/FK_L_UpperLeg_CTRL/FK_L_Offset_LowerLeg_loc/FK_L_LowerLeg_CTRL/FK_L_Offset_Foot_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_Offset_UpperLeg_loc/FK_L_UpperLeg_CTRL/FK_L_Offset_LowerLeg_loc/FK_L_LowerLeg_CTRL/FK_L_Offset_Foot_loc/FK_L_Foot_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_UpperLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_UpperLeg_jnt/FK_L_LowerLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_UpperLeg_jnt/FK_L_LowerLeg_jnt/FK_L_Foot_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_L_Leg_Loc/FK_L_UpperLeg_jnt/FK_L_LowerLeg_jnt/FK_L_Foot_jnt/FK_L_FootEnd_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_Offset_UpperArm_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_Offset_UpperArm_loc/FK_R_UpperArm_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_Offset_UpperArm_loc/FK_R_UpperArm_CTRL/FK_R_Offset_LowerArm_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_Offset_UpperArm_loc/FK_R_UpperArm_CTRL/FK_R_Offset_LowerArm_loc/FK_R_LowerArm_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_Offset_UpperArm_loc/FK_R_UpperArm_CTRL/FK_R_Offset_LowerArm_loc/FK_R_LowerArm_CTRL/FK_R_Offset_Wrist_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_Offset_UpperArm_loc/FK_R_UpperArm_CTRL/FK_R_Offset_LowerArm_loc/FK_R_LowerArm_CTRL/FK_R_Offset_Wrist_loc/FK_R_Wrist_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_UpperArm_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_UpperArm_jnt/FK_R_LowerArm_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Arm_Loc/FK_R_UpperArm_jnt/FK_R_LowerArm_jnt/FK_R_Wrist_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_Offset_UpperLeg_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_Offset_UpperLeg_loc/FK_R_UpperLeg_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_Offset_UpperLeg_loc/FK_R_UpperLeg_CTRL/FK_R_Offset_LowerLeg_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_Offset_UpperLeg_loc/FK_R_UpperLeg_CTRL/FK_R_Offset_LowerLeg_loc/FK_R_LowerLeg_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_Offset_UpperLeg_loc/FK_R_UpperLeg_CTRL/FK_R_Offset_LowerLeg_loc/FK_R_LowerLeg_CTRL/FK_R_Offset_Foot_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_Offset_UpperLeg_loc/FK_R_UpperLeg_CTRL/FK_R_Offset_LowerLeg_loc/FK_R_LowerLeg_CTRL/FK_R_Offset_Foot_loc/FK_R_Foot_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_UpperLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_UpperLeg_jnt/FK_R_LowerLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_UpperLeg_jnt/FK_R_LowerLeg_jnt/FK_R_Foot_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_R_Leg_Loc/FK_R_UpperLeg_jnt/FK_R_LowerLeg_jnt/FK_R_Foot_jnt/FK_R_FootEnd_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL/FK_Offset_Tail7_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL/FK_Offset_Tail7_loc/FK_Tail7_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL/FK_Offset_Tail7_loc/FK_Tail7_CTRL/FK_Offset_Tail8_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL/FK_Offset_Tail7_loc/FK_Tail7_CTRL/FK_Offset_Tail8_loc/FK_Tail8_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL/FK_Offset_Tail7_loc/FK_Tail7_CTRL/FK_Offset_Tail8_loc/FK_Tail8_CTRL/FK_Offset_Tail9_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL/FK_Offset_Tail7_loc/FK_Tail7_CTRL/FK_Offset_Tail8_loc/FK_Tail8_CTRL/FK_Offset_Tail9_loc/FK_Tail9_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL/FK_Offset_Tail7_loc/FK_Tail7_CTRL/FK_Offset_Tail8_loc/FK_Tail8_CTRL/FK_Offset_Tail9_loc/FK_Tail9_CTRL/FK_Offset_Tail10_loc
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Offset_Tail1_loc/FK_Tail1_CTRL/FK_Offset_Tail2_loc/FK_Tail2_CTRL/FK_Offset_Tail3_loc/FK_Tail3_CTRL/FK_Offset_Tail4_loc/FK_Tail4_CTRL/FK_Offset_Tail5_loc/FK_Tail5_CTRL/FK_Offset_Tail6_loc/FK_Tail6_CTRL/FK_Offset_Tail7_loc/FK_Tail7_CTRL/FK_Offset_Tail8_loc/FK_Tail8_CTRL/FK_Offset_Tail9_loc/FK_Tail9_CTRL/FK_Offset_Tail10_loc/FK_Tail10_CTRL
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt/FK_Tail4_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt/FK_Tail4_jnt/FK_Tail5_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt/FK_Tail4_jnt/FK_Tail5_jnt/FK_Tail6_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt/FK_Tail4_jnt/FK_Tail5_jnt/FK_Tail6_jnt/FK_Tail7_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt/FK_Tail4_jnt/FK_Tail5_jnt/FK_Tail6_jnt/FK_Tail7_jnt/FK_Tail8_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt/FK_Tail4_jnt/FK_Tail5_jnt/FK_Tail6_jnt/FK_Tail7_jnt/FK_Tail8_jnt/FK_Tail9_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt/FK_Tail4_jnt/FK_Tail5_jnt/FK_Tail6_jnt/FK_Tail7_jnt/FK_Tail8_jnt/FK_Tail9_jnt/FK_Tail10_jnt
+    m_Weight: 0
+  - m_Path: RIG/FK_CTRL_grp/FK_Offset_Tail_Loc/FK_Tail1_jnt/FK_Tail2_jnt/FK_Tail3_jnt/FK_Tail4_jnt/FK_Tail5_jnt/FK_Tail6_jnt/FK_Tail7_jnt/FK_Tail8_jnt/FK_Tail9_jnt/FK_Tail10_jnt/FK_TailEnd_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip
+    m_Weight: 0
+  - m_Path: RIG/Hip/L_UpperLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/L_UpperLeg_jnt/L_LowerLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/L_UpperLeg_jnt/L_LowerLeg_jnt/L_Foot_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/L_UpperLeg_jnt/L_LowerLeg_jnt/L_Foot_jnt/L_FootEnd_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/R_UpperLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/R_UpperLeg_jnt/R_LowerLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/R_UpperLeg_jnt/R_LowerLeg_jnt/R_Foot_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/R_UpperLeg_jnt/R_LowerLeg_jnt/R_Foot_jnt/R_FootEnd_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/Head
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/Head/HeadEnd
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/Head/L_Ear1_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/Head/L_Ear1_jnt/L_Ear2_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/Head/L_Ear1_jnt/L_Ear2_jnt/L_EarTip_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/Head/R_Ear1_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/Head/R_Ear1_jnt/R_Ear2_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/Head/R_Ear1_jnt/R_Ear2_jnt/R_EarTip_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt/L_UpperArm_jnt
+    m_Weight: 1
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt/L_UpperArm_jnt/L_LowerArm_jnt
+    m_Weight: 1
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt/L_UpperArm_jnt/L_LowerArm_jnt/L_Wrist_jnt
+    m_Weight: 1
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt/L_UpperArm_jnt/L_LowerArm_jnt/L_Wrist_jnt/L_Hand_jnt
+    m_Weight: 1
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt/L_UpperArm_jnt/L_LowerArm_jnt/L_Wrist_jnt/L_Hand_jnt/L_HandTip_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt/L_UpperArm_jnt/L_LowerArm_jnt/L_Wrist_jnt/L_Hand_jnt/L_Thumb1_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt/L_UpperArm_jnt/L_LowerArm_jnt/L_Wrist_jnt/L_Hand_jnt/L_Thumb1_jnt/L_Thumb2_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/L_Clavicle_jnt/L_UpperArm_jnt/L_LowerArm_jnt/L_Wrist_jnt/L_Hand_jnt/L_Thumb1_jnt/L_Thumb2_jnt/L_ThumbTip_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt/R_UpperArm_jnt
+    m_Weight: 1
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt/R_UpperArm_jnt/R_LowerArm_jnt
+    m_Weight: 1
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt/R_UpperArm_jnt/R_LowerArm_jnt/R_Wrist_jnt
+    m_Weight: 1
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt/R_UpperArm_jnt/R_LowerArm_jnt/R_Wrist_jnt/R_Hand_jnt
+    m_Weight: 1
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt/R_UpperArm_jnt/R_LowerArm_jnt/R_Wrist_jnt/R_Hand_jnt/R_HandTip_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt/R_UpperArm_jnt/R_LowerArm_jnt/R_Wrist_jnt/R_Hand_jnt/R_Thumb1_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt/R_UpperArm_jnt/R_LowerArm_jnt/R_Wrist_jnt/R_Hand_jnt/R_Thumb1_jnt/R_Thumb2_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Spine1/Spine2/R_Clavicle_jnt/R_UpperArm_jnt/R_LowerArm_jnt/R_Wrist_jnt/R_Hand_jnt/R_Thumb1_jnt/R_Thumb2_jnt/R_ThumbTip_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt/Tail4_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt/Tail4_jnt/Tail5_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt/Tail4_jnt/Tail5_jnt/Tail6_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt/Tail4_jnt/Tail5_jnt/Tail6_jnt/Tail7_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt/Tail4_jnt/Tail5_jnt/Tail6_jnt/Tail7_jnt/Tail8_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt/Tail4_jnt/Tail5_jnt/Tail6_jnt/Tail7_jnt/Tail8_jnt/Tail9_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt/Tail4_jnt/Tail5_jnt/Tail6_jnt/Tail7_jnt/Tail8_jnt/Tail9_jnt/Tail10_jnt
+    m_Weight: 0
+  - m_Path: RIG/Hip/Tail1_jnt/Tail2_jnt/Tail3_jnt/Tail4_jnt/Tail5_jnt/Tail6_jnt/Tail7_jnt/Tail8_jnt/Tail9_jnt/Tail10_jnt/TailEnd_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_Constraint
+    m_Weight: 0
+  - m_Path: RIG/IK_Constraint/L_Leg_ikHandle
+    m_Weight: 0
+  - m_Path: RIG/IK_Constraint/L_Wrist_ikHandle
+    m_Weight: 0
+  - m_Path: RIG/IK_Constraint/R_Leg_ikHandle
+    m_Weight: 0
+  - m_Path: RIG/IK_Constraint/R_Wrist_ikHandle
+    m_Weight: 0
+  - m_Path: RIG/IK_Constraint/Tail_ikHandle
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Arm_Loc
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Arm_Loc/IK_L_UpperArm_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Arm_Loc/IK_L_UpperArm_jnt/IK_L_LowerArm_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Arm_Loc/IK_L_UpperArm_jnt/IK_L_LowerArm_jnt/IK_L_Wrist_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Leg_Loc
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Leg_Loc/IK_L_UpperLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Leg_Loc/IK_L_UpperLeg_jnt/IK_L_LowerLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Leg_Loc/IK_L_UpperLeg_jnt/IK_L_LowerLeg_jnt/IK_L_Foot_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_L_Leg_Loc/IK_L_UpperLeg_jnt/IK_L_LowerLeg_jnt/IK_L_Foot_jnt/IK_L_FootEnd_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Arm_Loc
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Arm_Loc/IK_R_UpperArm_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Arm_Loc/IK_R_UpperArm_jnt/IK_R_LowerArm_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Arm_Loc/IK_R_UpperArm_jnt/IK_R_LowerArm_jnt/IK_R_Wrist_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Leg_Loc
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Leg_Loc/IK_R_UpperLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Leg_Loc/IK_R_UpperLeg_jnt/IK_R_LowerLeg_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Leg_Loc/IK_R_UpperLeg_jnt/IK_R_LowerLeg_jnt/IK_R_Foot_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_R_Leg_Loc/IK_R_UpperLeg_jnt/IK_R_LowerLeg_jnt/IK_R_Foot_jnt/IK_R_FootEnd_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Offset_Tail_loc
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Offset_Tail_loc/IK_L_Tail_CTRL
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt/IK_Tail4_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt/IK_Tail4_jnt/IK_Tail5_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt/IK_Tail4_jnt/IK_Tail5_jnt/IK_Tail6_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt/IK_Tail4_jnt/IK_Tail5_jnt/IK_Tail6_jnt/IK_Tail7_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt/IK_Tail4_jnt/IK_Tail5_jnt/IK_Tail6_jnt/IK_Tail7_jnt/IK_Tail8_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt/IK_Tail4_jnt/IK_Tail5_jnt/IK_Tail6_jnt/IK_Tail7_jnt/IK_Tail8_jnt/IK_Tail9_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt/IK_Tail4_jnt/IK_Tail5_jnt/IK_Tail6_jnt/IK_Tail7_jnt/IK_Tail8_jnt/IK_Tail9_jnt/IK_Tail10_jnt
+    m_Weight: 0
+  - m_Path: RIG/IK_CTRL_grp/IK_Offset_Tail_Loc/IK_Tail1_jnt/IK_Tail2_jnt/IK_Tail3_jnt/IK_Tail4_jnt/IK_Tail5_jnt/IK_Tail6_jnt/IK_Tail7_jnt/IK_Tail8_jnt/IK_Tail9_jnt/IK_Tail10_jnt/IK_TailEnd_jnt
+    m_Weight: 0
