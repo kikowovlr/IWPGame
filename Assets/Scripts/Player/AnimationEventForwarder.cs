@@ -16,4 +16,12 @@ public class AnimationEventForwarder : MonoBehaviour
             _playerController.UnityEvent_OnAbilityImpact();
         }
     }
+
+    public void UnityEvent_OnAbilityEnd()
+    {
+        if (_playerController != null)
+        {
+            _playerController.UnityEvent_OnAbilityEnd();
+        }
+    }
 }

@@ -34,6 +34,10 @@ public abstract class AbilitySO : ScriptableObject
     {
     }
 
+    public virtual void OnAnimationEndTriggered(NetworkPlayerController player)
+    {
+    }
+
     public virtual float HandleIncomingDamageCheck(NetworkPlayerController player, ref AbilityState state, float rawDamage)
     {
         return rawDamage;

@@ -11,6 +11,7 @@ public struct AbilityState : INetworkStruct
     public float _chargeTime;
     public int _activationId; // tracks current cast number
     public Vector3 _customVelocity; // to send physics calculations to the player controller script
+    public NetworkBool _isCasting; // for one shot skills
 
     // for goat
     public NetworkBool _isCharging;
