@@ -126,7 +126,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     public Quaternion InitialJointRotation => _initialJointRotation;
     public PlayerComponentRegistry Registry { get; private set; }
     public ref AbilityState AbilityStateRef => ref CurrentAbilityState;
-    public AbilitySO CurrentActiveAbilitySO { get; private set; }
+    public AbilitySO EquippedAbility => _equippedAbility;
 
 
     private int _rotationLogCounter = 0;
@@ -899,7 +899,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     private void ApplyAbilityInputMask(ref NetworkInputData inputData)
     {
-        if (!_isAbilityHeld || _equippedAbility == null) return;
+        if (_equippedAbility == null) return;
+
+        bool isAbilityActive = CurrentAbilityState._isCharging || CurrentAbilityState._isDashing;
+        if (!isAbilityActive) return;
 
         if (_equippedAbility.BlockAllCombatInputs)
         {
@@ -985,6 +988,23 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._abilityReleased = _isAbilityReleased;
             _isAbilityPressed = false;
             _isAbilityReleased = false;
+
+            // --- PARRELSYNC AUTO-HOLD DEBUG HACK ---
+#if UNITY_EDITOR
+            // If this window running the code is a ParrelSync clone, force the states on!
+            if (Application.dataPath.Contains("clone"))
+            {
+                // Force simulation to treat the button as permanently held down
+                networkInputData._abilityHeld = true;
+                _isAbilityHeld = true;
+
+                // Block release from firing naturally on the clone
+                networkInputData._abilityReleased = false;
+            }
+#endif
+            // ----------------------------------------
+
+
             if (networkInputData._abilityReleased)
             {
                 _isAbilityHeld = false;

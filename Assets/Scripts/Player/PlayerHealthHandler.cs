@@ -70,10 +70,9 @@ public class PlayerHealthHandler : NetworkBehaviour
 
         // get accumulated dmg if skill is charging rn
         ref AbilityState abilityState = ref _playerController.AbilityStateRef;
-        if (abilityState._isCharging && _playerController.CurrentActiveAbilitySO != null)
+        if (abilityState._isCharging && _playerController.EquippedAbility != null)
         {
-            finalDamage = _playerController.CurrentActiveAbilitySO.HandleIncomingDamageCheck(_playerController, ref abilityState, damageAmount);
-
+            finalDamage = _playerController.EquippedAbility.HandleIncomingDamageCheck(_playerController, ref abilityState, damageAmount);
             AccumulatedDamageTaken += finalDamage;
         }
 
@@ -90,7 +89,49 @@ public class PlayerHealthHandler : NetworkBehaviour
         else
         {
             // standard hit reaction
-            ApplyForceToBone(impactForce, impactForce, hitBoneName);
+            ApplyForceToBone(impactForce, impactPoint, hitBoneName);
+        }
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void Rpc_TakeDamage(float damageAmount, Vector3 impactForce)
+    {
+        float finalDamage = damageAmount;
+
+        if (_playerController.IsKnockedOut)
+        {
+            // getting hit while knocked down deals damage (health goes into -ve) -> stay knocked out longer
+            finalDamage = damageAmount * _knockedDownDamageMultiplier;
+            CurrentHealth -= finalDamage;
+
+            // apply force to hit point
+            _playerController.ApplyKnockback(impactForce, ForceMode.Impulse);
+            return;
+        }
+
+        // get accumulated dmg if skill is charging rn
+        ref AbilityState abilityState = ref _playerController.AbilityStateRef;
+        if (abilityState._isCharging && _playerController.EquippedAbility != null)
+        {
+            finalDamage = _playerController.EquippedAbility.HandleIncomingDamageCheck(_playerController, ref abilityState, damageAmount);
+
+            AccumulatedDamageTaken += finalDamage;
+        }
+
+        // reduce health
+        CurrentHealth -= damageAmount;
+
+        // check for knockout
+        if (CurrentHealth <= 0)
+        {
+            Knockout();
+            // amplified force to show knockout blow
+            _playerController.ApplyKnockback(impactForce * _knockOutForceMultiplier, ForceMode.Impulse);
+        }
+        else
+        {
+            // standard hit reaction
+            _playerController.ApplyKnockback(impactForce, ForceMode.Impulse);
         }
     }
 
@@ -111,7 +152,7 @@ public class PlayerHealthHandler : NetworkBehaviour
         if (targetRb != null)
         {
             targetRb.AddForceAtPosition(force, point, ForceMode.Impulse);
-            Utils.DebugLog($"[PHYSICS NETWORK] Successfully synchronized blast to local bone: {boneName}");
+            //Utils.DebugLog($"[PHYSICS NETWORK] Successfully synchronized blast to local bone: {boneName}");
         }
         else
         {
@@ -120,7 +161,7 @@ public class PlayerHealthHandler : NetworkBehaviour
             if (rootNetworkRb != null && rootNetworkRb.Rigidbody != null)
             {
                 rootNetworkRb.Rigidbody.AddForceAtPosition(force, point, ForceMode.Impulse);
-                Utils.DebugLog($"[PHYSICS NETWORK] Bone not found. Safely fell back to Root NetworkRigidbody3D.");
+                //Utils.DebugLog($"[PHYSICS NETWORK] Bone not found. Safely fell back to Root NetworkRigidbody3D.");
             }
         }
     }
@@ -130,7 +171,6 @@ public class PlayerHealthHandler : NetworkBehaviour
         // curr transform matches name we are looking for
         if (root.name == targetName)
         {
-            Utils.DebugLog($"[BONE] Bone found: {targetName}");
             return root.GetComponent<Rigidbody>();  
         }
 
@@ -142,12 +182,10 @@ public class PlayerHealthHandler : NetworkBehaviour
 
             if (foundRigidbody != null)
             {
-                Utils.DebugLog($"[BONE] Bone found: {targetName}");
                 return foundRigidbody;
             }
         }
 
-        Utils.DebugLog($"[BONE] Bone not found");
         return null;
     }
 

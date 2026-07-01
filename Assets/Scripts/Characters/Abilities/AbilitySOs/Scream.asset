@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ab9c512ab0e0ed48aae11233376cdf9, type: 3}
-  m_Name: Intimidate
-  m_EditorClassIdentifier: Assembly-CSharp::IntimidateAbilitySO
-  _name: Intimidate
+  m_Script: {fileID: 11500000, guid: aec42a5eb1241894faf38462f243603f, type: 3}
+  m_Name: Scream
+  m_EditorClassIdentifier: Assembly-CSharp::ScreamAbilitySO
+  _name: Scream
   _baseCooldown: 2
   _icon: {fileID: 0}
   _skillTrigger: SkillTrigger
@@ -23,8 +23,9 @@ MonoBehaviour:
   BlockAllCombatInputs: 1
   BlockJumping: 1
   BlockSprinting: 1
-  _range: 3
-  _coneAngle: 120
+  _range: 6
+  _coneAngle: 60
   _affectedLayer:
     serializedVersion: 2
     m_Bits: 256
+  _damage: 50

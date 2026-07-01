@@ -1,35 +1,33 @@
-using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
-/// stuns anyone in vision cone
-/// flash yellow cone as visual
+/// Unleashes a 
 /// </summary>
-[CreateAssetMenu(fileName = "Ability_RedPandaIntimidate", menuName = "Abilities/Red Panda Intimidate")]
-public class IntimidateAbilitySO : AbilitySO
+[CreateAssetMenu(fileName = "Ability_MonkeyScream", menuName = "Abilities/Monkey Scream")]
+public class ScreamAbilitySO : AbilitySO
 {
     [Header("Ability Settings")]
     [SerializeField] private float _range = 5f;
-    [SerializeField] private float _coneAngle = 60f;
+    [SerializeField] private float _coneAngle = 50f;
     [SerializeField] private LayerMask _affectedLayer;
+    [SerializeField] private float _damage = 10f;
+    [SerializeField] private float _knockbackForce = 1.5f;
 
-    // static reusable array buffer to hold up to 20 hits wihtout generating heap garbage
     private readonly Collider[] _hitBuffer = new Collider[20];
     private readonly List<NetworkId> _hitTargetIds = new List<NetworkId>(20);
 
     public override void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
-        // only run on host
         if (!player.Object.HasStateAuthority) return;
 
         player.Animator.SetTrigger(_skillTrigger);
         player.Animator.SetInteger(_skillTypeString, _skillType);
+
+        // TODO: show cone of AOE
     }
 
-    /// <summary>
-    /// called explicitly via Unity Animation Event down on the player controller
-    /// </summary
     public override void OnAnimationImpactTriggered(NetworkPlayerController player)
     {
         if (!player.Object.HasStateAuthority) return;
@@ -54,8 +52,14 @@ public class IntimidateAbilitySO : AbilitySO
                     if (_hitTargetIds.Contains(enemyId)) continue;
                     _hitTargetIds.Add(enemyId);
 
-                    Utils.DebugLog($"[Intimidate] Stunned {enemy.name} exactly on the animation's impact frame!");
-                    // TODO: apply stun
+                    Utils.DebugLog($"[Scream] Damaged {enemy.name} for {_damage}!");
+                    
+                    // apply slight knockback w damage
+                    Vector3 forceDirection = new Vector3(dirToTarget.x, 0f, dirToTarget.z).normalized;
+                    Vector3 impactForce = forceDirection * _knockbackForce;
+                    enemy.Registry.Health.Rpc_TakeDamage(_damage, impactForce);
+
+                    // TODO: apply VFX sound wave
                 }
             }
         }

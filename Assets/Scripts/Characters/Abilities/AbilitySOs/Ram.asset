@@ -26,9 +26,9 @@ MonoBehaviour:
   _maxChargeTime: 3
   _damageTakenMultiplier: 0.5
   _maxDamageBeforeCancel: 30
-  _maxRamDuration: 2
-  _baseRamSpeed: 2
-  _maxRamSpeedMultiplier: 2.5
+  _maxRamDuration: 0.3
+  _baseRamSpeed: 1.5
+  _maxRamSpeedMultiplier: 5
   _baseKnockbackForce: 7
   _hitLayer:
     serializedVersion: 2
@@ -36,7 +36,7 @@ MonoBehaviour:
   _floorLayer:
     serializedVersion: 2
     m_Bits: 128
-  _edgeCheckDistance: 2
+  _edgeCheckDistance: 0.8
   _range: 1.2
   _boxHeight: 0.4
   _boxDepth: 0.3

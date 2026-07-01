@@ -189,6 +189,7 @@ public class RamAbilitySO : AbilitySO
 
         // find if total damage taken is enough to break out of skill
         float totalTrackedDamage = player.Registry.Health.GetAccumulatedDamage() + mitigatedDamage;
+        Utils.DebugLog($"[Damage Check] Hit! IsCharging: {state._isCharging}, TotalTracked: {totalTrackedDamage}");
         if (totalTrackedDamage >= _maxDamageBeforeCancel)
         {
             state._isCharging = false;
