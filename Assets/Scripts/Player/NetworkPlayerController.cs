@@ -128,9 +128,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     public ref AbilityState AbilityStateRef => ref CurrentAbilityState;
     public AbilitySO EquippedAbility => _equippedAbility;
 
-
-    private int _rotationLogCounter = 0;
-
     private void Awake()
     {
         _initialJointRotation = _mainJoint.transform.localRotation;
