@@ -16,17 +16,6 @@ public class ActiveRagdollMember : MonoBehaviour
     [SerializeField, HideInInspector] Quaternion _worldRotationOffset; // saves the exact difference between the animated bone and physical bone
 
     [ContextMenu("Capture Pristine Bind-Pose (CLICK ME)")]
-    //public void SetupBaselineInEditor()
-    //{
-    //    _joint = GetComponent<ConfigurableJoint>();
-    //    if (_joint != null)
-    //    {
-    //        _startLocalRotation = transform.localRotation;
-    //        _startSlerpPositionSpring = _joint.slerpDrive.positionSpring;
-    //        _isSetupInEditor = true;
-    //        Debug.Log($"[Ragdoll] Manually captured pristine bind-pose for {gameObject.name}: {_startLocalRotation.eulerAngles}");
-    //    }
-    //}
     public void SetupBaselineInEditor()
     {
         _joint = GetComponent<ConfigurableJoint>();
@@ -50,8 +39,6 @@ public class ActiveRagdollMember : MonoBehaviour
 
     private void Awake()
     {
-        // Don't initialize instantly! 
-        // Wait until the first frame where the animation has actually played.
         StartCoroutine(DelayedInitialization());
     }
 
@@ -68,13 +55,6 @@ public class ActiveRagdollMember : MonoBehaviour
         _joint = GetComponent<ConfigurableJoint>();
 
         // Only capture at runtime if we forgot to do it in the Editor!
-        //if (!_isSetupInEditor && _joint != null)
-        //{
-        //    _startLocalRotation = transform.localRotation;
-        //    _startSlerpPositionSpring = _joint.slerpDrive.positionSpring;
-        //    _isSetupInEditor = true;
-        //    Debug.LogWarning($"[Ragdoll] Warning: {gameObject.name} captured baseline dynamically at runtime! Current rotation captured: {_startLocalRotation.eulerAngles}");
-        //}
         if (!_isSetupInEditor && _joint != null)
         {
             Transform physicalAnchor = _joint.connectedBody != null ? _joint.connectedBody.transform : transform.parent;

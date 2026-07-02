@@ -2290,7 +2290,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6702509345651407269, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _isSetupInEditor
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6702509345651407269, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _startLocalRotation.w
@@ -2390,19 +2390,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7821299772961735276, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _worldRotationOffset.w
-      value: 0.620978
+      value: 1.0000004
       objectReference: {fileID: 0}
     - target: {fileID: 7821299772961735276, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _worldRotationOffset.x
-      value: -0.7101899
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7821299772961735276, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _worldRotationOffset.y
-      value: -0.25396928
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7821299772961735276, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _worldRotationOffset.z
-      value: -0.213347
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7821299772961735276, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _startSlerpPositionSpring

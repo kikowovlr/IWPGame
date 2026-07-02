@@ -22,8 +22,14 @@ public class ScreamAbilitySO : AbilitySO
     {
         if (!player.Object.HasStateAuthority) return;
 
+        _hitTargetIds.Clear();
+
         player.Animator.SetTrigger(_skillTrigger);
         player.Animator.SetInteger(_skillTypeString, _skillType);
+
+        player.RawCanMove = false;
+        player.RawCanRotate = false;
+        state._isCasting = true;
 
         // TODO: show cone of AOE
     }
@@ -65,14 +71,21 @@ public class ScreamAbilitySO : AbilitySO
         }
     }
 
+    public override void OnAnimationEndTriggered(NetworkPlayerController player)
+    {
+        if (!player.Object.HasStateAuthority) return;
+
+        player.RawCanMove = true;
+        player.RawCanRotate = true;
+        player.ClearActiveCastingState();
+    }
+
     public override void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
     }
 
     public override void OnTickReleased(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
-        if (!player.Object.HasStateAuthority) return;
-        _hitTargetIds.Clear();
     }
 
     public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)

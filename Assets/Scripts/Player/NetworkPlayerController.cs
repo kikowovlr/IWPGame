@@ -798,6 +798,16 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
+    public void UnityEvent_OnAbilityEnd()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        if (_equippedAbility != null)
+        {
+            _equippedAbility.OnAnimationEndTriggered(this);
+        }
+    }
+
     private Vector2 CalculateMouseAimDirection()
     {
         if (Camera.main == null) return Vector2.zero;
@@ -901,7 +911,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     {
         if (_equippedAbility == null) return;
 
-        bool isAbilityActive = CurrentAbilityState._isCharging || CurrentAbilityState._isDashing;
+        bool isAbilityActive = CurrentAbilityState._isCharging || CurrentAbilityState._isDashing || CurrentAbilityState._isCasting;
         if (!isAbilityActive) return;
 
         if (_equippedAbility.BlockAllCombatInputs)
@@ -926,6 +936,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             inputData._isSprintPressed = false;
             _isRunning = false;
         }
+    }
+
+    public void ClearActiveCastingState()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        // grab the networked struct instance copy
+        var state = CurrentAbilityState;
+        state._isCasting = false;
+
+        // assign it back to update the network state
+        CurrentAbilityState = state;
     }
 
     /// <summary>
@@ -988,21 +1010,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._abilityReleased = _isAbilityReleased;
             _isAbilityPressed = false;
             _isAbilityReleased = false;
-
-            // --- PARRELSYNC AUTO-HOLD DEBUG HACK ---
-#if UNITY_EDITOR
-            // If this window running the code is a ParrelSync clone, force the states on!
-            if (Application.dataPath.Contains("clone"))
-            {
-                // Force simulation to treat the button as permanently held down
-                networkInputData._abilityHeld = true;
-                _isAbilityHeld = true;
-
-                // Block release from firing naturally on the clone
-                networkInputData._abilityReleased = false;
-            }
-#endif
-            // ----------------------------------------
 
 
             if (networkInputData._abilityReleased)
