@@ -23,6 +23,7 @@ MonoBehaviour:
   BlockAllCombatInputs: 1
   BlockJumping: 1
   BlockSprinting: 1
+  _indicatorData: {fileID: 11400000, guid: a74ae3b97bf8fe34e9bf95858e3e417e, type: 2}
   _maxChargeTime: 3
   _damageTakenMultiplier: 0.5
   _maxDamageBeforeCancel: 30
@@ -40,3 +41,5 @@ MonoBehaviour:
   _range: 1.2
   _boxHeight: 0.4
   _boxDepth: 0.3
+  _indicatorWidth: 1
+  _indicatorLength: 1

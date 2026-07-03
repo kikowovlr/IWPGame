@@ -40,6 +40,12 @@ public class RamAbilitySO : AbilitySO
     [SerializeField] private float _boxHeight = 1.0f;
     [SerializeField] private float _boxDepth = 0.6f;
 
+    [Header("Visuals")]
+    //[Range(0f, 1f)]
+    [SerializeField] private float _indicatorWidth = 0.3f;
+    //[Range(0f, 1f)]
+    [SerializeField] private float _indicatorLength = 1.0f;
+
     private readonly RaycastHit[] _hitBuffer = new RaycastHit[20];
     private readonly List<NetworkId> _hitTargetIds = new List<NetworkId>(20);
 
@@ -64,8 +70,13 @@ public class RamAbilitySO : AbilitySO
         player.Animator.SetInteger(_skillTypeString, _skillType);
         player.Animator.SetBool(_activeBool, true);
 
-        // TODO: show aim indicator
-
+        // show rectangular indicator for charge pct
+        if (player.ActiveAbilityIndicator != null)
+        {
+            player.ActiveAbilityIndicator.gameObject.SetActive(true);
+            player.ActiveAbilityIndicator.ConfigureIndicator(_indicatorData, _indicatorLength, _indicatorWidth, true);
+            player.ActiveAbilityIndicator.UpdateIndicatorFill(0f); // start at 0 fill
+        }
     }
 
     public override void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
@@ -78,9 +89,14 @@ public class RamAbilitySO : AbilitySO
             // increment charge time
             state._chargeTime = Mathf.Min(state._chargeTime + player.Runner.DeltaTime, _maxChargeTime);
 
-            // TODO - can add jittering??
+            // update fill amt of indicator
+            if (player.ActiveAbilityIndicator != null)
+            {
+                float chargePercent = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
+                player.ActiveAbilityIndicator.UpdateIndicatorFill(chargePercent);
+            }
 
-            //if 
+            // TODO - can add jittering??
             return;
         }
     }
@@ -100,7 +116,8 @@ public class RamAbilitySO : AbilitySO
 
         _hitTargetIds.Clear();
 
-        // TODO - hide direction arrow
+       if (player.ActiveAbilityIndicator != null)
+           player.ActiveAbilityIndicator.gameObject.SetActive(false);
     }
 
     private void ProcessCollisionCheck(NetworkPlayerController player, ref AbilityState state)
@@ -201,6 +218,10 @@ public class RamAbilitySO : AbilitySO
             player.Animator.SetTrigger(_releaseTrigger);
             Utils.DebugLogWarning("[Goat Ram] STUN CANCEL! Stance broken by posture damage.");
 
+            // disable indicator if active
+            if (player.ActiveAbilityIndicator != null)
+                player.ActiveAbilityIndicator.gameObject.SetActive(false);
+
             // TODO - apply stunned effect on goat
         }
 
@@ -293,7 +314,6 @@ public class RamAbilitySO : AbilitySO
                 state._isDashing = false;
                 player.RawCanMove = true;
                 player.RawCanRotate = true;
-                // TODO - remove arrow
                 Utils.DebugLog("[Goat Ram] Dash finished organically.");
                 player.Animator.SetBool(_activeBool, false);
                 return;

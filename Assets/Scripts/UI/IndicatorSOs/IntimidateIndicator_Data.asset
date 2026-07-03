@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fbac37360a0fc1c4eacdaa8ee1b1b4b2, type: 3}
-  m_Name: IntimidateIndicatorSO
+  m_Name: IntimidateIndicator_Data
   m_EditorClassIdentifier: Assembly-CSharp::IndicatorDataSO
   _shape: 2
   _indicatorSprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  _indicatorColor: {r: 0.8198757, g: 1, b: 0, a: 0.74509805}
+  _indicatorColor: {r: 0.819209, g: 1, b: 0, a: 0.6313726}
   _scaleLengthWithAbilityRange: 1
   _defaultLength: 1
-  LocalPositionOffset: {x: 0, y: 0.05, z: 0}
+  LocalPositionOffset: {x: 0, y: 0, z: 0}

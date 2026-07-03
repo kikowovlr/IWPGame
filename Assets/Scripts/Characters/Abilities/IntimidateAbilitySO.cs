@@ -13,6 +13,11 @@ public class IntimidateAbilitySO : AbilitySO
     [SerializeField] private float _range = 5f;
     [SerializeField] private float _coneAngle = 60f;
     [SerializeField] private LayerMask _affectedLayer;
+    
+    // flash settings
+    [SerializeField] private float _flashDuration = 0.15f;
+    private float _flashTimer;
+    private bool _isFlashActive;
 
     // static reusable array buffer to hold up to 20 hits wihtout generating heap garbage
     private readonly Collider[] _hitBuffer = new Collider[20];
@@ -24,6 +29,8 @@ public class IntimidateAbilitySO : AbilitySO
         if (!player.Object.HasStateAuthority) return;
 
         _hitTargetIds.Clear();
+        _isFlashActive = false;
+        _flashTimer = 0f;
 
         player.Animator.SetTrigger(_skillTrigger);
         player.Animator.SetInteger(_skillTypeString, _skillType);
@@ -44,6 +51,9 @@ public class IntimidateAbilitySO : AbilitySO
         {
             player.ActiveAbilityIndicator.gameObject.SetActive(true);
             player.ActiveAbilityIndicator.ConfigureIndicator(_indicatorData, _range, _coneAngle);
+
+            _flashTimer = _flashDuration;
+            _isFlashActive = true;
         }
 
         // query all players within radius
@@ -81,6 +91,7 @@ public class IntimidateAbilitySO : AbilitySO
         player.RawCanRotate = true;
         player.ClearActiveCastingState();
 
+        // safety fallback to ensure the indicator is turned off after the animation ends
         if (player.ActiveAbilityIndicator != null)
         {
             player.ActiveAbilityIndicator.gameObject.SetActive(false);
@@ -97,5 +108,20 @@ public class IntimidateAbilitySO : AbilitySO
 
     public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
     {
+        if (!player.Object.HasStateAuthority) return;
+
+        // manually set flash inactive after duration
+        if (_isFlashActive)
+        {
+            _flashTimer -= Time.deltaTime;
+
+            if (_flashTimer <= 0f)
+            {
+                _isFlashActive = false;
+
+                if (player.ActiveAbilityIndicator != null)
+                    player.ActiveAbilityIndicator.gameObject.SetActive(false);
+            }
+        }
     }
 }
