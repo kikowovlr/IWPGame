@@ -20,6 +20,9 @@ public abstract class AbilitySO : ScriptableObject
     public bool BlockJumping = true;
     public bool BlockSprinting = true;
 
+    // indicators
+    [SerializeField] protected IndicatorDataSO _indicatorData;
+
     // called on server/host during FixedUpdateNetwork ticks
     public abstract void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir); // ref - pass by reference
     public abstract void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir); 

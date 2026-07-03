@@ -538,7 +538,7 @@ MonoBehaviour:
   - {fileID: 61190307341830075}
   - {fileID: 6748015402955411278}
   - {fileID: 9121924289897987703}
-  _defaultCharacterIndex: 1
+  _defaultCharacterIndex: 0
   _CharacterIndex: 0
   _RawCanMove:
     _value: 1
@@ -2288,6 +2288,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6057967964320292010, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6666335059531308958, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6702509345651407269, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _isSetupInEditor
       value: 0
@@ -2327,6 +2335,10 @@ PrefabInstance:
     - target: {fileID: 6702509345651407269, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _startSlerpPositionSpring
       value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 7575734528204251841, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7675667051927988746, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _isSetupInEditor
@@ -2408,9 +2420,21 @@ PrefabInstance:
       propertyPath: _startSlerpPositionSpring
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 8161929100174573693, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 8220648202472382838, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: m_WarningMessage
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8390777298669650373, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8627224050517584219, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 9074371568722649595, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _isSetupInEditor

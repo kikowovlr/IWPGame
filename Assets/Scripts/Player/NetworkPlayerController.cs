@@ -104,12 +104,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private bool _isAbilityPressed;
     private bool _isAbilityHeld;
     private bool _isAbilityReleased;
+    private AbilityIndicatorController _activeAbilityIndicator;
 
     [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
     [Networked] public NetworkBool RawCanMove { get; set; } = true;
     [Networked] public NetworkBool RawCanRotate { get; set; } = true;
     public bool CanMove => RawCanMove && !IsInPhysicsRecovery;
-    public bool CanRotate => RawCanRotate && !IsInPhysicsRecovery; 
+    public bool CanRotate => RawCanRotate && !IsInPhysicsRecovery;
+    public AbilityIndicatorController ActiveAbilityIndicator => _activeAbilityIndicator;
 
     // time to recover after knockback, throw, etc
     [Header("Physics Recovery")]
@@ -117,7 +119,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     [SerializeField] private float _maxKnockbackControlLockDuration = 0.5f;
     public bool IsInPhysicsRecovery => !_physicsControlLockTimer.ExpiredOrNotRunning(Runner);
 
-    // 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
     public bool IsGrabbingActive => _isGrabbingActive;
@@ -861,6 +862,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             if (linker != null)
             {
                 _equippedAbility = linker.ability;
+                _activeAbilityIndicator = linker.abilityIndicator;
 
                 if (_punchHandler != null)
                     _punchHandler.SetUpActiveLimbs(linker._leftHandDamageDealer, linker._rightHandDamageDealer, linker._leftHandRb, linker._rightHandRb);

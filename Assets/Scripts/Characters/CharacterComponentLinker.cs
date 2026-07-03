@@ -29,4 +29,5 @@ public class CharacterComponentLinker : MonoBehaviour
 
     [Header("Ability")]
     public AbilitySO ability;
+    public AbilityIndicatorController abilityIndicator;
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// Unleashes a 
+/// Unleashes a scream that damages and slightly knocks back enemies in a cone in front of the player
 /// </summary>
 [CreateAssetMenu(fileName = "Ability_MonkeyScream", menuName = "Abilities/Monkey Scream")]
 public class ScreamAbilitySO : AbilitySO
@@ -30,13 +30,20 @@ public class ScreamAbilitySO : AbilitySO
         player.RawCanMove = false;
         player.RawCanRotate = false;
         state._isCasting = true;
-
-        // TODO: show cone of AOE
     }
 
     public override void OnAnimationImpactTriggered(NetworkPlayerController player)
     {
         if (!player.Object.HasStateAuthority) return;
+
+        // show soundwave + distance
+        if (player.ActiveAbilityIndicator != null)
+        {
+            player.ActiveAbilityIndicator.gameObject.SetActive(true);
+
+            // pass indicator asset data
+            player.ActiveAbilityIndicator.ConfigureIndicator(_indicatorData, _range, _coneAngle);
+        }
 
         // query all players within radius
         int hitCount = player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, _hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
@@ -64,8 +71,6 @@ public class ScreamAbilitySO : AbilitySO
                     Vector3 forceDirection = new Vector3(dirToTarget.x, 0f, dirToTarget.z).normalized;
                     Vector3 impactForce = forceDirection * _knockbackForce;
                     enemy.Registry.Health.Rpc_TakeDamage(_damage, impactForce);
-
-                    // TODO: apply VFX sound wave
                 }
             }
         }
@@ -78,6 +83,10 @@ public class ScreamAbilitySO : AbilitySO
         player.RawCanMove = true;
         player.RawCanRotate = true;
         player.ClearActiveCastingState();
+
+        // hide when done
+        if (player.ActiveAbilityIndicator != null)
+            player.ActiveAbilityIndicator.gameObject.SetActive(false);
     }
 
     public override void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)

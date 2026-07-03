@@ -23,6 +23,7 @@ MonoBehaviour:
   BlockAllCombatInputs: 1
   BlockJumping: 1
   BlockSprinting: 1
+  _indicatorData: {fileID: 11400000, guid: 9cd9bec9b4671804e8300b4e738aeac0, type: 2}
   _range: 3
   _coneAngle: 120
   _affectedLayer:

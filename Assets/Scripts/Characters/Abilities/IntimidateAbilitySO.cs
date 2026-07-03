@@ -40,6 +40,12 @@ public class IntimidateAbilitySO : AbilitySO
     {
         if (!player.Object.HasStateAuthority) return;
 
+        if (player.ActiveAbilityIndicator != null)
+        {
+            player.ActiveAbilityIndicator.gameObject.SetActive(true);
+            player.ActiveAbilityIndicator.ConfigureIndicator(_indicatorData, _range, _coneAngle);
+        }
+
         // query all players within radius
         int hitCount = player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, _hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
         Vector3 forwardDir = player.transform.forward;
@@ -74,6 +80,11 @@ public class IntimidateAbilitySO : AbilitySO
         player.RawCanMove = true;
         player.RawCanRotate = true;
         player.ClearActiveCastingState();
+
+        if (player.ActiveAbilityIndicator != null)
+        {
+            player.ActiveAbilityIndicator.gameObject.SetActive(false);
+        }
     }
 
     public override void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
