@@ -41,23 +41,25 @@ public class RamAbilitySO : AbilitySO
     [SerializeField] private float _boxDepth = 0.6f;
 
     [Header("Visuals")]
-    //[Range(0f, 1f)]
     [SerializeField] private float _indicatorWidth = 0.3f;
-    //[Range(0f, 1f)]
     [SerializeField] private float _indicatorLength = 1.0f;
-
-    private readonly RaycastHit[] _hitBuffer = new RaycastHit[20];
-    private readonly List<NetworkId> _hitTargetIds = new List<NetworkId>(20);
 
     /// <summary>
     /// start charging
     /// </summary>
     public override void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
-        if (!player.Object.HasStateAuthority) return;
         if (state._isDashing) return; // cannot use skill again while dashing
 
-        state._isCharging = true;
+        // alow input authority to show visuals, but only state authority can actually start the skill
+        if (player.Object.HasStateAuthority || player.Object.HasInputAuthority)
+        {
+            state._isCharging = true;
+            state._isVisualShown = true;
+        }
+
+        if (!player.Object.HasStateAuthority) return;
+
         state._isDashing = false;
         state._chargeTime = 0f;
 
@@ -70,41 +72,40 @@ public class RamAbilitySO : AbilitySO
         player.Animator.SetInteger(_skillTypeString, _skillType);
         player.Animator.SetBool(_activeBool, true);
 
-        // show rectangular indicator for charge pct
-        if (player.ActiveAbilityIndicator != null)
-        {
-            player.ActiveAbilityIndicator.gameObject.SetActive(true);
-            player.ActiveAbilityIndicator.ConfigureIndicator(_indicatorData, _indicatorLength, _indicatorWidth, true);
-            player.ActiveAbilityIndicator.UpdateIndicatorFill(0f); // start at 0 fill
-        }
+        state._hitCount = 0;
     }
 
     public override void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
-        if (!player.Object.HasStateAuthority) return;
-
-        // holding charge
-        if (state._isCharging)
+        if (player.Object.HasStateAuthority || player.Object.HasInputAuthority)
         {
-            // increment charge time
-            state._chargeTime = Mathf.Min(state._chargeTime + player.Runner.DeltaTime, _maxChargeTime);
-
-            // update fill amt of indicator
-            if (player.ActiveAbilityIndicator != null)
+            // holding charge
+            if (state._isCharging)
             {
-                float chargePercent = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
-                player.ActiveAbilityIndicator.UpdateIndicatorFill(chargePercent);
-            }
+                // increment charge time
+                state._chargeTime = Mathf.Min(state._chargeTime + player.Runner.DeltaTime, _maxChargeTime);
 
-            // TODO - can add jittering??
-            return;
+                // update fill amt of indicator
+                if (player.ActiveAbilityIndicator != null)
+                {
+                    float chargePercent = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
+                    player.ActiveAbilityIndicator.UpdateIndicatorFill(chargePercent);
+                }
+                // TODO - can add jittering??
+            }
         }
+
+        if (!player.Object.HasStateAuthority) return;
     }
 
     public override void OnTickReleased(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
-        if (!player.Object.HasStateAuthority) return;
         if (!state._isCharging) return;
+
+        if (player.Object.HasInputAuthority || player.Object.HasStateAuthority)
+            state._isVisualShown = false;
+
+        if (!player.Object.HasStateAuthority) return;
 
         // start ramming
         state._isCharging = false;
@@ -113,11 +114,6 @@ public class RamAbilitySO : AbilitySO
 
         player.RawCanMove = false;
         player.RawCanRotate = false;
-
-        _hitTargetIds.Clear();
-
-       if (player.ActiveAbilityIndicator != null)
-           player.ActiveAbilityIndicator.gameObject.SetActive(false);
     }
 
     private void ProcessCollisionCheck(NetworkPlayerController player, ref AbilityState state)
@@ -138,13 +134,14 @@ public class RamAbilitySO : AbilitySO
         float castDistance = (currentFrameSpeed * player.Runner.DeltaTime) + 0.2f; // margin buffer in case of gaps
 
         Quaternion boxRotation = player.transform.rotation;
+        RaycastHit[] hitBuffer = player.RaycastHitBuffer;
 
         // fire box overlap
         int hitCount = player.Runner.GetPhysicsScene().BoxCast(
             castStart,
             boxHalfExtents,
             castDirection,
-            _hitBuffer,
+            hitBuffer,
             boxRotation,
             castDistance,
             _hitLayer,
@@ -155,15 +152,31 @@ public class RamAbilitySO : AbilitySO
 
         for ( int i = 0; i < hitCount; i++ )
         {
-            RaycastHit hitInfo = _hitBuffer[i];
+            RaycastHit hitInfo = hitBuffer[i];
             Collider hitCollider = hitInfo.collider;
-            if (hitCollider == null) return;
+            if (hitCollider == null) continue;
             if (hitCollider.transform.root == player.transform) continue; // Skip self
             if (hitCollider.transform.root.TryGetComponent(out NetworkPlayerController enemy))
             {
                 NetworkId enemyId = enemy.Object.Id;
-                if (_hitTargetIds.Contains(enemyId)) continue;
-                _hitTargetIds.Add(enemyId);
+                bool alreadyHit = false;
+
+                for (int j = 0; j < state._hitCount; j++)
+                {
+                    if (state._abilityHitHistory[j] == enemyId)
+                    {
+                        alreadyHit = true;
+                        break;
+                    }
+                }
+
+                if (alreadyHit) continue;
+
+                if (state._hitCount < 8)
+                {
+                    state._abilityHitHistory.Set(state._hitCount, enemyId);
+                    state._hitCount++;
+                }
 
                 // apply knockback
                 float chargePercentage = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
@@ -218,9 +231,7 @@ public class RamAbilitySO : AbilitySO
             player.Animator.SetTrigger(_releaseTrigger);
             Utils.DebugLogWarning("[Goat Ram] STUN CANCEL! Stance broken by posture damage.");
 
-            // disable indicator if active
-            if (player.ActiveAbilityIndicator != null)
-                player.ActiveAbilityIndicator.gameObject.SetActive(false);
+            state._isVisualShown = false;
 
             // TODO - apply stunned effect on goat
         }
@@ -320,6 +331,15 @@ public class RamAbilitySO : AbilitySO
             }
 
             ProcessCollisionCheck(player, ref state);
+        }
+    }
+
+    public override void InitIndicatorVisual(AbilityIndicatorController indicator)
+    {
+        if (_indicatorData != null)
+        {
+            indicator.ConfigureIndicator(_indicatorData, _indicatorLength, _indicatorWidth, true);
+            indicator.UpdateIndicatorFill(0f); // start at 0 fill
         }
     }
 }

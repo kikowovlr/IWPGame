@@ -25,7 +25,7 @@ MonoBehaviour:
   BlockSprinting: 1
   _indicatorData: {fileID: 11400000, guid: a1517d7eac715604ca97a57413b3336c, type: 2}
   _range: 6
-  _coneAngle: 60
+  _coneAngle: 80
   _affectedLayer:
     serializedVersion: 2
     m_Bits: 256

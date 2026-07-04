@@ -16,21 +16,16 @@ public class IntimidateAbilitySO : AbilitySO
     
     // flash settings
     [SerializeField] private float _flashDuration = 0.15f;
-    private float _flashTimer;
-    private bool _isFlashActive;
-
-    // static reusable array buffer to hold up to 20 hits wihtout generating heap garbage
-    private readonly Collider[] _hitBuffer = new Collider[20];
-    private readonly List<NetworkId> _hitTargetIds = new List<NetworkId>(20);
 
     public override void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
         // only run on host
         if (!player.Object.HasStateAuthority) return;
 
-        _hitTargetIds.Clear();
-        _isFlashActive = false;
-        _flashTimer = 0f;
+        state._hitCount = 0;
+
+        state._visualTime = 0f;
+        state._isVisualShown = false;
 
         player.Animator.SetTrigger(_skillTrigger);
         player.Animator.SetInteger(_skillTypeString, _skillType);
@@ -47,22 +42,20 @@ public class IntimidateAbilitySO : AbilitySO
     {
         if (!player.Object.HasStateAuthority) return;
 
-        if (player.ActiveAbilityIndicator != null)
-        {
-            player.ActiveAbilityIndicator.gameObject.SetActive(true);
-            player.ActiveAbilityIndicator.ConfigureIndicator(_indicatorData, _range, _coneAngle);
+        ref AbilityState state = ref player.AbilityStateRef;
+        state._visualTime = _flashDuration;
+        state._isVisualShown = true;
 
-            _flashTimer = _flashDuration;
-            _isFlashActive = true;
-        }
+        Collider[] hitBuffer = player.HitBuffer;
 
         // query all players within radius
-        int hitCount = player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, _hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
+        int hitCount = player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
         Vector3 forwardDir = player.transform.forward;
 
         for (int i = 0; i < hitCount; i++)
         {
-            Collider hit = _hitBuffer[i];
+            Collider hit = hitBuffer[i];
+            if (hit == null) continue;
             if (hit.transform.root == player.transform) continue;
 
             Vector3 dirToTarget = (hit.transform.position - player.transform.position).normalized;
@@ -73,8 +66,24 @@ public class IntimidateAbilitySO : AbilitySO
                 if (hit.transform.root.TryGetComponent(out NetworkPlayerController enemy))
                 {
                     NetworkId enemyId = enemy.Object.Id;
-                    if (_hitTargetIds.Contains(enemyId)) continue;
-                    _hitTargetIds.Add(enemyId);
+                    bool alreadyHit = false;
+
+                    for (int j = 0; j < state._hitCount; j++)
+                    {
+                        if (state._abilityHitHistory[j] == enemyId)
+                        {
+                            alreadyHit = true;
+                            break;
+                        }
+                    }
+
+                    if (alreadyHit) continue;
+
+                    if (state._hitCount < 8)
+                    {
+                        state._abilityHitHistory.Set(state._hitCount, enemyId);
+                        state._hitCount++;
+                    }
 
                     Utils.DebugLog($"[Intimidate] Stunned {enemy.name} exactly on the animation's impact frame!");
                     // TODO: apply stun
@@ -87,15 +96,13 @@ public class IntimidateAbilitySO : AbilitySO
     {
         if (!player.Object.HasStateAuthority) return;
 
+        // safety fallback to ensure the indicator is turned off after the animation ends
+        ref AbilityState state = ref player.AbilityStateRef;
+        state._isVisualShown = false;
+
         player.RawCanMove = true;
         player.RawCanRotate = true;
         player.ClearActiveCastingState();
-
-        // safety fallback to ensure the indicator is turned off after the animation ends
-        if (player.ActiveAbilityIndicator != null)
-        {
-            player.ActiveAbilityIndicator.gameObject.SetActive(false);
-        }
     }
 
     public override void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
@@ -108,20 +115,22 @@ public class IntimidateAbilitySO : AbilitySO
 
     public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
     {
-        if (!player.Object.HasStateAuthority) return;
-
+        // only state authority can update timer
         // manually set flash inactive after duration
-        if (_isFlashActive)
+        if (player.Object.HasStateAuthority && state._isVisualShown)
         {
-            _flashTimer -= Time.deltaTime;
+            state._visualTime -= player.Runner.DeltaTime;
 
-            if (_flashTimer <= 0f)
+            if (state._visualTime <= 0f)
             {
-                _isFlashActive = false;
-
-                if (player.ActiveAbilityIndicator != null)
-                    player.ActiveAbilityIndicator.gameObject.SetActive(false);
+                state._isVisualShown = false;
             }
         }
+    }
+
+    public override void InitIndicatorVisual(AbilityIndicatorController indicator)
+    {
+        if (_indicatorData != null)
+            indicator.ConfigureIndicator(_indicatorData, _range, _coneAngle);
     }
 }

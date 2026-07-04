@@ -29,3 +29,4 @@ MonoBehaviour:
   _affectedLayer:
     serializedVersion: 2
     m_Bits: 256
+  _flashDuration: 0.15

@@ -22,6 +22,7 @@ public abstract class AbilitySO : ScriptableObject
 
     // indicators
     [SerializeField] protected IndicatorDataSO _indicatorData;
+    public IndicatorDataSO IndicatorData => _indicatorData;
 
     // called on server/host during FixedUpdateNetwork ticks
     public abstract void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir); // ref - pass by reference
@@ -45,4 +46,6 @@ public abstract class AbilitySO : ScriptableObject
     {
         return rawDamage;
     }
+
+    public abstract void InitIndicatorVisual(AbilityIndicatorController indicator);
 }

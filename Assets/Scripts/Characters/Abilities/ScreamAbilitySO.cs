@@ -15,14 +15,11 @@ public class ScreamAbilitySO : AbilitySO
     [SerializeField] private float _damage = 10f;
     [SerializeField] private float _knockbackForce = 1.5f;
 
-    private readonly Collider[] _hitBuffer = new Collider[20];
-    private readonly List<NetworkId> _hitTargetIds = new List<NetworkId>(20);
-
     public override void OnTickPressed(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
     {
         if (!player.Object.HasStateAuthority) return;
 
-        _hitTargetIds.Clear();
+        state._hitCount = 0;
 
         player.Animator.SetTrigger(_skillTrigger);
         player.Animator.SetInteger(_skillTypeString, _skillType);
@@ -37,21 +34,20 @@ public class ScreamAbilitySO : AbilitySO
         if (!player.Object.HasStateAuthority) return;
 
         // show soundwave + distance
-        if (player.ActiveAbilityIndicator != null)
-        {
-            player.ActiveAbilityIndicator.gameObject.SetActive(true);
+        ref AbilityState state = ref player.AbilityStateRef;
+        state._isVisualShown = true; // PlayerAbilityVisuals script will handle the configuring of the visual effect based on the ability data
 
-            // pass indicator asset data
-            player.ActiveAbilityIndicator.ConfigureIndicator(_indicatorData, _range, _coneAngle);
-        }
+        // use persistant hit buffer attached to player
+        Collider[] hitBuffer = player.HitBuffer;
 
         // query all players within radius
-        int hitCount = player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, _hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
+        int hitCount = player.Runner.GetPhysicsScene().OverlapSphere(player.transform.position, _range, hitBuffer, _affectedLayer, QueryTriggerInteraction.Ignore);
         Vector3 forwardDir = player.transform.forward;
 
         for (int i = 0; i < hitCount; i++)
         {
-            Collider hit = _hitBuffer[i];
+            Collider hit = hitBuffer[i];
+            if (hit == null) continue;
             if (hit.transform.root == player.transform) continue;
 
             Vector3 dirToTarget = (hit.transform.position - player.transform.position).normalized;
@@ -62,8 +58,27 @@ public class ScreamAbilitySO : AbilitySO
                 if (hit.transform.root.TryGetComponent(out NetworkPlayerController enemy))
                 {
                     NetworkId enemyId = enemy.Object.Id;
-                    if (_hitTargetIds.Contains(enemyId)) continue;
-                    _hitTargetIds.Add(enemyId);
+                    bool alreadyHit = false;
+
+                    // manually check for duplicated
+                    for (int j = 0; j < state._hitCount; j++)
+                    {
+                        if (state._abilityHitHistory[j] == enemyId)
+                        {
+                            alreadyHit = true;
+                            break;
+                        }
+                    }
+
+                    // skip if already hit
+                    if (alreadyHit) continue;
+
+                    // add to history if we have space (max 8 hits stored)
+                    if (state._hitCount < 8)
+                    {
+                        state._abilityHitHistory.Set(state._hitCount, enemyId);
+                        state._hitCount++; // move the pointer forward
+                    }
 
                     Utils.DebugLog($"[Scream] Damaged {enemy.name} for {_damage}!");
                     
@@ -80,13 +95,13 @@ public class ScreamAbilitySO : AbilitySO
     {
         if (!player.Object.HasStateAuthority) return;
 
+        // hide when done
+        ref AbilityState state = ref player.AbilityStateRef;
+        state._isVisualShown = false;
+
         player.RawCanMove = true;
         player.RawCanRotate = true;
         player.ClearActiveCastingState();
-
-        // hide when done
-        if (player.ActiveAbilityIndicator != null)
-            player.ActiveAbilityIndicator.gameObject.SetActive(false);
     }
 
     public override void OnTickHeld(NetworkPlayerController player, ref AbilityState state, Vector2 aimDir)
@@ -99,5 +114,11 @@ public class ScreamAbilitySO : AbilitySO
 
     public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
     {
+    }
+
+    public override void InitIndicatorVisual(AbilityIndicatorController indicator)
+    {
+        if (_indicatorData != null)
+            indicator.ConfigureIndicator(_indicatorData, _range, _coneAngle);
     }
 }

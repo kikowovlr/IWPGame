@@ -17,10 +17,11 @@ public class IndicatorDataSO : ScriptableObject
     [Header("Visual Shape")]
     public IndicatorShape _shape;
     public Sprite _indicatorSprite;
-    public Color _indicatorColor = new Color(0f, 0f, 0f, 0.8f);
 
-    [Header("Gradient Colors")]
+    [Header("Colors")]
+    [Tooltip("If unchecked, will use the single indicator color")]
     public bool _useColorGradient = false;
+    public Color _indicatorColor = new Color(0f, 0f, 0f, 0.8f);
     public Gradient _colorGradient;
 
     [Header("Dynamic Dimensions of Visual")]
@@ -29,5 +30,9 @@ public class IndicatorDataSO : ScriptableObject
     public float _defaultLength = 2.0f;
 
     [Header("Placement Settings")]
-    public Vector3 LocalPositionOffset = new Vector3(0f, 0.05f, 0f);
+    public Vector3 _localPositionOffset = new Vector3(0f, 0.05f, 0f);
+
+    [Header("Networked Settings")]
+    [Tooltip("If checked, the indicator will be networked and visible to all players.")]
+    public bool _isNetworked = true;
 }

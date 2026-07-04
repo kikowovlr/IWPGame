@@ -106,6 +106,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private bool _isAbilityReleased;
     private AbilityIndicatorController _activeAbilityIndicator;
 
+    // buffers for abilities
+    public readonly Collider[] HitBuffer = new Collider[20];
+    public readonly RaycastHit[] RaycastHitBuffer = new RaycastHit[20];
+
     [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
     [Networked] public NetworkBool RawCanMove { get; set; } = true;
     [Networked] public NetworkBool RawCanRotate { get; set; } = true;
@@ -752,13 +756,16 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     private void UpdateAbility(NetworkInputData inputData)
     {
-        // only run on host
-        if (!Object.HasStateAuthority) return;
+        // only run on host, allow input authority so client can predict
+        if (!Object.HasStateAuthority && !Object.HasInputAuthority) return;
 
-        if (CurrentAbilityState._cooldownTimer > 0)
-            CurrentAbilityState._cooldownTimer -= Runner.DeltaTime;
+        if (Object.HasStateAuthority)
+        {
+            if (CurrentAbilityState._cooldownTimer > 0)
+                CurrentAbilityState._cooldownTimer -= Runner.DeltaTime;
+            _equippedAbility.UpdateAbilityState(this, ref CurrentAbilityState);
+        }
 
-        _equippedAbility.UpdateAbilityState(this, ref CurrentAbilityState);
 
         // if ability on cooldown and is not being used currently, block input events completely
         bool canStartAbility = CurrentAbilityState._cooldownTimer <= 0
@@ -1009,7 +1016,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             networkInputData._abilityReleased = _isAbilityReleased;
             _isAbilityPressed = false;
             _isAbilityReleased = false;
-
 
             if (networkInputData._abilityReleased)
             {

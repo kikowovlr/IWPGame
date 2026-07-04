@@ -54,10 +54,10 @@ public class AbilityIndicatorController : MonoBehaviour
 
         _activeData = data;
 
-        _currentLocalOffset = data.LocalPositionOffset;
+        _currentLocalOffset = data._localPositionOffset;
 
         _runtimeMaterial.SetColor(IndicatorColorPropId, data._indicatorColor);
-        _runtimeMaterial.SetFloat(ArcAnglePropId, arcAngle);
+        _runtimeMaterial.SetFloat(ArcAnglePropId, arcAngle * 0.5f);
         _runtimeMaterial.SetFloat(ShapeIDPropId, (int)data._shape);
 
         float finalLength = data._scaleLengthWithAbilityRange ? radiusRange : data._defaultLength;
@@ -79,7 +79,7 @@ public class AbilityIndicatorController : MonoBehaviour
 
         _activeData = data;
 
-        _currentLocalOffset = data.LocalPositionOffset;
+        _currentLocalOffset = data._localPositionOffset;
 
         _runtimeMaterial.SetColor(IndicatorColorPropId, data._indicatorColor);
         _runtimeMaterial.SetFloat(ShapeIDPropId, (int)data._shape);
@@ -102,7 +102,7 @@ public class AbilityIndicatorController : MonoBehaviour
 
         _activeData = data;
 
-        _currentLocalOffset = data.LocalPositionOffset;
+        _currentLocalOffset = data._localPositionOffset;
 
         _runtimeMaterial.SetColor(IndicatorColorPropId, data._indicatorColor);
         _runtimeMaterial.SetFloat(ShapeIDPropId, (int)data._shape);
@@ -121,6 +121,12 @@ public class AbilityIndicatorController : MonoBehaviour
         float clampedFill = Mathf.Clamp01(fillAmount);
         _runtimeMaterial.SetFloat(FillPropId, clampedFill);
 
-
+        // if supposed to use gradient, update the color based on the fill amount
+        if (_activeData != null && _activeData._useColorGradient)
+        {
+            // evaluate -> samples gradient keys seamlessly from 0 to 100%
+            Color gradientColor = _activeData._colorGradient.Evaluate(clampedFill);
+            _runtimeMaterial.SetColor(IndicatorColorPropId, gradientColor);
+        }
     }
 }
