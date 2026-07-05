@@ -16,5 +16,11 @@ public class PlayerComponentRegistry : MonoBehaviour
     public PunchHandler Punch => _punchHandler;
     public KickHandler Kick => _kickHandler;
     public HeadbuttHandler Headbutt => _headbuttHandler;
+    public IAffectedByStatusEffects Status { get; private set; }
+
+    private void Awake()
+    {
+        Status = GetComponentInChildren<IAffectedByStatusEffects>();
+    }
 }
  

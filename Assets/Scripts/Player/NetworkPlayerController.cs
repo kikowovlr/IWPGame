@@ -4,9 +4,20 @@ using UnityEngine.InputSystem;
 using Fusion.Addons.Physics;
 using Unity.Cinemachine;
 
-/// <summary>
-/// IPlayerLeft - can clean up player later when they leave
-/// </summary>
+// uses powers of 2 so they can be combined into a single binary value 
+[System.Flags]
+public enum InputRestrictions
+{
+    None = 0,
+    BlockMovement = 1 << 0,  // 1
+    BlockCombat = 1 << 1,  // 2
+    BlockAbilities = 1 << 2,  // 4
+    BlockRotation = 1 << 3, // 8
+
+    // quick-access group combinations
+    BlockEverything = ~0       // links all flags together
+}
+
 public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 {
     public static NetworkPlayerController Local { get; set; }
@@ -111,10 +122,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     public readonly RaycastHit[] RaycastHitBuffer = new RaycastHit[20];
 
     [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
-    [Networked] public NetworkBool RawCanMove { get; set; } = true;
-    [Networked] public NetworkBool RawCanRotate { get; set; } = true;
-    public bool CanMove => RawCanMove && !IsInPhysicsRecovery;
-    public bool CanRotate => RawCanRotate && !IsInPhysicsRecovery;
+    //[Networked] public NetworkBool RawCanMove { get; set; } = true;
+    //[Networked] public NetworkBool RawCanRotate { get; set; } = true;
+    public bool CanMove => !IsInputBlocked(InputRestrictions.BlockMovement) && !IsInPhysicsRecovery;
+    public bool CanRotate => !IsInputBlocked(InputRestrictions.BlockRotation) && !IsInPhysicsRecovery;
     public AbilityIndicatorController ActiveAbilityIndicator => _activeAbilityIndicator;
 
     // time to recover after knockback, throw, etc
@@ -122,6 +133,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     [Networked] private TickTimer _physicsControlLockTimer { get; set; }
     [SerializeField] private float _maxKnockbackControlLockDuration = 0.5f;
     public bool IsInPhysicsRecovery => !_physicsControlLockTimer.ExpiredOrNotRunning(Runner);
+
+    // input blocking
+    // this clears and rebuilds at the top of every network tick
+    public InputRestrictions ActiveRestrictions { get; set; } = InputRestrictions.None;
 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
@@ -152,6 +167,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         _startSlerpPositionSpring = _mainJoint.slerpDrive.positionSpring;
     }
 
+    #region Inputs
     public void OnMove(InputValue value)
     {
         _moveInputVector = value.Get<Vector2>();
@@ -199,10 +215,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             _isAbilityHeld = false;
         }
     }
+    #endregion
 
     private void Update()
     {
-        // TEMP DEBUG SWITCH: Runs locally in standard frame updates to catch key strokes perfectly
+        // TODO - TEMP DEBUG SWITCH: Runs locally in standard frame updates to catch key strokes perfectly
         if (Object != null && Object.HasStateAuthority)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -227,6 +244,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 // apply downward gravity when unconscious so their dead weight falls naturally
                 _rb.AddForce(Vector3.down * _gravity, ForceMode.Force);
         }
+
+        // reset input restrictions
+        ActiveRestrictions = InputRestrictions.None;
 
         // holds the target anim float
         float targetAnimSpeed = 0f;
@@ -253,6 +273,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 else
                     Recover();
             }
+        
+            UpdateAbility(networkInputData);
 
             if (!_isKnockedOut)
             {
@@ -318,8 +340,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
                 if (_equippedAbility != null)
                 {
-                    UpdateAbility(networkInputData);
-
                     // if current ability is requesting for movement
                     if (CurrentAbilityState._isDashing)
                     {
@@ -756,6 +776,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     private void UpdateAbility(NetworkInputData inputData)
     {
+        if (_equippedAbility != null)
+            _equippedAbility.UpdateAbilityState(this, ref CurrentAbilityState);
+        
         // only run on host, allow input authority so client can predict
         if (!Object.HasStateAuthority && !Object.HasInputAuthority) return;
 
@@ -763,7 +786,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         {
             if (CurrentAbilityState._cooldownTimer > 0)
                 CurrentAbilityState._cooldownTimer -= Runner.DeltaTime;
-            _equippedAbility.UpdateAbilityState(this, ref CurrentAbilityState);
         }
 
 
@@ -786,8 +808,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             else if (inputData._abilityHeld)
                 _equippedAbility.OnTickHeld(this, ref CurrentAbilityState, inputData._abilityAimDirection);
         }
-
-
     }
 
     /// <summary>
@@ -913,34 +933,55 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
-    private void ApplyAbilityInputMask(ref NetworkInputData inputData)
+    /// <summary>
+    /// helper utility to check binary flags for input restrictions
+    /// </summary>
+    public bool IsInputBlocked(InputRestrictions restriction)
     {
-        if (_equippedAbility == null) return;
+        if (_isKnockedOut) return true; // if knocked out, restrict all
 
-        bool isAbilityActive = CurrentAbilityState._isCharging || CurrentAbilityState._isDashing || CurrentAbilityState._isCasting;
-        if (!isAbilityActive) return;
+        // & compared 2 sets of binary numbers
+        // if the result is equal to the restriction, then that means the restriction is active
+        return (ActiveRestrictions & restriction) == restriction;
+    }
 
-        if (_equippedAbility.BlockAllCombatInputs)
+    private void ApplyInputMask(ref NetworkInputData inputData)
+    {
+        bool blockAll = _isKnockedOut || IsInputBlocked(InputRestrictions.BlockEverything);
+
+        if (blockAll || IsInputBlocked(InputRestrictions.BlockCombat) || IsInputBlocked(InputRestrictions.BlockAbilities))
         {
-            inputData._isPunchOrGrabPressed = false;
-            inputData._isHeadbuttPressed = false;
-            inputData._isThrowPressed = false;
-            inputData._isKickPressed = false;
-
             _isHeadbuttButtonPressed = false;
             _isRightClickButtonPressed = false;
+            _isJumpButtonPressed = false;
+            _isAbilityPressed = false;
+            _isAbilityReleased = false;
         }
 
-        if (_equippedAbility.BlockJumping)
+        if (blockAll || IsInputBlocked(InputRestrictions.BlockMovement))
         {
+            inputData._movementInput = Vector2.zero;
             inputData._isJumpPressed = false;
             _isJumpButtonPressed = false;
-        }
-
-        if (_equippedAbility.BlockSprinting)
-        {
             inputData._isSprintPressed = false;
             _isRunning = false;
+        }
+
+        if (blockAll || IsInputBlocked(InputRestrictions.BlockCombat))
+        {
+            inputData._isPunchOrGrabPressed = false;
+            inputData._isThrowPressed = false;
+            inputData._isKickPressed = false;
+            inputData._isHeadbuttPressed = false;
+        }
+
+        if (blockAll || IsInputBlocked(InputRestrictions.BlockAbilities))
+        {
+            inputData._abilityPressed = false;
+            inputData._abilityHeld = false;
+            inputData._abilityReleased = false;
+            _isAbilityHeld = false;
+            inputData._abilityAimDirection = Vector2.zero;
         }
     }
 
@@ -1064,7 +1105,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             }
         }
 
-        ApplyAbilityInputMask(ref networkInputData);
+        ApplyInputMask(ref networkInputData);
 
         networkInputData._isRagdollPressed = Input.GetKeyDown(KeyCode.R);
 

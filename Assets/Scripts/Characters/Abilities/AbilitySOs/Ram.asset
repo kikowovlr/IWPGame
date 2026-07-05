@@ -26,7 +26,8 @@ MonoBehaviour:
   _indicatorData: {fileID: 11400000, guid: a74ae3b97bf8fe34e9bf95858e3e417e, type: 2}
   _maxChargeTime: 3
   _damageTakenMultiplier: 0.5
-  _maxDamageBeforeCancel: 30
+  _maxDamageBeforeCancel: 5
+  _cancelStunDuration: 3
   _maxRamDuration: 0.3
   _baseRamSpeed: 1.2
   _maxRamSpeedMultiplier: 5

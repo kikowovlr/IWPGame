@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum StatusEffectType : byte // store as byte for optimisation -> holds nums from 0 to 255
@@ -10,17 +11,23 @@ public enum StatusEffectType : byte // store as byte for optimisation -> holds n
 }
 
 [CreateAssetMenu(fileName = "NewEffect", menuName = "Combat/New Status Effect")]
-public class StatusEffectSO : ScriptableObject
+public abstract class StatusEffectSO : ScriptableObject
 {
-    protected StatusEffectType _type;
-    protected string _effectName;
-    protected float _defaultDuration = 3f;
+    [SerializeField] protected StatusEffectType _type;
+    [SerializeField] protected string _effectName;
+    [SerializeField] protected float _defaultDuration = 3f;
 
     [Header("Modifiers")]
     [Range(0f, 1f)] protected float _movementSpeedModifier = 1f;
-    public bool _blockActions = false; // blocks input, movement, and rotation
+
+    [Header("Visuals")]
+    [SerializeField] protected List<VFXContainer> _visualContainers;
 
     // getters
     public StatusEffectType Type => _type;
     public float DefaultDuration => _defaultDuration;
+
+    public abstract void OnEffectAdded(NetworkPlayerController player, ref StatusEffectState state);
+    public abstract void ApplyTickModifiers(NetworkPlayerController player, ref StatusEffectState state); // override in subclasses to apply specific modifiers EVERY TICK
+    public abstract void OnEffectRemoved(NetworkPlayerController player, ref StatusEffectState state);
 }

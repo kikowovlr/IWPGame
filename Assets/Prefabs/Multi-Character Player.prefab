@@ -253,6 +253,7 @@ Transform:
   - {fileID: 5086650793056675646}
   - {fileID: 2507571067660262790}
   - {fileID: 431872715138535999}
+  - {fileID: 4460523793677844102}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &5932050675032652149
@@ -509,10 +510,6 @@ MonoBehaviour:
   - {fileID: 9121924289897987703}
   _defaultCharacterIndex: 2
   _CharacterIndex: 0
-  _RawCanMove:
-    _value: 1
-  _RawCanRotate:
-    _value: 1
   _maxKnockbackControlLockDuration: 0.5
 --- !u!114 &4647790447083351236
 MonoBehaviour:
@@ -779,8 +776,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatusEffectManager
   _effectDatabase:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 815701c0bc4a5104bbdde421f41be1c7, type: 2}
 --- !u!1 &4386922937572452854
 GameObject:
   m_ObjectHideFlags: 0
@@ -825,6 +821,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86888aacb87a0a4488cea97b1e109a17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAbilityVisuals
+--- !u!1 &7429223573516146864
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4460523793677844102}
+  - component: {fileID: 7680917066660953470}
+  - component: {fileID: 6558575971082531101}
+  m_Layer: 0
+  m_Name: VFXHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4460523793677844102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7429223573516146864}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.07759, y: 0.08049, z: 0.0936}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6214267228832837403}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7680917066660953470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7429223573516146864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e4b76fa99a4cfc449cb63c04732993d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVFXHandler
+--- !u!114 &6558575971082531101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7429223573516146864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbdf6c65daf877b438ab7c5ff5bb2c29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVFXAnchors
 --- !u!1 &7724339401812349133
 GameObject:
   m_ObjectHideFlags: 0

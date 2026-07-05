@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// holds fixed numbers of abilities
 /// </summary>
-[CreateAssetMenu(fileName = "NewAbility", menuName = "Characters/Abilities/AbilitySO")]
+//[CreateAssetMenu(fileName = "NewAbility", menuName = "Characters/Abilities/AbilitySO")]
 public abstract class AbilitySO : ScriptableObject
 {
     public string _name;

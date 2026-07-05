@@ -21,6 +21,7 @@ public class RamAbilitySO : AbilitySO
     [Range(0f, 1f)]
     [SerializeField] private float _damageTakenMultiplier = 0.5f; // take 50% less than dmg when charging
     [SerializeField] private float _maxDamageBeforeCancel = 30f; // cancel threshold
+    [SerializeField] private float _cancelStunDuration = 3f;
 
     [Header("Ram Settings")]
     [SerializeField] private float _maxRamDuration = 2.5f;
@@ -63,9 +64,6 @@ public class RamAbilitySO : AbilitySO
         state._isDashing = false;
         state._chargeTime = 0f;
 
-        player.RawCanMove = false;
-        player.RawCanRotate = true;
-
         player.Registry.Health.ResetAccumulatedDamageCounter();
 
         player.Animator.SetTrigger(_skillTrigger);
@@ -91,7 +89,6 @@ public class RamAbilitySO : AbilitySO
                     float chargePercent = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
                     player.ActiveAbilityIndicator.UpdateIndicatorFill(chargePercent);
                 }
-                // TODO - can add jittering??
             }
         }
 
@@ -111,9 +108,6 @@ public class RamAbilitySO : AbilitySO
         state._isCharging = false;
         state._isDashing = true;
         state._dashDurationTimer = _maxRamDuration;
-
-        player.RawCanMove = false;
-        player.RawCanRotate = false;
     }
 
     private void ProcessCollisionCheck(NetworkPlayerController player, ref AbilityState state)
@@ -202,8 +196,6 @@ public class RamAbilitySO : AbilitySO
         if (hitSomething)
         {
             state._isDashing = false;
-            player.RawCanMove = true;
-            player.RawCanRotate = true;
             player.Animator.SetTrigger(_releaseTrigger);
             player.Animator.SetBool(_activeBool, false);
             Utils.DebugLog("[Goat Ram] Ram terminated via box target layer impact.");
@@ -225,15 +217,12 @@ public class RamAbilitySO : AbilitySO
             state._isCharging = false;
             state._isDashing = false;
 
-            player.RawCanMove = true;
-            player.RawCanRotate = true;
-
             player.Animator.SetTrigger(_releaseTrigger);
-            Utils.DebugLogWarning("[Goat Ram] STUN CANCEL! Stance broken by posture damage.");
 
             state._isVisualShown = false;
 
-            // TODO - apply stunned effect on goat
+            if (player.Registry.Status != null)
+                player.Registry.Status.InflictStatus(StatusEffectType.Stunned, _cancelStunDuration);
         }
 
         return mitigatedDamage;
@@ -290,6 +279,18 @@ public class RamAbilitySO : AbilitySO
     /// <param name="state"></param>
     public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
     {
+        // input restrictions
+        if (state._isCharging)
+        {
+            // block movement but allow rotation
+            player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockCombat;
+        }
+        else if (state._isDashing)
+        {
+            // block movement and rotation
+            player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+        }
+
         if (!player.Object.HasStateAuthority) return;
 
         // ramming
@@ -323,8 +324,6 @@ public class RamAbilitySO : AbilitySO
             if (state._dashDurationTimer < 0f)
             {
                 state._isDashing = false;
-                player.RawCanMove = true;
-                player.RawCanRotate = true;
                 Utils.DebugLog("[Goat Ram] Dash finished organically.");
                 player.Animator.SetBool(_activeBool, false);
                 return;

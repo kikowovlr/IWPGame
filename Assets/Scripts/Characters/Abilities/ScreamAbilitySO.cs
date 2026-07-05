@@ -24,8 +24,6 @@ public class ScreamAbilitySO : AbilitySO
         player.Animator.SetTrigger(_skillTrigger);
         player.Animator.SetInteger(_skillTypeString, _skillType);
 
-        player.RawCanMove = false;
-        player.RawCanRotate = false;
         state._isCasting = true;
     }
 
@@ -80,8 +78,6 @@ public class ScreamAbilitySO : AbilitySO
                         state._hitCount++; // move the pointer forward
                     }
 
-                    Utils.DebugLog($"[Scream] Damaged {enemy.name} for {_damage}!");
-                    
                     // apply slight knockback w damage
                     Vector3 forceDirection = new Vector3(dirToTarget.x, 0f, dirToTarget.z).normalized;
                     Vector3 impactForce = forceDirection * _knockbackForce;
@@ -99,8 +95,6 @@ public class ScreamAbilitySO : AbilitySO
         ref AbilityState state = ref player.AbilityStateRef;
         state._isVisualShown = false;
 
-        player.RawCanMove = true;
-        player.RawCanRotate = true;
         player.ClearActiveCastingState();
     }
 
@@ -114,6 +108,11 @@ public class ScreamAbilitySO : AbilitySO
 
     public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
     {
+        // apply input restrictions
+        if (state._isCasting)
+        {
+            player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+        }
     }
 
     public override void InitIndicatorVisual(AbilityIndicatorController indicator)

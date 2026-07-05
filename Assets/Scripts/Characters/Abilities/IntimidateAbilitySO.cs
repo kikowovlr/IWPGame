@@ -13,6 +13,7 @@ public class IntimidateAbilitySO : AbilitySO
     [SerializeField] private float _range = 5f;
     [SerializeField] private float _coneAngle = 60f;
     [SerializeField] private LayerMask _affectedLayer;
+    [SerializeField] private float _stunDuration = 3f;
     
     // flash settings
     [SerializeField] private float _flashDuration = 0.15f;
@@ -30,8 +31,6 @@ public class IntimidateAbilitySO : AbilitySO
         player.Animator.SetTrigger(_skillTrigger);
         player.Animator.SetInteger(_skillTypeString, _skillType);
 
-        player.RawCanMove = false;
-        player.RawCanRotate = false;
         state._isCasting = true;
     }
 
@@ -86,7 +85,9 @@ public class IntimidateAbilitySO : AbilitySO
                     }
 
                     Utils.DebugLog($"[Intimidate] Stunned {enemy.name} exactly on the animation's impact frame!");
-                    // TODO: apply stun
+
+                    if (enemy.Registry.Status != null)
+                        enemy.Registry.Status.InflictStatus(StatusEffectType.Stunned, _stunDuration);
                 }
             }
         }
@@ -100,8 +101,6 @@ public class IntimidateAbilitySO : AbilitySO
         ref AbilityState state = ref player.AbilityStateRef;
         state._isVisualShown = false;
 
-        player.RawCanMove = true;
-        player.RawCanRotate = true;
         player.ClearActiveCastingState();
     }
 
@@ -115,6 +114,12 @@ public class IntimidateAbilitySO : AbilitySO
 
     public override void UpdateAbilityState(NetworkPlayerController player, ref AbilityState state)
     {
+        // apply input restrictions
+        if (state._isCasting)
+        {
+            player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+        }
+
         // only state authority can update timer
         // manually set flash inactive after duration
         if (player.Object.HasStateAuthority && state._isVisualShown)
