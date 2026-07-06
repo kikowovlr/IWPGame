@@ -33,6 +33,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8812326928833729265}
+  - {fileID: 7485805685329836078}
   - {fileID: 4087270984688716905}
   - {fileID: 7135201368770255194}
   - {fileID: 429736465048569328}
@@ -1459,7 +1461,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: ad8f3fe2c272328458ad8caba0108eef, type: 2}
@@ -1785,6 +1787,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6762539838526617405}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1753787633355674884
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8812326928833729265}
+  m_Layer: 8
+  m_Name: LEye_Anchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8812326928833729265
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1753787633355674884}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.24048215, z: 3.4924594e-10, w: 0.97065353}
+  m_LocalPosition: {x: -0.31021842, y: 0.3754978, z: 0.48899996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8900459391672740595}
+  m_LocalEulerAnglesHint: {x: 0, y: -27.83, z: 0}
 --- !u!1 &1821568188090211418
 GameObject:
   m_ObjectHideFlags: 0
@@ -2303,7 +2336,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -7791486788655378091, guid: 6e5e9cb784d7e8a4eae9a6dbba3f8040, type: 3}
@@ -2909,7 +2942,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -7791486788655378091, guid: 6e5e9cb784d7e8a4eae9a6dbba3f8040, type: 3}
@@ -2948,6 +2981,37 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00078158826, y: 0.30256635, z: 0.5971995}
     m_Extent: {x: 0.05876314, y: 0.031101286, z: 0.016840875}
   m_DirtyAABB: 0
+--- !u!1 &3525964446383908291
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7485805685329836078}
+  m_Layer: 8
+  m_Name: REye_Anchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7485805685329836078
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3525964446383908291}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.24048214, z: 1.1641531e-10, w: 0.97065353}
+  m_LocalPosition: {x: 0.31178156, y: 0.3754977, z: 0.48899996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8900459391672740595}
+  m_LocalEulerAnglesHint: {x: 0, y: 27.83, z: 0}
 --- !u!1 &3546443388761749130
 GameObject:
   m_ObjectHideFlags: 0
@@ -3002,7 +3066,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: ad8f3fe2c272328458ad8caba0108eef, type: 2}
@@ -3189,7 +3253,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -7791486788655378091, guid: 6e5e9cb784d7e8a4eae9a6dbba3f8040, type: 3}
@@ -3357,6 +3421,9 @@ MonoBehaviour:
   characterAnimator: {fileID: 8220648202472382838}
   ability: {fileID: 11400000, guid: 5edaeb1cf953417468a40f56a9cf5bde, type: 2}
   abilityIndicator: {fileID: 7483696473131713318}
+  _head: {fileID: 4087270984688716905}
+  _leftEye: {fileID: 8812326928833729265}
+  _rightEye: {fileID: 7485805685329836078}
 --- !u!1 &4028586627239143860
 GameObject:
   m_ObjectHideFlags: 0
@@ -5150,7 +5217,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -7791486788655378091, guid: 6e5e9cb784d7e8a4eae9a6dbba3f8040, type: 3}
@@ -5467,7 +5534,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: ad8f3fe2c272328458ad8caba0108eef, type: 2}
@@ -6882,7 +6949,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: ad8f3fe2c272328458ad8caba0108eef, type: 2}
@@ -7133,7 +7200,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -7791486788655378091, guid: 6e5e9cb784d7e8a4eae9a6dbba3f8040, type: 3}
@@ -7382,7 +7449,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: -7791486788655378091, guid: 6e5e9cb784d7e8a4eae9a6dbba3f8040, type: 3}
@@ -7512,7 +7579,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: ad8f3fe2c272328458ad8caba0108eef, type: 2}
@@ -7900,7 +7967,7 @@ SkinnedMeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 4
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: ad8f3fe2c272328458ad8caba0108eef, type: 2}

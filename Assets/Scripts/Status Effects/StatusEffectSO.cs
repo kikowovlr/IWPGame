@@ -26,6 +26,7 @@ public abstract class StatusEffectSO : ScriptableObject
     // getters
     public StatusEffectType Type => _type;
     public float DefaultDuration => _defaultDuration;
+    public List<VFXContainer> VisualContainers => _visualContainers;
 
     public abstract void OnEffectAdded(NetworkPlayerController player, ref StatusEffectState state);
     public abstract void ApplyTickModifiers(NetworkPlayerController player, ref StatusEffectState state); // override in subclasses to apply specific modifiers EVERY TICK

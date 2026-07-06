@@ -30,4 +30,9 @@ public class CharacterComponentLinker : MonoBehaviour
     [Header("Ability")]
     public AbilitySO ability;
     public AbilityIndicatorController abilityIndicator;
+
+    [Header("VFX Placements")]
+    public Transform _head;
+    public Transform _leftEye;
+    public Transform _rightEye;
 }

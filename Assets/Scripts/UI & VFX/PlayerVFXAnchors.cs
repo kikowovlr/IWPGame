@@ -7,17 +7,18 @@ public struct VFXContainer
 {
     public GameObject _prefab;
     public VFXAnchorType _anchorType;
-    public Vector3 _localOffset;
+    public Vector3 _localPositionOffset;
+    public Vector3 _localRotationOffset;
 }
 
 public class PlayerVFXAnchors : MonoBehaviour
 {
-    [field: SerializeField] public Transform Head {  get; private set; }
-    [field: SerializeField] public Transform LeftEye { get; private set; }
-    [field: SerializeField] public Transform RightEye { get; private set; }
+    public Transform Head {  get; private set; }
+    public Transform LeftEye { get; private set; }
+    public Transform RightEye { get; private set; }
 
     // helper to connect anchor type to their corresponding bone, keeps logic inside this component
-    public Transform GetAnchor(VFXAnchorType anchorType)
+    public Transform GetAnchorTransform(VFXAnchorType anchorType)
     {
         return anchorType switch
         {
@@ -26,5 +27,13 @@ public class PlayerVFXAnchors : MonoBehaviour
             VFXAnchorType.RightEye => RightEye,
             _ => transform, //default case
         };
+    }
+
+    // helper to set up anchors (call when changing character
+    public void SetUpAnchors(Transform head, Transform leftEye, Transform rightEye)
+    {
+        Head = head;
+        LeftEye = leftEye;
+        RightEye = rightEye;
     }
 }

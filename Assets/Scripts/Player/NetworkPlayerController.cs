@@ -34,6 +34,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     [SerializeField] private float _rotationSpeed = 300f;
     [Range(0.1f, 1.0f)]
     [SerializeField] private float _walkInputScale = 0.5f;
+    [Networked] public float CurrentSpeedMultiplier { get; set; } = 1.0f;
+    [Networked] public float TargetSpeedMultiplier { get; set; } = 1.0f;
+    [SerializeField] private float _speedLerpRate = 10f;    
 
     [Header("Jump Settings")]
     [SerializeField] private float _jumpForce = 10f;
@@ -236,6 +239,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         // only host can do this
         if (Object.HasStateAuthority) // means we are controlling object
         {
+            // lerp speed
+            CurrentSpeedMultiplier = Mathf.MoveTowards(
+                CurrentSpeedMultiplier,
+                TargetSpeedMultiplier,
+                _speedLerpRate * Runner.DeltaTime
+            );
+
+            TargetSpeedMultiplier = 1.0f; // reset each frame, status effects, etc, will continuously overwrite this during ticks
+
             CheckForGround();
 
             if (!IsKnockedOut)
@@ -392,18 +404,21 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         Vector3 moveDir = CalculateMoveDirection(networkInputData);
         HandleRotation(moveDir);
 
-        if (_rb.linearVelocity.magnitude < _maxSpeed * inputMagnitude)
+        // calculate max speed based on speed multiplier
+        float dynamicMaxSpeed = _maxSpeed * CurrentSpeedMultiplier;
+
+        if (_rb.linearVelocity.magnitude < dynamicMaxSpeed * inputMagnitude)
         {
             // calculate how steep the current slope is
             float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
-            float finalForce = _movementForce;
+            float finalForce = _movementForce * CurrentSpeedMultiplier;
 
             // scale forces when climbing up hills
             if (_isGrounded && slopeAngle > 5f && slopeAngle <= _maxSlopeAngle)
             {
                 // as slope gets steeper, scale forces
                 float slopeFactor = slopeAngle / _maxSlopeAngle;
-                finalForce += _movementForce * slopeFactor * _slopeForceMultiplier;
+                finalForce += _movementForce * CurrentSpeedMultiplier * slopeFactor * _slopeForceMultiplier;
             }
 
             // move character in the dir they're facing
@@ -904,6 +919,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                  
                 if (linker.characterAnimator != null)
                     _animator = linker.characterAnimator;
+
+                PlayerVFXAnchors vfxAnchors = GetComponentInChildren<PlayerVFXAnchors>();
+                vfxAnchors.SetUpAnchors(linker._head, linker._leftEye, linker._rightEye);
 
                 _activeRagdollMembers = linker.physicsPackageRoot.GetComponentsInChildren<ActiveRagdollMember>(true);
 

@@ -488,6 +488,9 @@ MonoBehaviour:
   _movementForce: 30
   _rotationSpeed: 500
   _walkInputScale: 0.5
+  _CurrentSpeedMultiplier: 1
+  _TargetSpeedMultiplier: 1
+  _speedLerpRate: 2
   _jumpForce: 15
   _gravity: 10
   _jumpCooldown: 0.15
@@ -775,8 +778,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50da39828603b564bb10ddd99f92bb45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatusEffectManager
+  _vfxHandler: {fileID: 7680917066660953470}
   _effectDatabase:
   - {fileID: 11400000, guid: 815701c0bc4a5104bbdde421f41be1c7, type: 2}
+  - {fileID: 11400000, guid: ae15a582a4a0cd54994045905449a437, type: 2}
 --- !u!1 &4386922937572452854
 GameObject:
   m_ObjectHideFlags: 0
@@ -2280,14 +2285,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6057967964320292010, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
-      propertyPath: m_RenderingLayerMask
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 6666335059531308958, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
-      propertyPath: m_RenderingLayerMask
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 6702509345651407269, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _isSetupInEditor
       value: 0
@@ -2327,10 +2324,6 @@ PrefabInstance:
     - target: {fileID: 6702509345651407269, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _startSlerpPositionSpring
       value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 7575734528204251841, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
-      propertyPath: m_RenderingLayerMask
-      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7675667051927988746, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _isSetupInEditor
@@ -2412,21 +2405,9 @@ PrefabInstance:
       propertyPath: _startSlerpPositionSpring
       value: 100
       objectReference: {fileID: 0}
-    - target: {fileID: 8161929100174573693, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
-      propertyPath: m_RenderingLayerMask
-      value: 4
-      objectReference: {fileID: 0}
     - target: {fileID: 8220648202472382838, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: m_WarningMessage
       value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8390777298669650373, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
-      propertyPath: m_RenderingLayerMask
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 8627224050517584219, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
-      propertyPath: m_RenderingLayerMask
-      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 9074371568722649595, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _isSetupInEditor

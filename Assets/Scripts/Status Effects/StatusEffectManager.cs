@@ -1,5 +1,6 @@
 using Fusion;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -7,6 +8,7 @@ using UnityEngine;
 /// </summary>
 public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
 {
+    [SerializeField] private PlayerVFXHandler _vfxHandler;
     [SerializeField] private List<StatusEffectSO> _effectDatabase = new List<StatusEffectSO>();
     private Dictionary<StatusEffectType, StatusEffectSO> _effectsDictionary;
 
@@ -112,5 +114,22 @@ public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
                 _effectsDictionary[currentType].ApplyTickModifiers(_player, ref state);
             }
         }
+    }
+
+    public override void Render()
+    {
+        // gather which types are active this render frame
+        HashSet<StatusEffectType> activeTypes = new HashSet<StatusEffectType>();
+
+        // loop through all active effects to get their types
+        for (int i = 0; i < _activeEffects.Length; i++)
+        {
+            if (_activeEffects[i]._type != StatusEffectType.None && _activeEffects[i].IsActive(Runner))
+                activeTypes.Add(_activeEffects[i]._type);
+        }
+
+        // pass to vfx handler and update active types
+        if (_vfxHandler != null)
+            _vfxHandler.SyncStatusVisualEffects(activeTypes, _effectsDictionary);
     }
 }

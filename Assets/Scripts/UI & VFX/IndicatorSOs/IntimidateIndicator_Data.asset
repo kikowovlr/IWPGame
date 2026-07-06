@@ -48,5 +48,5 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   _scaleLengthWithAbilityRange: 1
   _defaultLength: 1
-  _localPositionOffset: {x: 0, y: 0.05, z: 0}
+  _localPositionOffset: {x: 0, y: 0.05, z: 0.3}
   _isNetworked: 1
