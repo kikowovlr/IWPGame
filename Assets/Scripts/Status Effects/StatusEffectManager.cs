@@ -17,6 +17,9 @@ public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
     [Networked, Capacity(MAX_EFFECTS)] private NetworkArray<StatusEffectState> _activeEffects => default;
     private NetworkPlayerController _player;
 
+    public bool SuppressVisuals { get; set; }
+
+
     private void Awake()
     {
         _player = GetComponentInParent<NetworkPlayerController>();
@@ -118,6 +121,13 @@ public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
 
     public override void Render()
     {
+        // if any system switches this bool, clear all vfx
+        if (SuppressVisuals)
+        {
+            _vfxHandler?.SyncStatusVisualEffects(new HashSet<StatusEffectType>(), _effectsDictionary);
+            return;
+        }
+
         // gather which types are active this render frame
         HashSet<StatusEffectType> activeTypes = new HashSet<StatusEffectType>();
 

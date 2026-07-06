@@ -94,8 +94,6 @@ public class AbilityIndicatorController : MonoBehaviour
     /// swaps indicator graphics and update shader properties based on the provided IndicatorDataSO
     /// used for CIRCLES
     /// </summary>
-    /// <param name="data"></param>
-    /// <param name=""></param>
     public void ConfigureIndicator(IndicatorDataSO data, float radiusRange)
     {
         if (data == null) return;

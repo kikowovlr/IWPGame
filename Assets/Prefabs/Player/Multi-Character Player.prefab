@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c46555378786c994caf7b4f764719664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthHandler
-  _maxHealth: 100
+  _maxHealth: 10
   _knockedDownDamageMultiplier: 0.3
   _baseKnockoutTime: 3
   _maxKnockoutTime: 8
@@ -206,7 +206,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerEliminationHandler
   _maxLives: 3
+  _spectatorTransitionDuration: 6
   _CurrentLives: 0
+  _IsEliminated: 0
+  _IsSpectatorTransitionComplete: 0
 --- !u!1 &1724745621430386209
 GameObject:
   m_ObjectHideFlags: 0
@@ -560,6 +563,7 @@ MonoBehaviour:
   - {fileID: 1981724414907585690}
   - {fileID: 6618815710476041754}
   - {fileID: 4717746424931653075}
+  - {fileID: 7970719517024901479}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &4169869315045129326
 MonoBehaviour:
@@ -602,6 +606,8 @@ MonoBehaviour:
   _punchHandler: {fileID: 6088960452406766346}
   _kickHandler: {fileID: 3224084901472776540}
   _headbuttHandler: {fileID: 1981724414907585690}
+  _vfxAnchors: {fileID: 6558575971082531101}
+  _visualOverrideController: {fileID: 7970719517024901479}
 --- !u!1 &2255523711681084658
 GameObject:
   m_ObjectHideFlags: 0
@@ -837,6 +843,7 @@ GameObject:
   - component: {fileID: 4460523793677844102}
   - component: {fileID: 7680917066660953470}
   - component: {fileID: 6558575971082531101}
+  - component: {fileID: 7970719517024901479}
   m_Layer: 0
   m_Name: VFXHandler
   m_TagString: Untagged
@@ -883,6 +890,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbdf6c65daf877b438ab7c5ff5bb2c29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerVFXAnchors
+--- !u!114 &7970719517024901479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7429223573516146864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b4858c19b42d6c40bdb148dd9895f5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVisualsOverrideController
+  _statusEffectManager: {fileID: 4717746424931653075}
+  _abilityVisuals: {fileID: 6618815710476041754}
 --- !u!1 &7724339401812349133
 GameObject:
   m_ObjectHideFlags: 0

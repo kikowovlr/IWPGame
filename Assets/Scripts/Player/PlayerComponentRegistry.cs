@@ -9,6 +9,8 @@ public class PlayerComponentRegistry : MonoBehaviour
     [SerializeField] private PunchHandler _punchHandler;
     [SerializeField] private KickHandler _kickHandler;
     [SerializeField] private HeadbuttHandler _headbuttHandler;
+    [SerializeField] private PlayerVFXAnchors _vfxAnchors;
+    [SerializeField] private PlayerVisualsOverrideController _visualOverrideController;
 
     public NetworkPlayerController Controller => _playerController;
     public PlayerHealthHandler Health => _healthHandler;
@@ -17,6 +19,8 @@ public class PlayerComponentRegistry : MonoBehaviour
     public KickHandler Kick => _kickHandler;
     public HeadbuttHandler Headbutt => _headbuttHandler;
     public IAffectedByStatusEffects Status { get; private set; }
+    public PlayerVFXAnchors vfxAnchors => _vfxAnchors;
+    public PlayerVisualsOverrideController VisualsOverrider => _visualOverrideController;
 
     private void Awake()
     {

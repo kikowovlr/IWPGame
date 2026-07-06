@@ -125,8 +125,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     public readonly RaycastHit[] RaycastHitBuffer = new RaycastHit[20];
 
     [Networked] private ref AbilityState CurrentAbilityState => ref MakeRef<AbilityState>();
-    //[Networked] public NetworkBool RawCanMove { get; set; } = true;
-    //[Networked] public NetworkBool RawCanRotate { get; set; } = true;
     public bool CanMove => !IsInputBlocked(InputRestrictions.BlockMovement) && !IsInPhysicsRecovery;
     public bool CanRotate => !IsInputBlocked(InputRestrictions.BlockRotation) && !IsInPhysicsRecovery;
     public AbilityIndicatorController ActiveAbilityIndicator => _activeAbilityIndicator;
@@ -720,12 +718,16 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
-    public void Recover()
+    public void Recover(bool playAnim = true)
     {
         if (!Object.HasStateAuthority)
             return;
 
         // TODO play recovery anim
+        if (playAnim)
+        {
+
+        }
 
         _isKnockedOut = false;
         _isGrabbingActive = false;
@@ -920,8 +922,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
                 if (linker.characterAnimator != null)
                     _animator = linker.characterAnimator;
 
-                PlayerVFXAnchors vfxAnchors = GetComponentInChildren<PlayerVFXAnchors>();
-                vfxAnchors.SetUpAnchors(linker._head, linker._leftEye, linker._rightEye);
+                Registry.vfxAnchors.SetUpAnchors(linker._head, linker._leftEye, linker._rightEye);
+
+                Registry.VisualsOverrider.UpdateActiveCharacterVisualReference(linker.visualMeshRoot);
 
                 _activeRagdollMembers = linker.physicsPackageRoot.GetComponentsInChildren<ActiveRagdollMember>(true);
 
@@ -1032,6 +1035,51 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
     }
 
+    /// <summary>
+    /// call when player transitions to spectator
+    /// shuts down all colliders
+    /// </summary>
+    public void DisableAllRigidbodyColliders()
+    {
+        if (_allChildRigidbodies == null) return;
+
+        for (int i = 0; i < _allChildRigidbodies.Length; i++)
+        {
+            if (_allChildRigidbodies[i] != null)
+            {
+                if (_allChildRigidbodies[i].TryGetComponent<Collider>(out var col))
+                {
+                    col.enabled = false;
+                }
+
+                _allChildRigidbodies[i].isKinematic = true;
+            }
+        }
+    }
+
+    public void EnableAllRagdollColliders()
+    {
+        if (_allChildRigidbodies == null) return;
+
+        for (int i = 0; i < _allChildRigidbodies.Length; i++)
+        {
+            if (_allChildRigidbodies[i] != null)
+            {
+                if (_allChildRigidbodies[i].TryGetComponent<Collider>(out var col))
+                {
+                    col.enabled = true;
+                }
+
+                _allChildRigidbodies[i].isKinematic = false;
+
+                if (_originalMasses != null && i < _originalMasses.Length)
+                {
+                    _allChildRigidbodies[i].mass = _originalMasses[i];
+                }
+            }
+        }
+    }
+
     // spawner calls this then transmit info to host
     public NetworkInputData GetNetworkInput()
     {
@@ -1137,15 +1185,19 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     {
         base.Spawned();
 
+        // link network id to this physical avatar root
+        PlayerRegistry.SetAvatarTransform(Object.InputAuthority, this.transform);
+
+        // only host/server registers this id into game manager match array
+        if (Object.HasStateAuthority && GameManager.Instance != null)
+            GameManager.Instance.TrackPlayer(Object.InputAuthority);
+
         // check if this is the owner's player
         if (Object.HasInputAuthority)
         {
             Local = this;
             PlayerRegistry.RegisterLocalPlayerTransform(_rb.transform);
-            Utils.DebugLog("Spawned player with input authority");
         }
-        else
-            Utils.DebugLog("Spawned player without input authority");
 
         // make it easier to tell which player is which
         transform.name = $"P_{Object.Id}";
@@ -1158,6 +1210,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
 
         ExecuteCharacterPackageSwap(_defaultCharacterIndex);
+    }
+
+    // prevent null ref when player dc/leave
+    public override void Despawned(NetworkRunner runner, bool hasStateAuthority)
+    {
+        base.Despawned(runner, hasStateAuthority);
+
+        // Clean up the local dictionary slot when this avatar is destroyed/despawned
+        PlayerRegistry.SetAvatarTransform(Object.InputAuthority, null);
     }
 
     public void PlayerLeft(PlayerRef player)

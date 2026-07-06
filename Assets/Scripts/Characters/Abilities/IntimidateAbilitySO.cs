@@ -84,8 +84,6 @@ public class IntimidateAbilitySO : AbilitySO
                         state._hitCount++;
                     }
 
-                    Utils.DebugLog($"[Intimidate] Stunned {enemy.name} exactly on the animation's impact frame!");
-
                     if (enemy.Registry.Status != null)
                         enemy.Registry.Status.InflictStatus(StatusEffectType.Stunned, _stunDuration);
                 }

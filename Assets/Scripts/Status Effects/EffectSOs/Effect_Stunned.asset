@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StunEffectSO
   _type: 1
   _effectName: Stunned
-  _defaultDuration: 3
+  _defaultDuration: 5
   _visualContainers:
   - _prefab: {fileID: 1449486581183628366, guid: 6e4ffd44759072a4a893c5aef23156c2, type: 3}
     _anchorType: 1
@@ -24,3 +24,7 @@ MonoBehaviour:
     _anchorType: 2
     _localPositionOffset: {x: 0, y: 0, z: 0}
     _localRotationOffset: {x: 0, y: 0, z: 0}
+  - _prefab: {fileID: 1278523780551391976, guid: 9be0560efa1bb2e46b0e7b0cecb0afba, type: 3}
+    _anchorType: 0
+    _localPositionOffset: {x: -0.129, y: 0, z: 0}
+    _localRotationOffset: {x: 0, y: 0, z: 90}

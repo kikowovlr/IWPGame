@@ -19,6 +19,7 @@ public class PlayerHealthHandler : NetworkBehaviour
     [Networked] private float AccumulatedDamageTaken { get; set; }
 
     private NetworkPlayerController _playerController;
+    private PlayerEliminationHandler _eliminationHandler;
     private Transform _characterRoot; // used to scan the rig hierarchy
 
     // events
@@ -30,6 +31,7 @@ public class PlayerHealthHandler : NetworkBehaviour
         if (registry != null)
         {
             _playerController = registry.Controller;
+            _eliminationHandler = registry.Elimination;
         }
         _characterRoot = transform.root;
     }
@@ -191,6 +193,9 @@ public class PlayerHealthHandler : NetworkBehaviour
 
     private void Knockout()
     {
+        if (_eliminationHandler != null)
+            _eliminationHandler.DeductLife();   
+
         // calculate dynamic duration -> negative health, longer knockedout time
         float overkill = Mathf.Abs(CurrentHealth);
         float extraTime = overkill * 0.05f; // adds 1 sec per 20 points of overkill
@@ -204,6 +209,13 @@ public class PlayerHealthHandler : NetworkBehaviour
         _playerController.Knockout();
 
         yield return new WaitForSeconds(duration);
+
+        // dont wake up if they are eliminated
+        if (_eliminationHandler != null && _eliminationHandler.IsEliminated)
+        {
+            Debug.Log($"[HEALTH] {gameObject.name} remains knocked out eternally (Eliminated).");
+            yield break;
+        }
 
         _playerController.Recover();
         CurrentHealth = _maxHealth;

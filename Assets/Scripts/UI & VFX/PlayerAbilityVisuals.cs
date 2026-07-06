@@ -5,6 +5,8 @@ public class PlayerAbilityVisuals : NetworkBehaviour
 {
     private NetworkPlayerController _playerController;
 
+    public bool SuppressVisuals { get; set; }
+
     private void Awake()
     {
         _playerController = GetComponentInParent<NetworkPlayerController>();
@@ -13,8 +15,16 @@ public class PlayerAbilityVisuals : NetworkBehaviour
     public override void Render()
     {
         // grab current targets from controller
-        AbilitySO currentAbility = _playerController.EquippedAbility;
         AbilityIndicatorController activeIndicator = _playerController.ActiveAbilityIndicator;
+
+        if (SuppressVisuals)
+        {
+            if (activeIndicator != null && activeIndicator.gameObject.activeSelf)
+                activeIndicator.gameObject.SetActive(false);
+            return;
+        }
+
+        AbilitySO currentAbility = _playerController.EquippedAbility;
 
         if (currentAbility == null || activeIndicator == null || currentAbility.IndicatorData == null) return;
 
