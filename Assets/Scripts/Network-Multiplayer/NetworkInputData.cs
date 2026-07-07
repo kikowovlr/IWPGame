@@ -4,7 +4,8 @@ using UnityEngine;
 public struct NetworkInputData : INetworkInput
 {
     // TODO optimise by sending bytes instead of vector2
-    public Vector2 _movementInput;
+    //public Vector2 _movementInput;
+    public Vector3 _cameraRelativeMoveDir;
     public NetworkBool _isJumpPressed;
     public NetworkBool _isSprintPressed;
     public NetworkBool _isPunchOrGrabPressed;

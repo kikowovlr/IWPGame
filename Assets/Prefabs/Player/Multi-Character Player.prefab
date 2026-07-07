@@ -257,6 +257,7 @@ Transform:
   - {fileID: 2507571067660262790}
   - {fileID: 431872715138535999}
   - {fileID: 4460523793677844102}
+  - {fileID: 5392125363664024304}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &5932050675032652149
@@ -484,6 +485,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _rb: {fileID: 5932050675032652149}
+  _mainCollider: {fileID: 6949252436366874919}
   _mainJoint: {fileID: 7582016312784311209}
   _animator: {fileID: 0}
   _networkRb3D: {fileID: 4169869315045129326}
@@ -517,6 +519,7 @@ MonoBehaviour:
   _defaultCharacterIndex: 2
   _CharacterIndex: 0
   _maxKnockbackControlLockDuration: 0.5
+  _cameraTarget: {fileID: 5392125363664024304}
 --- !u!114 &4647790447083351236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -608,6 +611,37 @@ MonoBehaviour:
   _headbuttHandler: {fileID: 1981724414907585690}
   _vfxAnchors: {fileID: 6558575971082531101}
   _visualOverrideController: {fileID: 7970719517024901479}
+--- !u!1 &2145209411239521523
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5392125363664024304}
+  m_Layer: 0
+  m_Name: CameraTargetPivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5392125363664024304
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2145209411239521523}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.364, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6214267228832837403}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2255523711681084658
 GameObject:
   m_ObjectHideFlags: 0

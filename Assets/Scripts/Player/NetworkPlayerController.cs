@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Fusion.Addons.Physics;
-using Unity.Cinemachine;
 
 // uses powers of 2 so they can be combined into a single binary value 
 [System.Flags]
@@ -24,6 +23,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     [Header("References")]
     [SerializeField] private Rigidbody _rb;
+    [SerializeField] private Collider _mainCollider;
     [SerializeField] private ConfigurableJoint _mainJoint;
     [SerializeField] private Animator _animator;
     [SerializeField] NetworkRigidbody3D _networkRb3D;
@@ -138,6 +138,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     // input blocking
     // this clears and rebuilds at the top of every network tick
     public InputRestrictions ActiveRestrictions { get; set; } = InputRestrictions.None;
+
+    [Header("Camera Target")]
+    [SerializeField] private Transform _cameraTarget;
 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
@@ -290,7 +293,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             {
                 // movement calculation
                 // if not sprinting, clamp input
-                float inputMagnitude = networkInputData._movementInput.magnitude;
+                //float inputMagnitude = networkInputData._movementInput.magnitude;
+                float inputMagnitude = networkInputData._cameraRelativeMoveDir.magnitude;
+
                 ProcessGrabPunchLogic(networkInputData._isPunchOrGrabPressed, inputMagnitude, networkInputData._isSprintPressed);
 
                 // DYNAMIC RECOVERY CLEANUP
@@ -634,18 +639,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     private Vector3 CalculateMoveDirection(NetworkInputData networkInputData)
     {
         // get cam dir vectors and flatten y
-        Vector3 camForward = Camera.main.transform.forward;
-        Vector3 camRight = Camera.main.transform.right;
-        camForward.y = 0f;
-        camRight.y = 0f;
-        camForward.Normalize();
-        camRight.Normalize();
+        //Vector3 camForward = Camera.main.transform.forward;
+        //Vector3 camRight = Camera.main.transform.right;
+        //camForward.y = 0f;
+        //camRight.y = 0f;
+        //camForward.Normalize();
+        //camRight.Normalize();
 
-        // movement dir vector based on cam's POV
-        Vector3 rawMoveDir = (camForward * networkInputData._movementInput.y) + (camRight * networkInputData._movementInput.x);
+        //// movement dir vector based on cam's POV
+        //Vector3 rawMoveDir = (camForward * networkInputData._movementInput.y) + (camRight * networkInputData._movementInput.x);
+
+        Vector3 rawMoveDir = networkInputData._cameraRelativeMoveDir;
 
         // if grounded, tilt dir to match slope of ground
-        if (_isGrounded)
+        if (_isGrounded && rawMoveDir.sqrMagnitude > 0.01f)
         {
             Vector3 slopeMoveDir = Vector3.ProjectOnPlane(rawMoveDir, _groundNormal).normalized;
             return slopeMoveDir * rawMoveDir.magnitude; // keep input scaling accurate
@@ -981,7 +988,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
         if (blockAll || IsInputBlocked(InputRestrictions.BlockMovement))
         {
-            inputData._movementInput = Vector2.zero;
+            inputData._cameraRelativeMoveDir = Vector2.zero;
             inputData._isJumpPressed = false;
             _isJumpButtonPressed = false;
             inputData._isSprintPressed = false;
@@ -1041,6 +1048,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     /// </summary>
     public void DisableAllRigidbodyColliders()
     {
+        if (_mainCollider == null && _rb == null) return;
+
+        _mainCollider.enabled = false;
+        _rb.isKinematic = true;
+        _rb.linearVelocity = Vector3.zero;
+
         if (_allChildRigidbodies == null) return;
 
         for (int i = 0; i < _allChildRigidbodies.Length; i++)
@@ -1059,6 +1072,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     public void EnableAllRagdollColliders()
     {
+        if (_mainCollider == null && _rb == null) return;
+
+        _mainCollider.enabled = true;
+        _rb.isKinematic = false;
+
         if (_allChildRigidbodies == null) return;
 
         for (int i = 0; i < _allChildRigidbodies.Length; i++)
@@ -1088,7 +1106,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         // move data
         if (_isKnockedOut)
         {
-            networkInputData._movementInput = Vector2.zero;
+            networkInputData._cameraRelativeMoveDir = Vector2.zero;
             networkInputData._isJumpPressed = false;
             networkInputData._isSprintPressed = false;
             networkInputData._isPunchOrGrabPressed = false;
@@ -1108,7 +1126,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         }
         else
         {
-            networkInputData._movementInput = _moveInputVector;
+            Vector3 calculatedDirection = Vector3.zero;
+
+            // calculate direction based on local camera instance
+            if (CameraManager.Instance != null && _moveInputVector.sqrMagnitude > 0.01f)
+            {
+                Vector3 camForward = CameraManager.Instance.GetCameraForward();
+                Vector3 camRight = CameraManager.Instance.GetCameraRight();
+
+                // based on cam POV
+                calculatedDirection = (camForward * _moveInputVector.y) + (camRight * _moveInputVector.x);
+            }
+
+            networkInputData._cameraRelativeMoveDir = calculatedDirection.normalized;
+            //networkInputData._movementInput = _moveInputVector;
             networkInputData._isJumpPressed = _isJumpButtonPressed;
             networkInputData._isSprintPressed = _isRunning;
             networkInputData._isPunchOrGrabPressed = Input.GetMouseButton(0);
@@ -1132,13 +1163,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             if (_isAbilityHeld)
             {
                 // while charging, use mouse for aim dir
-                networkInputData._movementInput = Vector2.zero;
+                //networkInputData._movementInput = Vector2.zero;
+                networkInputData._cameraRelativeMoveDir = Vector3.zero;
                 networkInputData._abilityAimDirection = CalculateMouseAimDirection();
             }
             else
             {
                 // otherwise, wasd for normal movement
-                networkInputData._movementInput = _moveInputVector;
+                //networkInputData._movementInput = _moveInputVector;
                 networkInputData._abilityAimDirection = Vector2.zero;
             }
 
@@ -1185,8 +1217,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
     {
         base.Spawned();
 
+        Transform finalCameraTarget = _cameraTarget != null ? _cameraTarget : this.transform;
+
         // link network id to this physical avatar root
-        PlayerRegistry.SetAvatarTransform(Object.InputAuthority, this.transform);
+        PlayerRegistry.SetAvatarTransform(Object.InputAuthority, finalCameraTarget);
 
         // only host/server registers this id into game manager match array
         if (Object.HasStateAuthority && GameManager.Instance != null)
@@ -1196,7 +1230,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
         if (Object.HasInputAuthority)
         {
             Local = this;
-            PlayerRegistry.RegisterLocalPlayerTransform(_rb.transform);
+            PlayerRegistry.RegisterLocalPlayerTransform(finalCameraTarget);
         }
 
         // make it easier to tell which player is which

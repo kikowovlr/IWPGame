@@ -7633,6 +7633,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterComponentLinker
   animatedModelRoot: {fileID: 3426182673854646155}
   physicsPackageRoot: {fileID: 5918829076310247645}
+  visualMeshRoot: {fileID: 7765520045726160071}
   _leftHandDamageDealer: {fileID: 2403587234199024553}
   _rightHandDamageDealer: {fileID: 8873272618532935145}
   _leftHandRb: {fileID: 8672626275528027183}
