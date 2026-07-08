@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Cinemachine;
 using System.Collections.Generic;
+using System;
 
 public class CameraManager : MonoBehaviour
 {
@@ -16,6 +17,11 @@ public class CameraManager : MonoBehaviour
     private int _currentSpectatorIndex = -1;
     private CameraMode _currentMode = CameraMode.StaticOverview;
     private SpectatorViewMode _currentViewMode = SpectatorViewMode.Overview;
+
+    // events
+    public static event Action OnCameraSwapRequested; // flag to know when to trigger vfx
+    public static event Action OnCameraCutExecuted; // flag to know exactly when camera cut occurs
+    private Action _pendingCameraCutAction; 
 
     public enum CameraMode
     {
@@ -161,6 +167,8 @@ public class CameraManager : MonoBehaviour
 
     private void HandleSpectatorInput()
     {
+        if (GameManager.Instance == null) return;
+
         // right click -> toggle spectator mode
         if (Input.GetMouseButtonDown(1))
         {
