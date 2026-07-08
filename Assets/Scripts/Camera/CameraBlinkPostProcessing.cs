@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using System;
 
 public class CameraBlinkPostProcessing : MonoBehaviour
 {
@@ -13,6 +14,12 @@ public class CameraBlinkPostProcessing : MonoBehaviour
 
     private readonly int _blinkProgressID = Shader.PropertyToID("_BlinkProgress");
     private bool _isBlinking = false;
+
+    // getters
+    public bool IsBlinking => _isBlinking;
+
+    // events
+    public static event Action OnPeakDarknessReached; // signals that blinkProgress == 1, screen is completely dark
 
     private void Awake()
     {
@@ -28,18 +35,26 @@ public class CameraBlinkPostProcessing : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        CameraManager.OnCameraSwapRequested += StartBlinkSequence; // starts blink sequence when spectator input detected
+    }
+
+    private void OnDisable()
+    {
+        CameraManager.OnCameraSwapRequested -= StartBlinkSequence;
+    }
+
     /// <summary>
     /// triggers full screen blink, executes cam action at peak darkness
     /// </summary>
-    public void TriggerBlink(System.Action onPeakDarkness)
+    private void StartBlinkSequence()
     {
-        // dont interrupt ongoing blink
-        if (_isBlinking) return;
-
-        StartCoroutine(BlinkRoutine(onPeakDarkness));
+        if (IsBlinking)
+            StartCoroutine(BlinkRoutine());
     }
 
-    private IEnumerator BlinkRoutine(System.Action onPeakDarkness)
+    private IEnumerator BlinkRoutine()
     {
         _isBlinking = true;
         float halfDuration = _blinkDuration * 0.5f;
@@ -59,8 +74,8 @@ public class CameraBlinkPostProcessing : MonoBehaviour
         // ensure perfect darkness milestone
         _blinkMaterial.SetFloat(_blinkProgressID, 0.5f);
 
-        // at peak darkness, swap cameras
-        onPeakDarkness?.Invoke();
+        // signal to mainly camera manager to swap camera when blinkProgress == 1
+        OnPeakDarknessReached?.Invoke();
 
         yield return null; // wait for one frame to snap to diff cam
 

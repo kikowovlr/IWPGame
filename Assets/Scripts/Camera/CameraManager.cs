@@ -19,9 +19,9 @@ public class CameraManager : MonoBehaviour
     private SpectatorViewMode _currentViewMode = SpectatorViewMode.Overview;
 
     // events
-    public static event Action OnCameraSwapRequested; // flag to know when to trigger vfx
-    public static event Action OnCameraCutExecuted; // flag to know exactly when camera cut occurs
-    private Action _pendingCameraCutAction; 
+    public static event Action OnCameraSwapRequested; // flag to signal spectator input for camera swap
+    public static event Action OnCameraCutExecuted; // flag to signal the actual camera swap
+    private Action _pendingCameraCutAction; // holds onto context until screen goes black from blink
 
     public enum CameraMode
     {
@@ -167,24 +167,31 @@ public class CameraManager : MonoBehaviour
 
     private void HandleSpectatorInput()
     {
-        if (GameManager.Instance == null) return;
+        if (GameManager.Instance == null || CameraBlinkPostProcessing.Instance.IsBlinking) return; // dont allow toggle if blinking is active
 
         // right click -> toggle spectator mode
         if (Input.GetMouseButtonDown(1))
         {
-            if (_currentViewMode == SpectatorViewMode.Overview)
+            OnCameraSwapRequested?.Invoke(); // signal to close eye/blink
+
+            // holds context until this event is called
+            _pendingCameraCutAction = () =>
             {
-                // switch to player tracking mode
-                _currentViewMode = SpectatorViewMode.Player;
-                _currentSpectatorIndex = 0; // reset loop tracking
-                SpectateFirstAvailablePlayer();
-            }
-            else
-            {
-                // switch back to standard bird's eye view
-                _currentViewMode = SpectatorViewMode.Overview;
-                SetCameraState(CameraMode.StaticOverview);
-            }
+                if (_currentViewMode == SpectatorViewMode.Overview)
+                {
+                    // switch to player tracking mode
+                    _currentViewMode = SpectatorViewMode.Player;
+                    _currentSpectatorIndex = 0; // reset loop tracking
+                    SpectateFirstAvailablePlayer();
+                }
+                else
+                {
+                    // switch back to standard bird's eye view
+                    _currentViewMode = SpectatorViewMode.Overview;
+                    SetCameraState(CameraMode.StaticOverview);
+                }
+            };
+
             return; // prevent execution cross-over on this frame
         }
 
@@ -193,13 +200,39 @@ public class CameraManager : MonoBehaviour
         {
             if (_currentViewMode == SpectatorViewMode.Player)
             {
-                CycleThroughLivingPlayers();
+                OnCameraSwapRequested?.Invoke(); // start closing
+
+                // holds context until this event is called
+                _pendingCameraCutAction = () =>
+                {
+                    CycleThroughLivingPlayers();
+                };
             }
             else if (_currentViewMode == SpectatorViewMode.Overview)
             {
-                // if more static cams added, cycle them here
-                SetCameraState(CameraMode.StaticOverview);
+                OnCameraSwapRequested?.Invoke(); // start closing
+
+                // holds context until this event is called
+                _pendingCameraCutAction = () =>
+                {
+                    // if more static cams added, cycle them here
+                    SetCameraState(CameraMode.StaticOverview);
+                };
             }
+        }
+    }
+
+    /// <summary>
+    /// called when blink covers 100% of viewport (blink progress == 1)
+    /// </summary>
+    private void ExecutePendingCameraCut()
+    {
+        if (_pendingCameraCutAction != null)
+        {
+            _pendingCameraCutAction.Invoke(); // execute camera switch
+            _pendingCameraCutAction = null; // clear container
+
+            OnCameraCutExecuted?.Invoke(); // tells shader to open eye (blink progress to 0)
         }
     }
 
