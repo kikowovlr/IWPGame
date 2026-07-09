@@ -11,6 +11,7 @@ public class CameraBlinkPostProcessing : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private float _blinkDuration = 0.15f; // total time for open and close sequence
+    [SerializeField] private float _holdDuration = 0.1f;
 
     private readonly int _blinkProgressID = Shader.PropertyToID("_BlinkProgress");
     private bool _isBlinking = false;
@@ -50,7 +51,7 @@ public class CameraBlinkPostProcessing : MonoBehaviour
     /// </summary>
     private void StartBlinkSequence()
     {
-        if (IsBlinking)
+        if (!IsBlinking)
             StartCoroutine(BlinkRoutine());
     }
 
@@ -66,25 +67,25 @@ public class CameraBlinkPostProcessing : MonoBehaviour
             elapsed += Time.deltaTime;
 
             // map elapsed time to blink progress
-            float progress = Mathf.Lerp(0f, 0.5f, elapsed/halfDuration);
+            float progress = Mathf.Lerp(0f, 1f, elapsed/halfDuration);
             _blinkMaterial.SetFloat(_blinkProgressID, progress);
             yield return null;
         }
 
         // ensure perfect darkness milestone
-        _blinkMaterial.SetFloat(_blinkProgressID, 0.5f);
+        _blinkMaterial.SetFloat(_blinkProgressID, 1f);
 
         // signal to mainly camera manager to swap camera when blinkProgress == 1
         OnPeakDarknessReached?.Invoke();
 
-        yield return null; // wait for one frame to snap to diff cam
+        yield return new WaitForSeconds(_holdDuration); // wait for hold duration before opening
 
         // opening
         elapsed = 0f;
         while (elapsed < halfDuration)
         {
             elapsed += Time.deltaTime;
-            float progress = Mathf.Lerp(0.5f, 1f, elapsed / halfDuration);
+            float progress = Mathf.Lerp(1f, 0f, elapsed / halfDuration);
             _blinkMaterial.SetFloat(_blinkProgressID, progress);
             yield return null;
         }

@@ -87,12 +87,16 @@ public class CameraManager : MonoBehaviour
         // listen to local player spawn
         PlayerRegistry.OnLocalPlayerSpawned += HandleLocalPlayerSpawned;
         PlayerEliminationHandler.OnPlayerSpectatorReady += HandlePlayerSpectatorReady;
+        CameraBlinkPostProcessing.OnPeakDarknessReached += ExecutePendingCameraCut;
+        PlayerEliminationHandler.OnPlayerEliminated += HandleTargetEliminated;
     }
 
     private void OnDisable()
     {
         PlayerRegistry.OnLocalPlayerSpawned -= HandleLocalPlayerSpawned;
         PlayerEliminationHandler.OnPlayerSpectatorReady -= HandlePlayerSpectatorReady;
+        CameraBlinkPostProcessing.OnPeakDarknessReached -= ExecutePendingCameraCut;
+        PlayerEliminationHandler.OnPlayerEliminated -= HandleTargetEliminated;
     }
 
     private void Update()
@@ -162,16 +166,29 @@ public class CameraManager : MonoBehaviour
     {
         // default to static overview when first entered spectator mode
         if (!handler.Object.HasInputAuthority) return;
-        SetCameraState(CameraMode.StaticOverview);
+
+        OnCameraSwapRequested?.Invoke();
+
+        _pendingCameraCutAction = () =>
+        {
+            _currentViewMode = SpectatorViewMode.Overview;
+            SetCameraState(CameraMode.StaticOverview);
+        };
     }
 
     private void HandleSpectatorInput()
     {
         if (GameManager.Instance == null || CameraBlinkPostProcessing.Instance.IsBlinking) return; // dont allow toggle if blinking is active
 
+        var livingPlayerIDs = GameManager.Instance.GetLivingPlayerIDs();
+        int livingCount = livingPlayerIDs != null ? livingPlayerIDs.Count : 0;
+
         // right click -> toggle spectator mode
         if (Input.GetMouseButtonDown(1))
         {
+            // if trying to switch but no players alive, dont switch
+            if (_currentViewMode == SpectatorViewMode.Overview && livingCount == 0) return;
+
             OnCameraSwapRequested?.Invoke(); // signal to close eye/blink
 
             // holds context until this event is called
@@ -200,6 +217,8 @@ public class CameraManager : MonoBehaviour
         {
             if (_currentViewMode == SpectatorViewMode.Player)
             {
+                if (livingCount <= 1) return;
+
                 OnCameraSwapRequested?.Invoke(); // start closing
 
                 // holds context until this event is called
@@ -239,6 +258,8 @@ public class CameraManager : MonoBehaviour
     private void CycleThroughLivingPlayers()
     {
         var livingPlayerIDs = GameManager.Instance.GetLivingPlayerIDs();
+
+        // if no one is alive, fall back to overview
         if (livingPlayerIDs == null || livingPlayerIDs.Count == 0)
         {
             // if everyone is dead, use static view
@@ -249,22 +270,37 @@ public class CameraManager : MonoBehaviour
 
         // cycle through spectator cams
         // loop through to find valid transform
-        for (int i = 0; i < livingPlayerIDs.Count; i++)
-        {
-            _currentSpectatorIndex = (_currentSpectatorIndex + 1) % livingPlayerIDs.Count;
-            Fusion.PlayerRef targetID = livingPlayerIDs[_currentSpectatorIndex];
+        int currentIndex = -1;
 
-            Transform targetTransform = PlayerRegistry.GetAvatarTransform(targetID);
-            if (targetTransform != null)
+        // look up current target pos in new list
+        if (_spectatorCam.Follow != null)
+        {
+            // find wat player we are spectating ow
+            for (int i = 0; i < livingPlayerIDs.Count; i++)
             {
-                SpectateTarget(targetTransform);
-                return;
+                if (PlayerRegistry.GetAvatarTransform(livingPlayerIDs[i]) == _spectatorCam.Follow)
+                {
+                    currentIndex = i;
+                    break;
+                }
             }
         }
 
-        // if looped through and cant find a valid target, switch to overview
-        _currentViewMode = SpectatorViewMode.Overview;
-        SetCameraState(CameraMode.StaticOverview);
+        // loop forward from current spot to find next valid target
+        int nextIndex = (currentIndex + 1) % livingPlayerIDs.Count;
+        Fusion.PlayerRef nextTargetID = livingPlayerIDs[nextIndex];
+
+        Transform targetTransform = PlayerRegistry.GetAvatarTransform(nextTargetID);
+        if (targetTransform != null)
+        {
+            _currentSpectatorIndex = nextIndex; 
+            SpectateTarget(targetTransform);
+        }
+        else
+        {
+            _currentViewMode = SpectatorViewMode.Overview;
+            SetCameraState(CameraMode.StaticOverview);
+        }
     }
 
     private void SpectateFirstAvailablePlayer()
@@ -290,5 +326,10 @@ public class CameraManager : MonoBehaviour
 
             SetCameraState(CameraMode.SpectatingPlayer);
         }
+    }
+
+    private void HandleTargetEliminated(PlayerEliminationHandler handler)
+    {
+        //if (Camer)
     }
 }

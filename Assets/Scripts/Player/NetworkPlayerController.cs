@@ -522,7 +522,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             {
                 // stop horizontal sliding on hills
                 _rb.linearVelocity = new Vector3(0f, _rb.linearVelocity.y, 0f);
-                _rb.angularVelocity = Vector3.zero;
+                //_rb.angularVelocity = Vector3.zero;
 
                 // counteract gravity
                 _rb.AddForce(-Physics.gravity * _rb.mass, ForceMode.Force);
@@ -537,7 +537,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             }
         }
 
-        _rb.angularVelocity = Vector3.MoveTowards(_rb.angularVelocity, Vector3.zero, _brakeStrength * Runner.DeltaTime);
+        //_rb.angularVelocity = Vector3.MoveTowards(_rb.angularVelocity, Vector3.zero, _brakeStrength * Runner.DeltaTime);
     }
 
     public override void Render()
