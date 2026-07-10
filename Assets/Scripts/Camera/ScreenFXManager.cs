@@ -2,19 +2,25 @@ using System.Collections;
 using UnityEngine;
 using System;
 
-public class CameraBlinkPostProcessing : MonoBehaviour
+public class ScreenFXManager : MonoBehaviour
 {
-    public static CameraBlinkPostProcessing Instance { get; private set; }
+    public static ScreenFXManager Instance { get; private set; }
 
-    [Header("References")]
+    [Header("Blink Settings")]
     [SerializeField] private Material _blinkMaterial;
-
-    [Header("Settings")]
     [SerializeField] private float _blinkDuration = 0.15f; // total time for open and close sequence
     [SerializeField] private float _holdDuration = 0.1f;
 
     private readonly int _blinkProgressID = Shader.PropertyToID("_BlinkProgress");
     private bool _isBlinking = false;
+
+    [Header("Grayscale Settings")]
+    [SerializeField] private Material _blackAndWhiteMaterial;
+    [SerializeField] private float _grayFadeDuration = 3.0f;
+
+    private float _targetGrayscale = 0f;
+    private float _currentGrayscale = 0f;
+    private readonly int _grayscaleIntensityID = Shader.PropertyToID("_Intensity");
 
     // getters
     public bool IsBlinking => _isBlinking;
@@ -29,21 +35,53 @@ public class CameraBlinkPostProcessing : MonoBehaviour
         else
             Destroy(gameObject);
 
-        // reset shader to fully open (0)
-        if (_blinkMaterial != null)
-        {
-            _blinkMaterial.SetFloat(_blinkProgressID, 0f);
-        }
+        ResetMaterials();
     }
 
     private void OnEnable()
     {
         CameraManager.OnCameraSwapRequested += StartBlinkSequence; // starts blink sequence when spectator input detected
+        PlayerEliminationHandler.OnPlayerEliminated += HandleLocalPlayerEliminated;
+        PlayerEliminationHandler.OnPlayerSpectatorReady += HandleSpectatorReady;
     }
 
     private void OnDisable()
     {
         CameraManager.OnCameraSwapRequested -= StartBlinkSequence;
+        PlayerEliminationHandler.OnPlayerEliminated -= HandleLocalPlayerEliminated;
+        PlayerEliminationHandler.OnPlayerSpectatorReady -= HandleSpectatorReady;
+    }
+
+    private void Update()
+    {
+        // animate b&w transition
+        if (!Mathf.Approximately(_currentGrayscale, _targetGrayscale))
+        {
+            _currentGrayscale = Mathf.MoveTowards(_currentGrayscale, _targetGrayscale, Time.deltaTime / _grayFadeDuration);
+            if (_blackAndWhiteMaterial != null)
+                _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, Mathf.Clamp01(_currentGrayscale));
+        }
+    }
+
+    private void HandleLocalPlayerEliminated(PlayerEliminationHandler handler)
+    {
+        // turn gray when player dies
+        if (handler.Object.HasInputAuthority)
+        {
+            _targetGrayscale = 1f; // for update to start blending b&w
+        }    
+    }
+
+    private void ResetMaterials()
+    {
+        _currentGrayscale = 0f;
+        _targetGrayscale = 0f;
+
+        if (_blinkMaterial != null) 
+            _blinkMaterial.SetFloat(_blinkProgressID, 0f);
+
+        if (_blackAndWhiteMaterial != null) 
+            _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, 0f);
     }
 
     /// <summary>
@@ -95,12 +133,25 @@ public class CameraBlinkPostProcessing : MonoBehaviour
         _isBlinking = false;
     }
 
+    private void HandleSpectatorReady(PlayerEliminationHandler handler)
+    {
+        // remove black and white for this player
+        if (handler.Object.HasInputAuthority)
+        {
+            _currentGrayscale = 0f;
+            _targetGrayscale = 0f;
+
+            if (_blackAndWhiteMaterial != null)
+                _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, 0f);
+        }
+    }
+
     private void OnDestroy()
     {
         // reset shader on exit
         if (_blinkMaterial != null)
-        {
             _blinkMaterial.SetFloat(_blinkProgressID, 0f);
-        }
+        if (_blackAndWhiteMaterial != null)
+            _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, 0f);
     }
 }

@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Cinemachine;
 using System.Collections.Generic;
 using System;
+using Fusion;
 
 public class CameraManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private CinemachineCamera _staticSpectatorCam; // static cam looking down at the arena
     [SerializeField] private CinemachineCamera _spectatorCam; // reusable orbital cam for spectating specific players
     [SerializeField] private Camera _myLocalCamera;
+    [SerializeField] private CinemachineInputAxisController _axisController;
 
     private int _currentSpectatorIndex = -1;
     private CameraMode _currentMode = CameraMode.StaticOverview;
@@ -87,7 +89,7 @@ public class CameraManager : MonoBehaviour
         // listen to local player spawn
         PlayerRegistry.OnLocalPlayerSpawned += HandleLocalPlayerSpawned;
         PlayerEliminationHandler.OnPlayerSpectatorReady += HandlePlayerSpectatorReady;
-        CameraBlinkPostProcessing.OnPeakDarknessReached += ExecutePendingCameraCut;
+        ScreenFXManager.OnPeakDarknessReached += ExecutePendingCameraCut;
         PlayerEliminationHandler.OnPlayerEliminated += HandleTargetEliminated;
     }
 
@@ -95,7 +97,7 @@ public class CameraManager : MonoBehaviour
     {
         PlayerRegistry.OnLocalPlayerSpawned -= HandleLocalPlayerSpawned;
         PlayerEliminationHandler.OnPlayerSpectatorReady -= HandlePlayerSpectatorReady;
-        CameraBlinkPostProcessing.OnPeakDarknessReached -= ExecutePendingCameraCut;
+        ScreenFXManager.OnPeakDarknessReached -= ExecutePendingCameraCut;
         PlayerEliminationHandler.OnPlayerEliminated -= HandleTargetEliminated;
     }
 
@@ -106,6 +108,8 @@ public class CameraManager : MonoBehaviour
         {
             HandleSpectatorInput();
         }
+
+        HandleGameplayCameraLock();
     }
 
     /// <summary>
@@ -178,7 +182,7 @@ public class CameraManager : MonoBehaviour
 
     private void HandleSpectatorInput()
     {
-        if (GameManager.Instance == null || CameraBlinkPostProcessing.Instance.IsBlinking) return; // dont allow toggle if blinking is active
+        if (GameManager.Instance == null || ScreenFXManager.Instance.IsBlinking) return; // dont allow toggle if blinking is active
 
         var livingPlayerIDs = GameManager.Instance.GetLivingPlayerIDs();
         int livingCount = livingPlayerIDs != null ? livingPlayerIDs.Count : 0;
@@ -229,6 +233,8 @@ public class CameraManager : MonoBehaviour
             }
             else if (_currentViewMode == SpectatorViewMode.Overview)
             {
+                if (_currentMode == CameraMode.StaticOverview) return; // if alrdy looking at overview cam, dont change
+
                 OnCameraSwapRequested?.Invoke(); // start closing
 
                 // holds context until this event is called
@@ -330,6 +336,48 @@ public class CameraManager : MonoBehaviour
 
     private void HandleTargetEliminated(PlayerEliminationHandler handler)
     {
-        //if (Camer)
+        if (_currentMode != CameraMode.SpectatingPlayer || _spectatorCam.Follow == null) return;
+
+        PlayerRef deadPlayerId = handler.Object.InputAuthority;
+        Transform deadPlayerTransform = PlayerRegistry.GetAvatarTransform(deadPlayerId);
+
+        // check if the player that js died is the one that our camera is following
+        if (_spectatorCam.Follow == deadPlayerTransform)
+        {
+            Debug.Log($"[CameraManager] The player we are currently spectating ({deadPlayerId}) was eliminated! Triggering auto-swap.");
+            OnCameraSwapRequested?.Invoke();
+
+            _pendingCameraCutAction = () =>
+            {
+                CycleThroughLivingPlayers();
+            };
+        }
+    }
+
+    private void HandleGameplayCameraLock()
+    {
+        if (_axisController == null) return;
+
+        // only lock if gameplay mode
+        if (_currentMode == CameraMode.Gameplay)
+        {
+            Transform localTransform = PlayerRegistry.LocalPlayerTransform;
+
+            if (localTransform != null)
+            {
+                // check interface
+                if (localTransform.TryGetComponent(out ICameraLockable lockableEntity))
+                {
+                    _axisController.enabled = !lockableEntity.IsCameraRotationLocked;
+                    return;
+                }
+            }
+        }
+
+        // ensure input is enabled if we arent in gameplay
+        if (!_axisController.enabled && _currentMode != CameraMode.Gameplay)
+        {
+            _axisController.enabled = true;
+        }
     }
 }

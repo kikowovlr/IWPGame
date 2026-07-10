@@ -9,12 +9,14 @@ public static class PlayerRegistry
     public static event Action<Transform> OnLocalPlayerSpawned;
     public static CinemachineBrain SceneBrain { get; private set; }
     public static CinemachineCamera SceneVirtualCamera { get; private set; }
+    public static Transform LocalPlayerTransform { get; private set; }
 
     // local client lookup map matching network ids to the player root obj 
     private static readonly Dictionary<PlayerRef, Transform> _playerAvatarTransforms = new Dictionary<PlayerRef, Transform>();
 
     public static void RegisterLocalPlayerTransform(Transform transform)
     {
+        LocalPlayerTransform = transform;
         OnLocalPlayerSpawned?.Invoke(transform);
     }
 

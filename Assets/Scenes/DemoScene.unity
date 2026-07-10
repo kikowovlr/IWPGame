@@ -550,8 +550,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Status: '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 550ed645df69b8b4e85ee21f57ea915b, type: 2}
+  m_sharedMaterial: {fileID: 2878009197384601229, guid: 550ed645df69b8b4e85ee21f57ea915b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1719,6 +1719,7 @@ MonoBehaviour:
   _staticSpectatorCam: {fileID: 1638088877}
   _spectatorCam: {fileID: 245700449}
   _myLocalCamera: {fileID: 0}
+  _axisController: {fileID: 0}
 --- !u!4 &1251434095
 Transform:
   m_ObjectHideFlags: 0
@@ -1751,6 +1752,66 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraBlinkPostProcessing
   _blinkMaterial: {fileID: 2100000, guid: 15b27a6d524e6b747adc63286161259a, type: 2}
   _blinkDuration: 0.15
+  _holdDuration: 0.1
+  _blackAndWhiteMaterial: {fileID: 2100000, guid: 850260ea518c02e4a9710a36b22de038, type: 2}
+  _grayFadeDuration: 3
+--- !u!1001 &1381636202
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.1539
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.61
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.18726
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 377841917181263231, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1815944182259241662, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_Name
+      value: NetworkRunnerPrefab
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
 --- !u!1 &1629073304
 GameObject:
   m_ObjectHideFlags: 0
@@ -2079,8 +2140,7 @@ MonoBehaviour:
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
-  NetworkedBehaviours:
-  - {fileID: 1746812895}
+  NetworkedBehaviours: []
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1746812895
 MonoBehaviour:
@@ -2094,6 +2154,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6781c40bad7a0747ba9c6a5ce8d9efe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  _matchSettings: {fileID: 0}
+  _CurrentRoundNumber: 0
+  _CurrentRoundState: 0
 --- !u!4 &1746812896
 Transform:
   m_ObjectHideFlags: 0
@@ -2751,3 +2814,4 @@ SceneRoots:
   - {fileID: 389799219}
   - {fileID: 2043201039}
   - {fileID: 2114161990304537783}
+  - {fileID: 1381636202}

@@ -211,14 +211,14 @@ public class RamAbilitySO : AbilitySO
 
         // find if total damage taken is enough to break out of skill
         float totalTrackedDamage = player.Registry.Health.GetAccumulatedDamage() + mitigatedDamage;
-        Utils.DebugLog($"[Damage Check] Hit! IsCharging: {state._isCharging}, TotalTracked: {totalTrackedDamage}");
         if (totalTrackedDamage >= _maxDamageBeforeCancel)
         {
             state._isCharging = false;
             state._isDashing = false;
 
-            player.Animator.SetTrigger(_releaseTrigger);
+            player.IsCameraRotationLocked = false;
 
+            player.Animator.SetTrigger(_releaseTrigger);
             state._isVisualShown = false;
 
             if (player.Registry.Status != null)
@@ -284,11 +284,17 @@ public class RamAbilitySO : AbilitySO
         {
             // block movement but allow rotation
             player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockCombat;
+            player.IsCameraRotationLocked = true;
         }
         else if (state._isDashing)
         {
             // block movement and rotation
             player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+            player.IsCameraRotationLocked = false;
+        }
+        else
+        {
+            player.IsCameraRotationLocked = false;
         }
 
         if (!player.Object.HasStateAuthority) return;

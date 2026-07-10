@@ -17,7 +17,7 @@ public enum InputRestrictions
     BlockEverything = ~0       // links all flags together
 }
 
-public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
+public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLockable
 {
     public static NetworkPlayerController Local { get; set; }
 
@@ -141,6 +141,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     [Header("Camera Target")]
     [SerializeField] private Transform _cameraTarget;
+    public bool IsCameraRotationLocked { get; set; }
 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
@@ -237,6 +238,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     public override void FixedUpdateNetwork()
     {
+        CheckForGround();
+
         // only host can do this
         if (Object.HasStateAuthority) // means we are controlling object
         {
@@ -249,7 +252,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
             TargetSpeedMultiplier = 1.0f; // reset each frame, status effects, etc, will continuously overwrite this during ticks
 
-            CheckForGround();
 
             if (!IsKnockedOut)
                 ApplyGravity();
@@ -638,17 +640,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
 
     private Vector3 CalculateMoveDirection(NetworkInputData networkInputData)
     {
-        // get cam dir vectors and flatten y
-        //Vector3 camForward = Camera.main.transform.forward;
-        //Vector3 camRight = Camera.main.transform.right;
-        //camForward.y = 0f;
-        //camRight.y = 0f;
-        //camForward.Normalize();
-        //camRight.Normalize();
-
-        //// movement dir vector based on cam's POV
-        //Vector3 rawMoveDir = (camForward * networkInputData._movementInput.y) + (camRight * networkInputData._movementInput.x);
-
         Vector3 rawMoveDir = networkInputData._cameraRelativeMoveDir;
 
         // if grounded, tilt dir to match slope of ground
@@ -1139,7 +1130,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             }
 
             networkInputData._cameraRelativeMoveDir = calculatedDirection.normalized;
-            //networkInputData._movementInput = _moveInputVector;
             networkInputData._isJumpPressed = _isJumpButtonPressed;
             networkInputData._isSprintPressed = _isRunning;
             networkInputData._isPunchOrGrabPressed = Input.GetMouseButton(0);
@@ -1163,14 +1153,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft
             if (_isAbilityHeld)
             {
                 // while charging, use mouse for aim dir
-                //networkInputData._movementInput = Vector2.zero;
                 networkInputData._cameraRelativeMoveDir = Vector3.zero;
                 networkInputData._abilityAimDirection = CalculateMouseAimDirection();
             }
             else
             {
                 // otherwise, wasd for normal movement
-                //networkInputData._movementInput = _moveInputVector;
                 networkInputData._abilityAimDirection = Vector2.zero;
             }
 

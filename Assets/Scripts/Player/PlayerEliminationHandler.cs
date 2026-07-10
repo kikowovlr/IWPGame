@@ -81,7 +81,10 @@ public class PlayerEliminationHandler : NetworkBehaviour
     private void OnEliminationStatusChanged()
     {
         if (IsEliminated)
+        {
+            OnPlayerEliminated?.Invoke(this);
             HandleLocalElimination();
+        }
     }
 
     /// <summary>
@@ -93,9 +96,6 @@ public class PlayerEliminationHandler : NetworkBehaviour
         {
 
         }
-
-        // TODO: trigger grayed out screen - post processing
-        // TODO: switch to spectator camera
         // TODO: show spectator UI
 
         _playerController.ActiveRestrictions = InputRestrictions.BlockEverything;
