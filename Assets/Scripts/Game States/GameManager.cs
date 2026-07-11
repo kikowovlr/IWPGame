@@ -13,16 +13,16 @@ public class GameManager : NetworkBehaviour
     [Networked, Capacity(MAX_PLAYERS)]
     private NetworkArray<PlayerRef> _activePlayersInRound => default;
     private HashSet<PlayerRef> _localLivingPlayers = new HashSet<PlayerRef>(); // local tracking
-    [Networked] InputRestrictions GlobalRestrictions { get; private set; } = InputRestrictions.None;
+    [Networked] public InputRestrictions GlobalRestrictions { get; private set; } = InputRestrictions.None;
 
     // match
     [SerializeField] private MatchSettings _matchSettings;
     public MatchSettings Settings => _matchSettings;
 
     // rounds
-    [Networked] public int CurrentRoundNumber { get; private set; }
+    [Networked] public int CurrentRoundNumber { get; private set; } = 0;
     [Networked, OnChangedRender(nameof(OnRoundStateChanged))] public RoundState CurrentRoundState { get; private set; }
-
+    private RoundState _lastTrackedState = RoundState.Setup;
     [Networked] private TickTimer StateTimer { get; set; }
 
     // state machine tracking dictionary
@@ -72,11 +72,27 @@ public class GameManager : NetworkBehaviour
             }
         }
 
+        _lastTrackedState = CurrentRoundState;
+        if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState initialRoundState))
+        {
+            Debug.Log($"[MATCH LOCAL] -> Initializing First Frame State: {CurrentRoundState}");
+            initialRoundState.OnStateEnter(this);
+        }
+
         // start game in setup state
         if (Object.HasStateAuthority)
         {
-            TransitionToState(RoundState.Setup, _matchSettings.SetUpDuration);
+            TransitionToState(RoundState.Setup);
         }
+
+        //// TODO: FOR DEBUGGING - SKIPS SETUP
+        //_lastTrackedState = RoundState.RoundActive;
+
+        //if (Object.HasStateAuthority)
+        //{
+        //    SetGlobalInputRestrictions(InputRestrictions.None);
+        //    TransitionToState(RoundState.RoundActive);
+        //}
     }
 
     public override void FixedUpdateNetwork()
@@ -93,30 +109,32 @@ public class GameManager : NetworkBehaviour
     /// <summary>
     /// sets new state, ticks state timer down
     /// </summary>
-    public void TransitionToState(RoundState newState, float duration)
+    public void TransitionToState(RoundState newState, float duration = 0f)
     {
         if (!Object.HasStateAuthority) return;
 
-        if (CurrentRoundState != newState)
-        {
-            if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState oldState))
-            {
-                oldState.OnStateExit(this);
-            }
-        }
-
         CurrentRoundState = newState;
         StateTimer = duration > 0f ? TickTimer.CreateFromSeconds(Runner, duration) : TickTimer.None;
-
-        if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState nextState))
-        {
-            nextState.OnStateEnter(this);
-        }
     }
 
     private void OnRoundStateChanged()
     {
-        Debug.Log($"[CLIENT] State changed to: {CurrentRoundState}");
+        if (_lastTrackedState != CurrentRoundState)
+        {
+            if (_stateMachine.TryGetValue(_lastTrackedState, out IRoundState oldState))
+            {
+                Debug.Log($"[MATCH LOCAL] -> Exiting state: {_lastTrackedState}");
+                oldState.OnStateExit(this);
+            }
+
+            if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState nextState))
+            {
+                Debug.Log($"[MATCH LOCAL] -> Entering state: {CurrentRoundState}");
+                nextState.OnStateEnter(this);
+            }
+
+            _lastTrackedState = CurrentRoundState;
+        }
     }
 
     /// <summary>
@@ -210,5 +228,11 @@ public class GameManager : NetworkBehaviour
     {
         if (Object.HasStateAuthority)
             GlobalRestrictions = restrictions;
+    }
+
+    public void ResetStateTimer(float duration)
+    {
+        if (Object.HasStateAuthority)
+            StateTimer = duration > 0f ? TickTimer.CreateFromSeconds(Runner, duration) : TickTimer.None;
     }
 }

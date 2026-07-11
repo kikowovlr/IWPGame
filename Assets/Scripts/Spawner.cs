@@ -29,8 +29,7 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 
     private void Start()
     {
-        // Default UI to initializing state
-        ShowStatus("Initializing...");
+
     }
 
     public void ShowStatus(string message)

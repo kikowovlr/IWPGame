@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd8db8bb5cb966d4982484fa9309299a, type: 3}
   m_Name: MatchSettings
   m_EditorClassIdentifier: Assembly-CSharp::MatchSettings
-  _setupDuration: 10
+  _setupDuration: 4
   _countdownDuration: 3.5
   _roundOverBufferDuration: 4
   _crownsToWinMatch: 3

@@ -16,6 +16,12 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private Camera _myLocalCamera;
     [SerializeField] private CinemachineInputAxisController _axisController;
 
+    [Header("Camera Settings")]
+    [SerializeField] private CinemachineBlendDefinition _gameplayIntroBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.EaseInOut, 1.5f);
+    [SerializeField] private CinemachineBlendDefinition _cutCameraBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.Cut, 0f);
+    public CinemachineBlendDefinition GameplayIntroBlend => _gameplayIntroBlend;
+    public CinemachineBlendDefinition CutCameraBlend => _cutCameraBlend;
+
     private int _currentSpectatorIndex = -1;
     private CameraMode _currentMode = CameraMode.StaticOverview;
     private SpectatorViewMode _currentViewMode = SpectatorViewMode.Overview;
@@ -163,7 +169,12 @@ public class CameraManager : MonoBehaviour
     {
         _gameplayCam.Follow = target;
         _gameplayCam.LookAt = target;
-        SetCameraState(CameraMode.Gameplay);
+
+        // if in setup state, start in static overview
+        if (GameManager.Instance != null && GameManager.Instance.CurrentRoundState == RoundState.Setup)
+            SetCameraState(CameraMode.StaticOverview);
+        else
+            SetCameraState(CameraMode.Gameplay);
     }
 
     private void HandlePlayerSpectatorReady(PlayerEliminationHandler handler)
@@ -358,26 +369,53 @@ public class CameraManager : MonoBehaviour
     {
         if (_axisController == null) return;
 
-        // only lock if gameplay mode
-        if (_currentMode == CameraMode.Gameplay)
-        {
+        bool shouldLockCamera = false;
+
             Transform localTransform = PlayerRegistry.LocalPlayerTransform;
 
             if (localTransform != null)
             {
-                // check interface
-                if (localTransform.TryGetComponent(out ICameraLockable lockableEntity))
+                // check interface in parent
+                ICameraLockable lockableEntity = localTransform.GetComponentInParent<ICameraLockable>();
+
+                if (lockableEntity != null)
                 {
-                    _axisController.enabled = !lockableEntity.IsCameraRotationLocked;
-                    return;
+                    shouldLockCamera = lockableEntity.IsCameraRotationLocked;
                 }
             }
-        }
 
+        //// ensure input is enabled if we arent in gameplay
+        //if (!_axisController.enabled && _currentMode != CameraMode.Gameplay)
+        //{
+        //    _axisController.enabled = true;
+        //}
+
+        SetCinemachineInputLocked(shouldLockCamera);
+    }
+
+    private void SetCinemachineInputLocked(bool isLocked)
+    {
         // ensure input is enabled if we arent in gameplay
-        if (!_axisController.enabled && _currentMode != CameraMode.Gameplay)
+        _axisController.enabled = !isLocked;
+
+        if (isLocked)
         {
-            _axisController.enabled = true;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
+        else
+        {
+            if (_currentMode == CameraMode.Gameplay)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+        }
+    }
+
+    public void SetDefaultBlendStyle(CinemachineBlendDefinition blend)
+    {
+        if (_brain != null)
+            _brain.DefaultBlend = blend;
     }
 }

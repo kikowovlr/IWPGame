@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 
 // state enums to track round state
@@ -25,11 +26,20 @@ public interface IRoundState
 public class SetupState : IRoundState
 {
     public RoundState StateType => RoundState.Setup;
+    private bool _hasStartedTimer = false;
 
     public void OnStateEnter(GameManager manager)
     {
+        _hasStartedTimer = false;
         // TODO: Ensure network synchronization before kicking off countdown
         Debug.Log("[MATCH ENGINE] -> Entered Setup State.");
+
+        // all players on overview camera mode on scene boot
+        if (CameraManager.Instance != null)
+        {
+            CameraManager.Instance.SetDefaultBlendStyle(CameraManager.Instance.CutCameraBlend);
+            CameraManager.Instance.SetCameraState(CameraManager.CameraMode.StaticOverview);
+        }
 
         // increment round - managed by server
         if (manager.Object.HasStateAuthority)
@@ -44,6 +54,12 @@ public class SetupState : IRoundState
         // TODO: test
         if (manager.GetTotalRegisteredCount() < 2)
             return;
+
+        if (!_hasStartedTimer)
+        {
+            manager.ResetStateTimer(manager.Settings.SetUpDuration);
+            _hasStartedTimer = true;
+        }
 
         // once setup timer finishes, transition to next state
         if (manager.IsStateTimerExpired)
@@ -65,14 +81,33 @@ public class CountdownState : IRoundState
 
     public void OnStateEnter(GameManager manager)
     {
-    }
+        Debug.Log("[MATCH ENGINE] -> Enter Countdown State.");
 
-    public void OnStateExit(GameManager manager)
-    {
+        if (CameraManager.Instance != null)
+        {
+            CameraManager.Instance.SetDefaultBlendStyle(CameraManager.Instance.GameplayIntroBlend);
+            CameraManager.Instance.SetCameraState(CameraManager.CameraMode.Gameplay);
+        }
     }
 
     public void OnStateUpdate(GameManager manager)
     {
+        if (manager.IsStateTimerExpired)
+        {
+            manager.TransitionToState(RoundState.RoundActive);
+        }
+    }
+
+    public void OnStateExit(GameManager manager)
+    {
+        Debug.Log("[MATCH ENGINE] -> Exit Countdown State.");
+
+        // allow controls
+        if (manager.Object.HasStateAuthority)
+            manager.SetGlobalInputRestrictions(InputRestrictions.None);
+
+        if (CameraManager.Instance != null)
+            CameraManager.Instance.SetDefaultBlendStyle(CameraManager.Instance.CutCameraBlend);
     }
 }
 

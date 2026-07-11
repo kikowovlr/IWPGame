@@ -12,6 +12,7 @@ public enum InputRestrictions
     BlockCombat = 1 << 1,  // 2
     BlockAbilities = 1 << 2,  // 4
     BlockRotation = 1 << 3, // 8
+    BlockSeperateCameraMovement = 1 << 4,
 
     // quick-access group combinations
     BlockEverything = ~0       // links all flags together
@@ -141,7 +142,13 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
     [Header("Camera Target")]
     [SerializeField] private Transform _cameraTarget;
-    public bool IsCameraRotationLocked { get; set; }
+    public bool IsCameraRotationLocked
+    {
+        get
+        {
+            return IsInputBlocked(InputRestrictions.BlockSeperateCameraMovement);
+        }
+    }
 
     // getters
     public bool IsKnockedOut => _isKnockedOut;
@@ -262,6 +269,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
         // reset input restrictions
         ActiveRestrictions = InputRestrictions.None;
+
+        // check game manager for global restrictions
+        if (GameManager.Instance != null)
+            ActiveRestrictions |= GameManager.Instance.GlobalRestrictions;
 
         // holds the target anim float
         float targetAnimSpeed = 0f;

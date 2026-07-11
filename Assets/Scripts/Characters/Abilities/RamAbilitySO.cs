@@ -216,8 +216,6 @@ public class RamAbilitySO : AbilitySO
             state._isCharging = false;
             state._isDashing = false;
 
-            player.IsCameraRotationLocked = false;
-
             player.Animator.SetTrigger(_releaseTrigger);
             state._isVisualShown = false;
 
@@ -285,18 +283,12 @@ public class RamAbilitySO : AbilitySO
             // block movement but allow rotation
             InputRestrictions currRestricitons = InputRestrictions.BlockMovement | InputRestrictions.BlockCombat;
             player.AddInputRestriction(currRestricitons);
-            player.IsCameraRotationLocked = true;
         }
         else if (state._isDashing)
         {
             // block movement and rotation
             InputRestrictions currRestricitons = InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
             player.AddInputRestriction(currRestricitons);
-            player.IsCameraRotationLocked = false;
-        }
-        else
-        {
-            player.IsCameraRotationLocked = false;
         }
 
         if (!player.Object.HasStateAuthority) return;

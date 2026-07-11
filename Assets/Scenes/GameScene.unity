@@ -1719,7 +1719,25 @@ MonoBehaviour:
   _staticSpectatorCam: {fileID: 1638088877}
   _spectatorCam: {fileID: 245700449}
   _myLocalCamera: {fileID: 0}
-  _axisController: {fileID: 0}
+  _axisController: {fileID: 1629073308}
+  _gameplayIntroBlend:
+    Style: 1
+    Time: 1.2
+    CustomCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  _cutCameraBlend:
+    Style: 0
+    Time: 0
+    CustomCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
 --- !u!4 &1251434095
 Transform:
   m_ObjectHideFlags: 0
