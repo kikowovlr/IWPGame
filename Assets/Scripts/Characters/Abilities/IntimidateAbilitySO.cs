@@ -115,7 +115,8 @@ public class IntimidateAbilitySO : AbilitySO
         // apply input restrictions
         if (state._isCasting)
         {
-            player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+            InputRestrictions currRestrictions = InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+            player.AddInputRestriction(currRestrictions);
         }
 
         // only state authority can update timer

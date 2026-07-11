@@ -98,7 +98,7 @@ public class PlayerEliminationHandler : NetworkBehaviour
         }
         // TODO: show spectator UI
 
-        _playerController.ActiveRestrictions = InputRestrictions.BlockEverything;
+        //_playerController.AddInputRestriction(InputRestrictions.BlockEverything);
     }
 
     /// <summary>

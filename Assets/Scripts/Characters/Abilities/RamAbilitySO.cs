@@ -283,13 +283,15 @@ public class RamAbilitySO : AbilitySO
         if (state._isCharging)
         {
             // block movement but allow rotation
-            player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockCombat;
+            InputRestrictions currRestricitons = InputRestrictions.BlockMovement | InputRestrictions.BlockCombat;
+            player.AddInputRestriction(currRestricitons);
             player.IsCameraRotationLocked = true;
         }
         else if (state._isDashing)
         {
             // block movement and rotation
-            player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+            InputRestrictions currRestricitons = InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+            player.AddInputRestriction(currRestricitons);
             player.IsCameraRotationLocked = false;
         }
         else

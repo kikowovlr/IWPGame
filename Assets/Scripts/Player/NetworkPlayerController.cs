@@ -137,7 +137,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
     // input blocking
     // this clears and rebuilds at the top of every network tick
-    public InputRestrictions ActiveRestrictions { get; set; } = InputRestrictions.None;
+    public InputRestrictions ActiveRestrictions { get; private set; } = InputRestrictions.None;
 
     [Header("Camera Target")]
     [SerializeField] private Transform _cameraTarget;
@@ -962,6 +962,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         // & compared 2 sets of binary numbers
         // if the result is equal to the restriction, then that means the restriction is active
         return (ActiveRestrictions & restriction) == restriction;
+    }
+
+    public void AddInputRestriction(InputRestrictions restriction)
+    {
+        ActiveRestrictions |= restriction;
     }
 
     private void ApplyInputMask(ref NetworkInputData inputData)

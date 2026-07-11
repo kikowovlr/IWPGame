@@ -35,6 +35,7 @@ public class SetupState : IRoundState
         if (manager.Object.HasStateAuthority)
         {
             manager.IncrementRoundCounter();
+            manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
         }
     }
 

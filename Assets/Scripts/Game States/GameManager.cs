@@ -13,6 +13,7 @@ public class GameManager : NetworkBehaviour
     [Networked, Capacity(MAX_PLAYERS)]
     private NetworkArray<PlayerRef> _activePlayersInRound => default;
     private HashSet<PlayerRef> _localLivingPlayers = new HashSet<PlayerRef>(); // local tracking
+    [Networked] InputRestrictions GlobalRestrictions { get; private set; } = InputRestrictions.None;
 
     // match
     [SerializeField] private MatchSettings _matchSettings;
@@ -96,9 +97,12 @@ public class GameManager : NetworkBehaviour
     {
         if (!Object.HasStateAuthority) return;
 
-        if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState oldState))
+        if (CurrentRoundState != newState)
         {
-            oldState.OnStateExit(this);
+            if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState oldState))
+            {
+                oldState.OnStateExit(this);
+            }
         }
 
         CurrentRoundState = newState;
@@ -200,5 +204,11 @@ public class GameManager : NetworkBehaviour
             if (_activePlayersInRound[i] != PlayerRef.None) count++;
         }
         return count;
+    }
+
+    public void SetGlobalInputRestrictions(InputRestrictions restrictions)
+    {
+        if (Object.HasStateAuthority)
+            GlobalRestrictions = restrictions;
     }
 }

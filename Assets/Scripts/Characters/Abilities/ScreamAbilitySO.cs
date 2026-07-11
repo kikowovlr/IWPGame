@@ -111,7 +111,8 @@ public class ScreamAbilitySO : AbilitySO
         // apply input restrictions
         if (state._isCasting)
         {
-            player.ActiveRestrictions |= InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+            InputRestrictions currentRestrictions = InputRestrictions.BlockMovement | InputRestrictions.BlockRotation | InputRestrictions.BlockCombat;
+            player.AddInputRestriction(currentRestrictions);
         }
     }
 
