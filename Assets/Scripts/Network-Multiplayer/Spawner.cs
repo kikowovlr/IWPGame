@@ -7,6 +7,8 @@ using TMPro;
 using UnityEngine.UI;
 
 /// <summary>
+/// Handles gameplay session operations once connected
+/// 
 /// SimulationBehaviour
 /// -> give script access to Fusion's Network Simulation Loop
 /// -> e.g. FixedUpdateNetwork(): replaces Unity’s FixedUpdate()
@@ -22,26 +24,36 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] NetworkPlayerController _networkPlayerPrefab;
 
-    [Header("Connection UI Settings")]
-    [SerializeField] private GameObject _statusPanel;
-    [SerializeField] private TMP_Text _statusText;
-    private bool _isConnecting = false;
-
-    private void Start()
+    // input is being collected by network player which is then sent to the host thru this fn
+    public void OnInput(NetworkRunner runner, NetworkInput input)
     {
+        NetworkInputData inputData = new NetworkInputData();
+        if (NetworkPlayerController.Local != null)
+            inputData = NetworkPlayerController.Local.GetNetworkInput();
 
+        input.Set(inputData);
     }
 
-    public void ShowStatus(string message)
+    /// <summary>
+    /// fires only after destination is reached
+    /// </summary>
+    public void OnSceneLoadDone(NetworkRunner runner)
     {
-        if (_statusPanel != null) _statusPanel.SetActive(true);
-        if (_statusText != null) _statusText.text = message;
+        if (runner.IsServer)
+            Utils.DebugLog("[SPAWNER] -> Scene load complete. Spawning player avatars into arena.");
     }
 
-    public void OnStartConnecting()
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        _isConnecting = true;
-        ShowStatus("Connecting to Server...");
+        if (runner.IsServer)
+            SpawnPlayerAvatar(runner, player);
+    }
+
+    private void SpawnPlayerAvatar(NetworkRunner runner, PlayerRef player)
+    {
+        NetworkObject spawnedObj =  runner.Spawn(_networkPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity, player);
+
+        runner.SetPlayerObject(player, spawnedObj);
     }
 
     public void OnConnectedToServer(NetworkRunner runner)
@@ -68,16 +80,6 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
     {
     }
 
-    // input is being collected by network player which is then sent to the host thru this fn
-    public void OnInput(NetworkRunner runner, NetworkInput input)
-    {
-        NetworkInputData inputData = new NetworkInputData();
-        if (NetworkPlayerController.Local != null)
-            inputData = NetworkPlayerController.Local.GetNetworkInput();
-
-        input.Set(inputData);
-    }
-
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
     {
     }
@@ -90,19 +92,6 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
     {
     }
 
-    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
-    {
-        // true for server or host 
-        if (runner.IsServer)
-        {
-            Utils.DebugLog("OnPlayerJoined this is the server/host, spawning network player");
-
-            runner.Spawn(_networkPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity, player);
-        }
-        else
-            Utils.DebugLog("OnPlayerJoined this is the client");
-    }
-
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
     }
@@ -112,10 +101,6 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
     }
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data)
-    {
-    }
-
-    public void OnSceneLoadDone(NetworkRunner runner)
     {
     }
 

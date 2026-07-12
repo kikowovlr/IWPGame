@@ -1,6 +1,7 @@
 using Fusion;
-using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 /// <summary>
 /// centralised game manager script to handle rounds and games
@@ -17,17 +18,23 @@ public class GameManager : NetworkBehaviour
 
     // match
     [SerializeField] private MatchSettings _matchSettings;
-    public MatchSettings Settings => _matchSettings;
 
     // rounds
     [Networked] public int CurrentRoundNumber { get; private set; } = 0;
     [Networked, OnChangedRender(nameof(OnRoundStateChanged))] public RoundState CurrentRoundState { get; private set; }
     private RoundState _lastTrackedState = RoundState.Setup;
     [Networked] private TickTimer StateTimer { get; set; }
+    [Networked, OnChangedRender(nameof(OnSetupUIStateChanged))] public NetworkBool IsSetupUIActive { get; private set; }
 
     // state machine tracking dictionary
     private Dictionary<RoundState, IRoundState> _stateMachine = new Dictionary<RoundState, IRoundState>();
     public bool IsStateTimerExpired => StateTimer.Expired(Runner); // helper for state classes to check if time is up
+
+    // getters
+    public MatchSettings Settings => _matchSettings;
+    public RoundState GetCurrentRoundState() => CurrentRoundState;
+    public int GetLivingPlayerCount() => _localLivingPlayers.Count;
+
 
     private void Awake()
     {
@@ -79,6 +86,11 @@ public class GameManager : NetworkBehaviour
             initialRoundState.OnStateEnter(this);
         }
 
+        // force UI update if server has activated round UI screen
+        if (IsSetupUIActive)
+        {
+            OnSetupUIStateChanged();
+        }
         // start game in setup state
         if (Object.HasStateAuthority)
         {
@@ -216,12 +228,11 @@ public class GameManager : NetworkBehaviour
 
     public int GetTotalRegisteredCount()
     {
-        int count = 0;
-        for (int i = 0; i < _activePlayersInRound.Length; i++)
+        if (Runner != null)
         {
-            if (_activePlayersInRound[i] != PlayerRef.None) count++;
+            return Runner.ActivePlayers.Count();
         }
-        return count;
+        return 0;
     }
 
     public void SetGlobalInputRestrictions(InputRestrictions restrictions)
@@ -234,5 +245,82 @@ public class GameManager : NetworkBehaviour
     {
         if (Object.HasStateAuthority)
             StateTimer = duration > 0f ? TickTimer.CreateFromSeconds(Runner, duration) : TickTimer.None;
+    }
+
+    private void OnSetupUIStateChanged()
+    {
+        if (TransitionUIManager.Instance == null) return;
+
+        if (IsSetupUIActive)
+        {
+            string currentRoundName = $"ROUND {CurrentRoundNumber}";
+            TransitionUIManager.Instance.ShowRoundSetupScreen(currentRoundName);
+        }
+        else
+        {
+            TransitionUIManager.Instance.ClearAllOverlays();
+        }
+    }
+
+    public void SetSetupUIActive(bool active)
+    {
+        if (Object.HasStateAuthority)
+            IsSetupUIActive = active;
+    }
+
+    /// <summary>
+    /// returns remaining time of StateTimer in seconds
+    /// </summary>
+    public float GetRemainingStateTime()
+    {
+        if (StateTimer.IsRunning && Runner != null)
+        {
+            return StateTimer.RemainingTime(Runner) ?? 0f; // ?? means if timer has time left, return left of ??, if timer is null, return right of ??
+        }
+        return 0f;
+    }
+
+    /// <summary>
+    /// awards one crown
+    /// called on server when there is only one player alive during roundactive state
+    /// </summary>
+    public void AwardCrownToPlayer(PlayerRef winner)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        Utils.DebugLog($"[SERVER] -> Round complete! Winner identified: Player {winner}");
+
+        NetworkPlayerStats winningStats = null;
+
+        if (Runner.TryGetPlayerObject(winner, out NetworkObject netObj))
+        {
+            PlayerComponentRegistry registry = netObj.GetComponent<PlayerComponentRegistry>();
+
+            if (registry != null)
+            {
+                winningStats = registry.Stats;
+            }
+        }
+
+        // found winner, add crown to their count
+        if (winningStats != null)
+        {
+            winningStats.IncrementCrowns();
+
+            // check if shld end game or not
+            if (winningStats.CrownCount >= _matchSettings.CrownsToWinMatch)
+            {
+                Utils.DebugLog($"[MATCH END] -> Player {winner} achieved ultimate victory! Ending match.");
+                TransitionToState(RoundState.MatchOver, _matchSettings.MatchOverBufferDuration);
+            }
+            else
+            {
+                TransitionToState(RoundState.RoundOver, _matchSettings.RoundOverBufferDuration);
+            }
+        }
+        else
+        {
+            Utils.DebugLog($"[SERVER] -> Cannot find winning player");
+        }
     }
 }

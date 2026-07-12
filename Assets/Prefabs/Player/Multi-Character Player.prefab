@@ -52,6 +52,51 @@ MonoBehaviour:
   _knockOutForceMultiplier: 1.8
   _CurrentHealth: 0
   _MaxHealth: 0
+--- !u!1 &447863915937865332
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6318924731026463202}
+  - component: {fileID: 972994574516817064}
+  m_Layer: 8
+  m_Name: StatsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6318924731026463202
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447863915937865332}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6214267228832837403}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &972994574516817064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447863915937865332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d98cbfc2c41be34d870d4b85e6092a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerStats
+  _CrownCount: 0
 --- !u!1 &913415309473153653
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,6 +303,7 @@ Transform:
   - {fileID: 431872715138535999}
   - {fileID: 4460523793677844102}
   - {fileID: 5392125363664024304}
+  - {fileID: 6318924731026463202}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &5932050675032652149
@@ -567,6 +613,7 @@ MonoBehaviour:
   - {fileID: 6618815710476041754}
   - {fileID: 4717746424931653075}
   - {fileID: 7970719517024901479}
+  - {fileID: 972994574516817064}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &4169869315045129326
 MonoBehaviour:
@@ -611,6 +658,7 @@ MonoBehaviour:
   _headbuttHandler: {fileID: 1981724414907585690}
   _vfxAnchors: {fileID: 6558575971082531101}
   _visualOverrideController: {fileID: 7970719517024901479}
+  _playerStats: {fileID: 972994574516817064}
 --- !u!1 &2145209411239521523
 GameObject:
   m_ObjectHideFlags: 0
