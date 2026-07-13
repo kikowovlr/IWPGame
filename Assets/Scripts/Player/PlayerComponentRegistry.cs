@@ -23,10 +23,16 @@ public class PlayerComponentRegistry : MonoBehaviour
     public PlayerVFXAnchors vfxAnchors => _vfxAnchors;
     public PlayerVisualsOverrideController VisualsOverrider => _visualOverrideController;
     public NetworkPlayerStats Stats => _playerStats;
+    public CharacterComponentLinker ActiveCharacterLinker { get; private set; }
 
     private void Awake()
     {
         Status = GetComponentInChildren<IAffectedByStatusEffects>();
+    }
+
+    public void UpdateActiveLinker(CharacterComponentLinker newLinker)
+    {
+        ActiveCharacterLinker = newLinker;
     }
 }
  

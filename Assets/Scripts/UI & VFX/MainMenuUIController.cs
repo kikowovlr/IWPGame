@@ -15,11 +15,20 @@ public class MainMenuUIController : MonoBehaviour
     [SerializeField] private Button _hostButton;
     [SerializeField] private Button _joinButton;
 
+    [SerializeField] private TMP_InputField _nameInputField;
+    private const string NAME_PREFS_KEY = "SavedPlayerName";
+
     private void Start()
     {
         // initial UI
         if (_menuSelectionPanel != null)
             _menuSelectionPanel.SetActive(true);
+
+        // load their previously typed name if they played b4, if not dont fill
+        if (_nameInputField != null && PlayerPrefs.HasKey(NAME_PREFS_KEY))
+        {
+            _nameInputField.text = PlayerPrefs.GetString(NAME_PREFS_KEY);
+        }
 
         // assign button callbacks
         if (_hostButton != null)
@@ -30,6 +39,9 @@ public class MainMenuUIController : MonoBehaviour
 
     private async void StartMatchmaking(GameMode mode)
     {
+        // save name input into input field
+        SaveCurrentName();
+
         // swap panels
         if (_menuSelectionPanel != null)
             _menuSelectionPanel.SetActive(false);
@@ -56,7 +68,28 @@ public class MainMenuUIController : MonoBehaviour
                 Invoke(nameof(ResetMenuUI), 2.5f);
             }
         }
-    }    
+    }  
+    
+    private void SaveCurrentName()
+    {
+        if (_nameInputField == null) return;
+
+        string finalName = _nameInputField.text;
+
+        // validation check - dont save it blank
+        if (string.IsNullOrWhiteSpace(finalName))
+        {
+            // clear so system uses default fallbacks later on
+            PlayerPrefs.DeleteKey(NAME_PREFS_KEY);
+        }
+        else
+        {
+            // trim
+            PlayerPrefs.SetString(NAME_PREFS_KEY, finalName);
+        }
+
+        PlayerPrefs.Save();
+    }
 
 
     private void ResetMenuUI()

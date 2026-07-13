@@ -1,6 +1,7 @@
 using Fusion;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -84,6 +85,10 @@ public class SetupState : IRoundState
     public void OnStateExit(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Exited Setup State.");
+
+        // init leaderboard when setup ends (everyone is connected)
+        if (LeaderboardManager.Instance != null)
+            LeaderboardManager.Instance.InitialiseLeaderboard();
     }
 }
 
@@ -135,10 +140,12 @@ public class CountdownState : IRoundState
 public class RoundActiveState : IRoundState
 {
     public RoundState StateType => RoundState.RoundActive;
+    private bool _roundEndingSequenceTriggered = false;
 
     public void OnStateEnter(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Enter RoundActive State.");
+        _roundEndingSequenceTriggered = false;
 
         // allow controls
         if (manager.Object.HasStateAuthority)
@@ -150,35 +157,47 @@ public class RoundActiveState : IRoundState
         if (!manager.Object.HasStateAuthority) return;
 
         // track how many players alive - see if need to end round or not
-        int playersRemaining = manager.GetLivingPlayerCount();
+        int totalPlayersInMatch = manager.Runner.ActivePlayers.Count();
+        int livingPlayers = manager.GetLivingPlayerCount();
+        int readySpectators = manager.GetActiveSpectatorCount();
+
+        int expectedSpectators = totalPlayersInMatch - 1;
 
         // if one player left
-        if (playersRemaining == 1)
+        if (livingPlayers == 1)
         {
-            List<PlayerRef> winnerList = manager.GetLivingPlayerIDs();
-
-            if (winnerList.Count > 0)
+            // check if all other players turned into spectators alr
+            if (readySpectators >= expectedSpectators)
             {
-                PlayerRef roundWinner = winnerList[0];
+                List<PlayerRef> winnerList = manager.GetLivingPlayerIDs();
 
-                manager.AwardCrownToPlayer(roundWinner);
+                if (winnerList.Count > 0)
+                {
+                    PlayerRef roundWinner = winnerList[0];
+
+                    manager.AwardCrownToPlayer(roundWinner);
+                }
             }
         }
         // if draw (players died at the same network tick) -> draw: no one wins crown
-        else if (playersRemaining == 0)
+        else if (livingPlayers == 0)
         {
-            Utils.DebugLog("[SERVER] -> Condition Met: Zero survivors left standing. Processing draw round sequence.");
+            // wait until all players turn into spectators then transition
+            if (readySpectators >= totalPlayersInMatch)
+            {
+                if (!_roundEndingSequenceTriggered)
+                {
+                    _roundEndingSequenceTriggered = true;
+                    Utils.DebugLog("[SERVER] -> All players are spectators. Ending match as a DRAW sequence.");
+                    manager.TransitionToState(RoundState.RoundOver);
+                }
+            }
         }
     }
 
     public void OnStateExit(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Exit RoundActive State.");
-
-        // TODO show round over UI
-        // TODO only trigger round over when the last player that was eliminated has became a spectator -> go by spectator count??
-        if (manager.Object.HasStateAuthority)
-            manager.TransitionToState(RoundState.RoundOver, manager.Settings.RoundOverBufferDuration);
     }
 }
 
@@ -190,6 +209,7 @@ public class RoundOverState : IRoundState
     public void OnStateEnter(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Enter RoundOver State.");
+        // TODO show round over UI
 
         if (manager.Object.HasStateAuthority)
         {

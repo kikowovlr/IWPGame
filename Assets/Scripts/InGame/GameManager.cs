@@ -207,6 +207,29 @@ public class GameManager : NetworkBehaviour
     }
 
     /// <summary>
+    /// returns the total number of players who have completely transitioned into spectators
+    /// </summary>
+    public int GetActiveSpectatorCount()
+    {
+        int spectatorCount = 0;
+        var runner = Object.Runner;
+
+        foreach (var playerRef in runner.ActivePlayers)
+        {
+            if (runner.TryGetPlayerObject(playerRef, out NetworkObject playerObj))
+            {
+                PlayerComponentRegistry registry = playerObj.GetComponentInParent<PlayerComponentRegistry>();
+                if (registry != null && registry.Elimination != null && registry.Elimination.IsSpectatorTransitionComplete)
+                {
+                    spectatorCount++;
+                }
+            }
+        }
+
+        return spectatorCount;
+    }
+
+    /// <summary>
     /// helper to increment round outside of game manager
     /// </summary>
     public void IncrementRoundCounter()

@@ -143,6 +143,7 @@ MonoBehaviour:
   animatedModelRoot: {fileID: 7126096626073897399}
   physicsPackageRoot: {fileID: 5780631137783875044}
   visualMeshRoot: {fileID: 834318584694292002}
+  _characterData: {fileID: 11400000, guid: a2dec6583a7d738408c3de0a9d5fd575, type: 2}
   _leftHandDamageDealer: {fileID: 8939794342795802609}
   _rightHandDamageDealer: {fileID: 2852398192967329505}
   _leftHandRb: {fileID: 5489975683418116252}

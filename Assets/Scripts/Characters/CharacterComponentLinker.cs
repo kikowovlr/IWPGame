@@ -8,6 +8,7 @@ public class CharacterComponentLinker : MonoBehaviour
     public GameObject animatedModelRoot;
     public GameObject physicsPackageRoot;
     public GameObject visualMeshRoot;
+    public CharacterDataSO _characterData;
 
     [Header("Punch Elements")]
     public DamageDealer _leftHandDamageDealer;

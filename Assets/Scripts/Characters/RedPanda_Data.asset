@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b278586aff4b711479fdef29840ac233, type: 3}
+  m_Name: RedPanda_Data
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterDataSO
+  CharacterName: Wah
+  CharacterIcon: {fileID: 21300000, guid: 02b4be555fd228f42868278b7e55e385, type: 3}
+  PrefabPackage: {fileID: 7760978505757086777, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}

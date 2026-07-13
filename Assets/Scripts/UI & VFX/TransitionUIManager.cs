@@ -20,7 +20,6 @@ public class TransitionUIManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
 
             // hide everything on startup
             ClearAllOverlays();

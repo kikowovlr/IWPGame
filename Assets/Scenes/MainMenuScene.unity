@@ -171,6 +171,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NetworkRunnerPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 8788690969805464123, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -231,6 +235,7 @@ MonoBehaviour:
   _menuSelectionPanel: {fileID: 751203938}
   _hostButton: {fileID: 1561718854}
   _joinButton: {fileID: 1877223866}
+  _nameInputField: {fileID: 2583066471322291545}
 --- !u!4 &1081608734
 Transform:
   m_ObjectHideFlags: 0
@@ -726,22 +731,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: MainMenuPanel
       objectReference: {fileID: 0}
-    - target: {fileID: 6898735710910707524, guid: 54520ec7723df07479fabac1e867573e, type: 3}
-      propertyPath: m_fontColor.b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6898735710910707524, guid: 54520ec7723df07479fabac1e867573e, type: 3}
-      propertyPath: m_fontColor.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6898735710910707524, guid: 54520ec7723df07479fabac1e867573e, type: 3}
-      propertyPath: m_fontColor.r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6898735710910707524, guid: 54520ec7723df07479fabac1e867573e, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4294967295
-      objectReference: {fileID: 0}
     - target: {fileID: 7458595115008624856, guid: 54520ec7723df07479fabac1e867573e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -827,6 +816,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 54520ec7723df07479fabac1e867573e, type: 3}
+--- !u!114 &2583066471322291545 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1400315752676430143, guid: 54520ec7723df07479fabac1e867573e, type: 3}
+  m_PrefabInstance: {fileID: 2583066471322291544}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2da0c512f12947e489f739169773d7ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TMP_InputField
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

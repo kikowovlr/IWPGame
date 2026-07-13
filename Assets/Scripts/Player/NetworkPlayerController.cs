@@ -935,6 +935,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
                 Registry.VisualsOverrider.UpdateActiveCharacterVisualReference(linker.visualMeshRoot);
 
+                Registry.UpdateActiveLinker(linker);
+
                 _activeRagdollMembers = linker.physicsPackageRoot.GetComponentsInChildren<ActiveRagdollMember>(true);
 
                 for (int i = 0; i < _activeRagdollMembers.Length; i++)
