@@ -172,6 +172,18 @@ PrefabInstance:
       value: NetworkRunnerPrefab
       objectReference: {fileID: 0}
     - target: {fileID: 8788690969805464123, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0.00012207
+      objectReference: {fileID: 0}
+    - target: {fileID: 8788690969805464123, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8788690969805464123, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0.000061035
+      objectReference: {fileID: 0}
+    - target: {fileID: 8788690969805464123, guid: 6675552c17c496f46b6df55568ded1bd, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}

@@ -14,7 +14,7 @@ public class GameManager : NetworkBehaviour
     [Networked, Capacity(MAX_PLAYERS)]
     private NetworkArray<PlayerRef> _activePlayersInRound => default;
     private HashSet<PlayerRef> _localLivingPlayers = new HashSet<PlayerRef>(); // local tracking
-    [Networked] public InputRestrictions GlobalRestrictions { get; private set; } = InputRestrictions.None;
+    [HideInInspector] [Networked] public InputRestrictions GlobalRestrictions { get; private set; } = InputRestrictions.None;
 
     // match
     [SerializeField] private MatchSettings _matchSettings;
@@ -24,16 +24,21 @@ public class GameManager : NetworkBehaviour
     [Networked, OnChangedRender(nameof(OnRoundStateChanged))] public RoundState CurrentRoundState { get; private set; }
     private RoundState _lastTrackedState = RoundState.Setup;
     [Networked] private TickTimer StateTimer { get; set; }
-    [Networked, OnChangedRender(nameof(OnSetupUIStateChanged))] public NetworkBool IsSetupUIActive { get; private set; }
+    [HideInInspector] [Networked, OnChangedRender(nameof(OnSetupUIStateChanged))] public NetworkBool IsSetupUIActive { get; private set; }
 
     // state machine tracking dictionary
     private Dictionary<RoundState, IRoundState> _stateMachine = new Dictionary<RoundState, IRoundState>();
-    public bool IsStateTimerExpired => StateTimer.Expired(Runner); // helper for state classes to check if time is up
+    [HideInInspector] public bool IsStateTimerExpired => StateTimer.Expired(Runner); // helper for state classes to check if time is up
+
+    // end of round
+    [SerializeField] private RoundEndDisplayController _roundEndDisplayController;
+    [HideInInspector] [Networked] public PlayerRef LastRoundWinner { get; private set; } = PlayerRef.None;
 
     // getters
     public MatchSettings Settings => _matchSettings;
     public RoundState GetCurrentRoundState() => CurrentRoundState;
     public int GetLivingPlayerCount() => _localLivingPlayers.Count;
+    public RoundEndDisplayController RoundEndDisplay => _roundEndDisplayController;
 
 
     private void Awake()
@@ -79,32 +84,34 @@ public class GameManager : NetworkBehaviour
             }
         }
 
-        _lastTrackedState = CurrentRoundState;
-        if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState initialRoundState))
-        {
-            Debug.Log($"[MATCH LOCAL] -> Initializing First Frame State: {CurrentRoundState}");
-            initialRoundState.OnStateEnter(this);
-        }
+        //_lastTrackedState = CurrentRoundState;
+        //if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState initialRoundState))
+        //{
+        //    Debug.Log($"[MATCH LOCAL] -> Initializing First Frame State: {CurrentRoundState}");
+        //    initialRoundState.OnStateEnter(this);
+        //}
+
+        // TODO: FOR DEBUGGING - SKIPS SETUP
+        _lastTrackedState = RoundState.RoundActive;
 
         // force UI update if server has activated round UI screen
         if (IsSetupUIActive)
         {
             OnSetupUIStateChanged();
         }
-        // start game in setup state
-        if (Object.HasStateAuthority)
-        {
-            TransitionToState(RoundState.Setup);
-        }
 
-        //// TODO: FOR DEBUGGING - SKIPS SETUP
-        //_lastTrackedState = RoundState.RoundActive;
-
+        //// start game in setup state
         //if (Object.HasStateAuthority)
         //{
-        //    SetGlobalInputRestrictions(InputRestrictions.None);
-        //    TransitionToState(RoundState.RoundActive);
+        //    TransitionToState(RoundState.Setup);
         //}
+
+        // TODO: FOR DEBUGGING - SKIPS SETUP
+        if (Object.HasStateAuthority)
+        {
+            SetGlobalInputRestrictions(InputRestrictions.None);
+            TransitionToState(RoundState.RoundActive);
+        }
     }
 
     public override void FixedUpdateNetwork()
@@ -344,6 +351,13 @@ public class GameManager : NetworkBehaviour
         else
         {
             Utils.DebugLog($"[SERVER] -> Cannot find winning player");
+            TransitionToState(RoundState.RoundOver, _matchSettings.RoundOverBufferDuration);
         }
+    }
+
+    public void SetRoundWinner(PlayerRef winnerId)
+    {
+        if (Object.HasStateAuthority)
+            LastRoundWinner = winnerId;
     }
 }

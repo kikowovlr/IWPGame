@@ -35,7 +35,6 @@ public class SetupState : IRoundState
     public void OnStateEnter(GameManager manager)
     {
         _hasStartedTimer = false;
-        // TODO: Ensure network synchronization before kicking off countdown
         Debug.Log("[MATCH ENGINE] -> Entered Setup State.");
 
         // all players on overview camera mode on scene boot
@@ -169,13 +168,15 @@ public class RoundActiveState : IRoundState
             // check if all other players turned into spectators alr
             if (readySpectators >= expectedSpectators)
             {
-                List<PlayerRef> winnerList = manager.GetLivingPlayerIDs();
-
-                if (winnerList.Count > 0)
+                if (!_roundEndingSequenceTriggered)
                 {
-                    PlayerRef roundWinner = winnerList[0];
-
-                    manager.AwardCrownToPlayer(roundWinner);
+                    _roundEndingSequenceTriggered = true;
+                    List<PlayerRef> winnerList = manager.GetLivingPlayerIDs();
+                    if (winnerList.Count > 0)
+                    {
+                        manager.SetRoundWinner(winnerList[0]);
+                        manager.TransitionToState(RoundState.RoundOver, manager.Settings.RoundOverBufferDuration);
+                    }
                 }
             }
         }
@@ -188,8 +189,8 @@ public class RoundActiveState : IRoundState
                 if (!_roundEndingSequenceTriggered)
                 {
                     _roundEndingSequenceTriggered = true;
-                    Utils.DebugLog("[SERVER] -> All players are spectators. Ending match as a DRAW sequence.");
-                    manager.TransitionToState(RoundState.RoundOver);
+                    manager.SetRoundWinner(PlayerRef.None);
+                    manager.TransitionToState(RoundState.RoundOver, manager.Settings.RoundOverBufferDuration);
                 }
             }
         }
@@ -212,20 +213,52 @@ public class RoundOverState : IRoundState
     public void OnStateEnter(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Enter RoundOver State.");
-        // TODO show round over UI
 
         if (manager.Object.HasStateAuthority)
         {
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
         }
-    }
 
-    public void OnStateExit(GameManager manager)
-    {
+        // fetch current leaderboard -- not updated with winner yet
+        List<LeaderboardItemData> snapshot = new List<LeaderboardItemData>(
+            LeaderboardManager.Instance.GetSortedLeaderboard
+        );
+
+        // display end of round UI
+        if (manager.RoundEndDisplay != null)
+        {
+            manager.RoundEndDisplay.ShowRoundOverSequence(
+                snapshot,
+                manager.LastRoundWinner,
+                manager.CurrentRoundNumber
+            );
+        }
+
+        // award crown
+        if (manager.Object.HasStateAuthority && manager.LastRoundWinner != PlayerRef.None)
+        {
+            manager.AwardCrownToPlayer(manager.LastRoundWinner);
+        }
     }
 
     public void OnStateUpdate(GameManager manager)
     {
+        if (!manager.Object.HasStateAuthority) return;
+
+        // go to next round setup once display buffer time expires
+        if (manager.IsStateTimerExpired)
+        {
+            if (manager.RoundEndDisplay != null)
+            {
+                manager.RoundEndDisplay.gameObject.SetActive(false);
+            }
+            manager.TransitionToState(RoundState.Setup, manager.Settings.SetUpDuration);
+        }
+    }
+
+    public void OnStateExit(GameManager manager)
+    {
+        Debug.Log("[MATCH ENGINE] -> Exit RoundOver State.");
     }
 }
 
@@ -236,14 +269,17 @@ public class MatchOverState : IRoundState
 
     public void OnStateEnter(GameManager manager)
     {
-    }
+        Debug.Log("[MATCH ENGINE] -> Enter MatchOver State.");
 
-    public void OnStateExit(GameManager manager)
-    {
     }
 
     public void OnStateUpdate(GameManager manager)
     {
+    }
+
+    public void OnStateExit(GameManager manager)
+    {
+        Debug.Log("[MATCH ENGINE] -> Exit MatchOver State.");
     }
 }
 

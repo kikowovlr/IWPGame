@@ -8,8 +8,6 @@ using Fusion;
 public class PlayerHUDController : MonoBehaviour
 {
     [Header("Leaderboard")]
-    [SerializeField] private Sprite _emptyCrownSprite;
-    [SerializeField] private Sprite _filledCrownSprite;
     [SerializeField] private TMP_Text _topPlayerRankText;
     [SerializeField] private TMP_Text _topPlayerNameText;
     [SerializeField] private Image _topPlayerIconImage;
@@ -21,9 +19,7 @@ public class PlayerHUDController : MonoBehaviour
     [SerializeField] private Image[] _secondaryPlayerCrownImages;
     [SerializeField] private GameObject _secondaryRowPanel;
 
-    [Header("Configuration")]
-    [SerializeField] private Color _defaultPlayerColor = Color.white;
-    [SerializeField] private Color _localPlayerHighightColor = new Color(1f, 0.84f, 0f);
+    [SerializeField] private LeaderboardItemConfig _theme;
 
     private void OnEnable()
     {
@@ -104,7 +100,7 @@ public class PlayerHUDController : MonoBehaviour
 
     private void PopulateRowData(int rankValue, LeaderboardItemData data, PlayerRef localPlayer, TMP_Text rankText, Image iconImage, TMP_Text nameText, Image[] crownImages)
     {
-        Color targetColor = (data.PlayerReference == localPlayer) ? _localPlayerHighightColor : _defaultPlayerColor;
+        Color targetColor = (data.PlayerReference == localPlayer) ? _theme.LocalPlayerHighlightColor : _theme.DefaultPlayerColor;
 
         if (rankText != null)
         {
@@ -139,14 +135,14 @@ public class PlayerHUDController : MonoBehaviour
         if (rankText != null)
         {
             rankText.text = "-";
-            rankText.color = _defaultPlayerColor;
+            rankText.color = _theme.DefaultPlayerColor;
         }
 
         if (cIconImage != null) cIconImage.gameObject.SetActive(false);
         if (nameText != null)
         {
             nameText.text = "---";
-            nameText.color = _defaultPlayerColor;
+            nameText.color = _theme.DefaultPlayerColor;
         }
 
         UpdateCrownGroupGraphics(crownImages, 0);
@@ -166,12 +162,12 @@ public class PlayerHUDController : MonoBehaviour
             if (i < crownCount)
             {
                 // less than num of crowns + 1 == filled crown
-                if (_filledCrownSprite != null) crownImages[i].sprite = _filledCrownSprite;
+                if (_theme.FilledCrownSprite != null) crownImages[i].sprite = _theme.FilledCrownSprite;
             }
             else
             {
                 // = or more than num of crowns == empty crown
-                if (_emptyCrownSprite != null) crownImages[i].sprite = _emptyCrownSprite;
+                if (_theme.EmptyCrownSprite != null) crownImages[i].sprite = _theme.EmptyCrownSprite;
             }
         }
     }

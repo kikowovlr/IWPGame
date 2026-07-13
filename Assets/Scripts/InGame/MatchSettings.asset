@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MatchSettings
   _setupDuration: 4
   _countdownDuration: 5
-  _roundOverBufferDuration: 4
-  _matchOverBufferDuration: 4
+  _roundOverBufferDuration: 8
+  _matchOverBufferDuration: 6
   _crownsToWinMatch: 3
