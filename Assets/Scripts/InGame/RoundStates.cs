@@ -202,7 +202,9 @@ public class RoundActiveState : IRoundState
 }
 
 // last player left - round winner, crown awarded, UI displays
-// "Round _ " 
+// round over UI - "Round _ over!" ovelay
+// show full leaderboard on the left side
+// animate the changing of rankings??
 public class RoundOverState : IRoundState
 {
     public RoundState StateType => RoundState.RoundOver;
