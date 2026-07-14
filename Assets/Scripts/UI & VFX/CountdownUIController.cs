@@ -24,6 +24,7 @@ public class CountdownUIController : MonoBehaviour
     private void Update()
     {
         if (GameManager.Instance == null) return;
+        if (!GameManager.Instance.Object || !GameManager.Instance.Object.IsValid) return; // ensure game manager has spawned first
 
         RoundState currState = GameManager.Instance.GetCurrentRoundState();
 

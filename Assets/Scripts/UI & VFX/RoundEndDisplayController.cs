@@ -22,13 +22,10 @@ public class RoundEndDisplayController : MonoBehaviour
     [SerializeField] private float _delayUntilLBUpdate = 2.0f;
     [SerializeField] private float _showLBDelay = 3.0f;
 
-    private List<LeaderboardRowUI> _spawnedRows = new List<LeaderboardRowUI>();
+    [SerializeField] private GameObject _victoryTextObj;
+    [SerializeField] private GameObject _defeatTextObj;
 
-    private void Start()
-    {
-        if (_leaderboardContainer != null)
-            _leaderboardContainer.SetActive(false);
-    }
+    private List<LeaderboardRowUI> _spawnedRows = new List<LeaderboardRowUI>();
 
     /// <summary>
     /// shows animated standings b4 n after
@@ -125,5 +122,17 @@ public class RoundEndDisplayController : MonoBehaviour
                 rowToMove.AnimateToNewPosition(targetY, newIndex + 1, _animationDuration);
             }
         }
+    }
+
+    public void ShowMatchVictoryOverlay()
+    {
+        if (_victoryTextObj != null) _victoryTextObj.SetActive(true);
+        if (_defeatTextObj != null) _defeatTextObj.SetActive(false);
+    }
+
+    public void ShowMatchDefeatOverlay()
+    {
+        if (_victoryTextObj != null) _victoryTextObj.SetActive(false);
+        if (_defeatTextObj != null) _defeatTextObj.SetActive(true);
     }
 }

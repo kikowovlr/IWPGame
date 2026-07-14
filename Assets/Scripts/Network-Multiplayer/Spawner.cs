@@ -1,9 +1,10 @@
-using UnityEngine;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Fusion;
 using Fusion.Sockets;
-using System.Collections.Generic;
-using System;
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
@@ -23,6 +24,7 @@ using UnityEngine.UI;
 public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] NetworkPlayerController _networkPlayerPrefab;
+
 
     // input is being collected by network player which is then sent to the host thru this fn
     public void OnInput(NetworkRunner runner, NetworkInput input)
@@ -51,10 +53,73 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 
     private void SpawnPlayerAvatar(NetworkRunner runner, PlayerRef player)
     {
-        NetworkObject spawnedObj =  runner.Spawn(_networkPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity, player);
+        NetworkObject spawnedObj = runner.Spawn(_networkPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity, player);
 
         runner.SetPlayerObject(player, spawnedObj);
     }
+
+    //public void OnSceneLoadDone(NetworkRunner runner)
+    //{
+    //    if (!runner.IsServer) return;
+
+    //    Utils.DebugLog("[SPAWNER] -> Scene load complete. Spawning player avatars into arena.");
+    //    _sceneLoadingComplete = true;
+
+    //    CheckAndStartGameEngine(runner);
+    //}
+
+    //public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+    //{
+    //    if (!runner.IsServer) return;
+
+    //    SpawnPlayerAvatar(runner, player);
+
+    //    _spawnedPlayers.Add(player);
+
+    //    if (_sceneLoadingComplete)
+    //    {
+    //        CheckAndStartGameEngine(runner);
+    //    }
+    //}
+
+    //private void SpawnPlayerAvatar(NetworkRunner runner, PlayerRef player)
+    //{
+    //    NetworkObject spawnedObj = runner.Spawn(_networkPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity, player);
+    //    runner.SetPlayerObject(player, spawnedObj);
+    //}
+
+    //private void CheckAndStartGameEngine(NetworkRunner runner)
+    //{
+    //    if (GameManager.Instance == null) return;
+
+    //    int activeConnections = runner.ActivePlayers.Count();
+    //    int spawnedAvatarsCount = _spawnedPlayers.Count;
+
+    //    // We only start the match if the scene is open AND every connected player has a spawned avatar body
+    //    if (_sceneLoadingComplete && spawnedAvatarsCount >= activeConnections)
+    //    {
+    //        Debug.Log($"[SPAWNER] -> All connections satisfied ({spawnedAvatarsCount}/{activeConnections}). Signaling GameManager to start match!");
+
+    //        Invoke(nameof(ExecuteDeferredEngineStart), 0.05f);
+    //    }
+    //}
+
+    //private void ExecuteDeferredEngineStart()
+    //{
+    //    if (GameManager.Instance != null && Runner.IsServer)
+    //    {
+    //        Debug.Log("[SPAWNER] -> One-frame buffer cleared. Safely signaling GameManager to start match engine.");
+    //        GameManager.Instance.StartMatchEngine();
+    //    }
+    //}
+
+    //public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    //{
+    //    if (runner.IsServer && _spawnedPlayers.Contains(player))
+    //    {
+    //        _spawnedPlayers.Remove(player);
+    //    }
+    //}
 
     public void OnConnectedToServer(NetworkRunner runner)
     {

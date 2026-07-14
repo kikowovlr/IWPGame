@@ -64,6 +64,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3397ce13023f1204694e845e50a3df83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  _GlobalRestrictions: 0
   _matchSettings: {fileID: 11400000, guid: ce78f13881ffe224e8da7e4f64bf1f2c, type: 2}
   _CurrentRoundNumber: 0
   _CurrentRoundState: 0
+  _IsSetupUIActive:
+    _value: 0
+  _roundEndDisplayController: {fileID: 0}

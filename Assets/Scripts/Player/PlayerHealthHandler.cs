@@ -229,4 +229,8 @@ public class PlayerHealthHandler : NetworkBehaviour
 
     public void ResetAccumulatedDamageCounter() => AccumulatedDamageTaken = 0f;
     public float GetAccumulatedDamage() => AccumulatedDamageTaken;
+    public void ResetHealthToMax()
+    {
+        CurrentHealth = MaxHealth;
+    }
 }

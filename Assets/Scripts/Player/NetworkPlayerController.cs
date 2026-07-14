@@ -290,16 +290,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         }
 
         if (GetInput(out NetworkInputData networkInputData))
-        {
-            // testing
-            if (networkInputData._isRagdollPressed)
-            {
-                if (!IsKnockedOut)
-                    Knockout();
-                else
-                    Recover();
-            }
-        
+        {        
             UpdateAbility(networkInputData);
 
             if (!_isKnockedOut)
@@ -1211,8 +1202,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
         ApplyInputMask(ref networkInputData);
 
-        networkInputData._isRagdollPressed = Input.GetKeyDown(KeyCode.R);
-
         // reset jump button 
         _isJumpButtonPressed = false;
 
@@ -1227,10 +1216,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
         // link network id to this physical avatar root
         PlayerRegistry.SetAvatarTransform(Object.InputAuthority, finalCameraTarget);
-
-        // only host/server registers this id into game manager match array
-        if (Object.HasStateAuthority && GameManager.Instance != null)
-            GameManager.Instance.TrackPlayer(Object.InputAuthority);
 
         // check if this is the owner's player
         if (Object.HasInputAuthority)

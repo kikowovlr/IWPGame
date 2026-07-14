@@ -107,4 +107,9 @@ public class PlayerEliminationHandler : NetworkBehaviour
         if (IsSpectatorTransitionComplete)
             OnPlayerSpectatorReady?.Invoke(this);
     }
+
+    public void ResetLivesToMax()
+    {
+        CurrentLives = _maxLives;
+    }
 }

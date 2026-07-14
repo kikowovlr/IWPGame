@@ -10,6 +10,9 @@ public class PlayerVisualsOverrideController : NetworkBehaviour
     private GameObject _activeCharacterVisualRoot;
     private NetworkPlayerController _playerController;
 
+    //[Networked, OnChangedRender(nameof(OnVisualStateChanged))]
+    //private NetworkBool IsVisualsEnabled { get; set; } = true;
+
     private void Awake()
     {
         PlayerComponentRegistry registry = transform.root.GetComponent<PlayerComponentRegistry>();

@@ -12,6 +12,7 @@ public class PlayerComponentRegistry : MonoBehaviour
     [SerializeField] private PlayerVFXAnchors _vfxAnchors;
     [SerializeField] private PlayerVisualsOverrideController _visualOverrideController;
     [SerializeField] private NetworkPlayerStats _playerStats;
+    [SerializeField] private RespawnHandler _respawnHandler;
 
     public NetworkPlayerController Controller => _playerController;
     public PlayerHealthHandler Health => _healthHandler;
@@ -24,6 +25,7 @@ public class PlayerComponentRegistry : MonoBehaviour
     public PlayerVisualsOverrideController VisualsOverrider => _visualOverrideController;
     public NetworkPlayerStats Stats => _playerStats;
     public CharacterComponentLinker ActiveCharacterLinker { get; private set; }
+    public RespawnHandler RespawnHandler => _respawnHandler;
 
     private void Awake()
     {

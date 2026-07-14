@@ -1,9 +1,8 @@
 using Fusion;
-using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // state enums to track round state
 public enum RoundState
@@ -49,6 +48,7 @@ public class SetupState : IRoundState
         {
             manager.IncrementRoundCounter();
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
+            manager.ResetRoundEntities();
         }
     }
 
@@ -248,17 +248,25 @@ public class RoundOverState : IRoundState
         // go to next round setup once display buffer time expires
         if (manager.IsStateTimerExpired)
         {
-            if (manager.RoundEndDisplay != null)
-            {
-                manager.RoundEndDisplay.gameObject.SetActive(false);
-            }
-            manager.TransitionToState(RoundState.Setup, manager.Settings.SetUpDuration);
+            // check if shld transition to match over
+            if (manager.IsMatchOver())
+                manager.TransitionToState(RoundState.MatchOver, manager.Settings.MatchOverBufferDuration);
+            else
+                manager.TransitionToState(RoundState.Setup, manager.Settings.SetUpDuration);
         }
     }
 
     public void OnStateExit(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Exit RoundOver State.");
+
+        // dont remove display if match over
+        if (manager.IsMatchOver())
+            return;
+
+        if (manager.RoundEndDisplay != null)
+            manager.RoundEndDisplay.gameObject.SetActive(false);
+
     }
 }
 
@@ -271,15 +279,59 @@ public class MatchOverState : IRoundState
     {
         Debug.Log("[MATCH ENGINE] -> Enter MatchOver State.");
 
+        if (manager.Object.HasStateAuthority)
+        {
+            manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
+        }
+
+        // show victory or defeat UI
+        if (manager.RoundEndDisplay != null)
+        {
+            // find out which player won
+            PlayerRef matchWinner = manager.GetOverallMatchWinner();
+            PlayerRef localPlayer = manager.Object.Runner.LocalPlayer;
+
+            if (localPlayer != matchWinner)
+            {
+                // display defeat
+                manager.RoundEndDisplay.ShowMatchDefeatOverlay();
+            }
+            else
+            {
+                manager.RoundEndDisplay.ShowMatchVictoryOverlay();
+            }
+        }
+
     }
 
     public void OnStateUpdate(GameManager manager)
     {
-    }
+        if (!manager.Object.HasStateAuthority) return;
 
+        if (manager.IsStateTimerExpired)
+        {
+            // grab path of scene
+            string targetPath = manager.Settings.PodiumScene.ScenePath;
+            int sceneBuildIndex = SceneUtility.GetBuildIndexByScenePath(targetPath);
+
+            if (sceneBuildIndex != -1)
+            {
+                Debug.Log($"[SERVER] -> Dynamically resolved index ({sceneBuildIndex}) for path: {targetPath}");
+                manager.Object.Runner.LoadScene(SceneRef.FromIndex(sceneBuildIndex), LoadSceneMode.Single);
+            }
+            else
+            {
+                Debug.LogError($"[ERROR] -> Scene at path '{targetPath}' is missing from your Build Settings list!");
+            }
+        }
+    }
+        
     public void OnStateExit(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Exit MatchOver State.");
+
+        if (manager.RoundEndDisplay != null)
+            manager.RoundEndDisplay.gameObject.SetActive(false);
     }
 }
 

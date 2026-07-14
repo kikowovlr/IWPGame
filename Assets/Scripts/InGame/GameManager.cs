@@ -2,11 +2,12 @@ using Fusion;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// centralised game manager script to handle rounds and games
 /// </summary>
-public class GameManager : NetworkBehaviour
+public class GameManager : NetworkBehaviour, IPlayerJoined
 {
     public static GameManager Instance { get; private set; }
 
@@ -25,6 +26,7 @@ public class GameManager : NetworkBehaviour
     private RoundState _lastTrackedState = RoundState.Setup;
     [Networked] private TickTimer StateTimer { get; set; }
     [HideInInspector] [Networked, OnChangedRender(nameof(OnSetupUIStateChanged))] public NetworkBool IsSetupUIActive { get; private set; }
+    private bool _firstRoundInitialised = false;
 
     // state machine tracking dictionary
     private Dictionary<RoundState, IRoundState> _stateMachine = new Dictionary<RoundState, IRoundState>();
@@ -75,6 +77,16 @@ public class GameManager : NetworkBehaviour
     /// </summary>
     public override void Spawned()
     {
+        DontDestroyOnLoad(gameObject);
+
+        if (Object.HasStateAuthority)
+        {
+            foreach (var player in Object.Runner.ActivePlayers)
+            {
+                TrackPlayer(player);
+            }
+        }
+
         _localLivingPlayers.Clear();
         for (int i = 0; i < _activePlayersInRound.Length; i++)
         {
@@ -84,15 +96,15 @@ public class GameManager : NetworkBehaviour
             }
         }
 
-        //_lastTrackedState = CurrentRoundState;
-        //if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState initialRoundState))
-        //{
-        //    Debug.Log($"[MATCH LOCAL] -> Initializing First Frame State: {CurrentRoundState}");
-        //    initialRoundState.OnStateEnter(this);
-        //}
+        _lastTrackedState = CurrentRoundState;
+        if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState initialRoundState))
+        {
+            Debug.Log($"[MATCH LOCAL] -> Initializing First Frame State: {CurrentRoundState}");
+            initialRoundState.OnStateEnter(this);
+        }
 
         // TODO: FOR DEBUGGING - SKIPS SETUP
-        _lastTrackedState = RoundState.RoundActive;
+        //_lastTrackedState = RoundState.RoundActive;
 
         // force UI update if server has activated round UI screen
         if (IsSetupUIActive)
@@ -100,23 +112,57 @@ public class GameManager : NetworkBehaviour
             OnSetupUIStateChanged();
         }
 
-        //// start game in setup state
-        //if (Object.HasStateAuthority)
-        //{
-        //    TransitionToState(RoundState.Setup);
-        //}
-
-        // TODO: FOR DEBUGGING - SKIPS SETUP
+        // start game in setup state
         if (Object.HasStateAuthority)
         {
-            SetGlobalInputRestrictions(InputRestrictions.None);
-            TransitionToState(RoundState.RoundActive);
+            TransitionToState(RoundState.Setup);
         }
+
+        //// TODO: FOR DEBUGGING - SKIPS SETUP
+        //if (Object.HasStateAuthority)
+        //{
+        //    SetGlobalInputRestrictions(InputRestrictions.None);
+        //    TransitionToState(RoundState.RoundActive);
+        //}
     }
+
+    //public void StartMatchEngine()
+    //{
+    //    if (!Object.HasStateAuthority) return;
+    //    if (_firstRoundInitialised) return;
+
+    //    Debug.Log("[MATCH ENGINE] -> Spawner confirmed all avatars are cooked. Initiating SetupState!");
+    //    _firstRoundInitialised = true;
+
+    //    TransitionToState(RoundState.Setup, _matchSettings.SetUpDuration);
+
+    //    if (_stateMachine.TryGetValue(RoundState.Setup, out IRoundState setupState))
+    //    {
+    //        setupState.OnStateEnter(this);
+    //    }
+    //}
 
     public override void FixedUpdateNetwork()
     {
+        if (IsCurrentlyOnPodiumScene()) return;
+
         if (!Object.HasStateAuthority) return;
+
+        // wait until fusion generates player network wrappers before starting
+        if (!_firstRoundInitialised)
+        {
+            int activeNetworkPlayers = Object.Runner.ActivePlayers.Count();
+            int fullyTrackedCount = GetTotalTrackedPlayerCount();
+
+            if (activeNetworkPlayers > 0 && fullyTrackedCount >= activeNetworkPlayers)
+            {
+                Debug.Log($"[MATCH ENGINE] -> Network arrays synced ({fullyTrackedCount}/{activeNetworkPlayers}). Commencing Setup state safely.");
+                _firstRoundInitialised = true;
+                TransitionToState(RoundState.Setup, _matchSettings.SetUpDuration);
+            }
+            else
+                return;
+        }
 
         // update state
         if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState currState))
@@ -160,7 +206,6 @@ public class GameManager : NetworkBehaviour
     /// registers player to tracked list when they spawn
     /// called by server/host
     /// </summary>
-    /// <param name="handler"></param>
     public void TrackPlayer(PlayerRef playerRef)
     {
         _localLivingPlayers.Add(playerRef);
@@ -252,8 +297,44 @@ public class GameManager : NetworkBehaviour
     /// </summary>
     public void ResetRoundEntities()
     {
-        // TODO: set spawn positions
-        // TODO: randomise spawn positions between players
+        if (!Object.HasStateAuthority) return;
+
+        var activePlayers = Object.Runner.ActivePlayers.ToList();
+
+        // grab randomised spawn pos
+        List<Transform> assignedSpawnPoints = SpawnManager.Instance.GetRandomisedSpawnPoints(activePlayers.Count);
+
+        _localLivingPlayers.Clear(); // clear old list
+
+        for (int i = 0; i < activePlayers.Count; i++)
+        {
+            PlayerRef playerRef = activePlayers[i];
+
+            if (Object.Runner.TryGetPlayerObject(playerRef, out NetworkObject playerObj))
+            {
+                TrackPlayer(playerRef);
+
+                Transform targetTransform = assignedSpawnPoints[i];
+
+                if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
+                {
+                    if (registry.RespawnHandler != null)
+                    {
+                        registry.RespawnHandler.TeleportToSpawnPoint(targetTransform.position, targetTransform.rotation);
+                    }
+
+                    if (registry.Health != null)
+                    {
+                        registry.Health.ResetHealthToMax();
+                    }
+
+                    if (registry.Elimination != null)
+                    {
+                        registry.Elimination.ResetLivesToMax();
+                    }
+                }
+            }
+        }
     }
 
     public int GetTotalRegisteredCount()
@@ -359,5 +440,81 @@ public class GameManager : NetworkBehaviour
     {
         if (Object.HasStateAuthority)
             LastRoundWinner = winnerId;
+    }
+
+    /// <summary>
+    /// checks if any player has reached the max crowns to win
+    /// </summary>
+    public bool IsMatchOver()
+    {
+        if (Object.Runner == null) return false;
+
+        // loop thru every player currently connected
+        foreach(PlayerRef playerRef in Object.Runner.ActivePlayers)
+        {
+            if (Object.Runner.TryGetPlayerObject(playerRef, out NetworkObject playerObj))
+            {
+                // Reach through your Service Locator pattern to check their stats
+                if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
+                {
+                    if (registry.Stats != null && registry.Stats.CrownCount >= _matchSettings.CrownsToWinMatch)
+                    {
+                        Debug.Log($"[MATCH ENGINE] -> Match over condition met! Player {playerRef} hit the crown limit.");
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// retrieve the player that won the match (most crowns)
+    /// </summary>
+    public PlayerRef GetOverallMatchWinner()
+    {
+        if (Object.Runner == null) return PlayerRef.None;
+
+        foreach (PlayerRef playerRef in Object.Runner.ActivePlayers)
+        {
+            if (Object.Runner.TryGetPlayerObject(playerRef, out NetworkObject playerObj))
+            {
+                if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
+                {
+                    if (registry.Stats != null && registry.Stats.CrownCount >= _matchSettings.CrownsToWinMatch)
+                        return playerRef;
+                }
+            }
+        }
+
+        return PlayerRef.None;
+    }
+
+    public void PlayerJoined(PlayerRef player)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        TrackPlayer(player);
+    }
+
+    public bool IsCurrentlyOnPodiumScene()
+    {
+        if (_matchSettings == null || _matchSettings.PodiumScene == null) return false;
+
+        Scene activeScene = SceneManager.GetActiveScene();
+        return activeScene.name == _matchSettings.PodiumScene.SceneName;
+    }
+
+    private int GetTotalTrackedPlayerCount()
+    {
+        int count = 0;
+        for (int i = 0; i < _activePlayersInRound.Length; i++)
+        {
+            if (_activePlayersInRound[i] != PlayerRef.None)
+                count++;
+        }
+
+        return count;
     }
 }
