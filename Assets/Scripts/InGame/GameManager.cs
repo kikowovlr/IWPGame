@@ -112,12 +112,6 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
             OnSetupUIStateChanged();
         }
 
-        // start game in setup state
-        if (Object.HasStateAuthority)
-        {
-            TransitionToState(RoundState.Setup);
-        }
-
         //// TODO: FOR DEBUGGING - SKIPS SETUP
         //if (Object.HasStateAuthority)
         //{
@@ -125,22 +119,6 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
         //    TransitionToState(RoundState.RoundActive);
         //}
     }
-
-    //public void StartMatchEngine()
-    //{
-    //    if (!Object.HasStateAuthority) return;
-    //    if (_firstRoundInitialised) return;
-
-    //    Debug.Log("[MATCH ENGINE] -> Spawner confirmed all avatars are cooked. Initiating SetupState!");
-    //    _firstRoundInitialised = true;
-
-    //    TransitionToState(RoundState.Setup, _matchSettings.SetUpDuration);
-
-    //    if (_stateMachine.TryGetValue(RoundState.Setup, out IRoundState setupState))
-    //    {
-    //        setupState.OnStateEnter(this);
-    //    }
-    //}
 
     public override void FixedUpdateNetwork()
     {
@@ -158,6 +136,8 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
             {
                 Debug.Log($"[MATCH ENGINE] -> Network arrays synced ({fullyTrackedCount}/{activeNetworkPlayers}). Commencing Setup state safely.");
                 _firstRoundInitialised = true;
+
+                ResetRoundEntities();
                 TransitionToState(RoundState.Setup, _matchSettings.SetUpDuration);
             }
             else
@@ -189,7 +169,15 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
             if (_stateMachine.TryGetValue(_lastTrackedState, out IRoundState oldState))
             {
                 Debug.Log($"[MATCH LOCAL] -> Exiting state: {_lastTrackedState}");
-                oldState.OnStateExit(this);
+                if (_lastTrackedState == RoundState.RoundOver && CurrentRoundState == RoundState.MatchOver)
+                {
+                    // Guard the display if we are specifically moving to the final match presentation screen
+                    Debug.Log("[MATCH ENGINE UI GUARD] -> Preserving end display for match screen.");
+                }
+                else
+                {
+                    oldState.OnStateExit(this);
+                }
             }
 
             if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState nextState))
@@ -417,23 +405,9 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
         if (winningStats != null)
         {
             winningStats.IncrementCrowns();
-
-            // check if shld end game or not
-            if (winningStats.CrownCount >= _matchSettings.CrownsToWinMatch)
-            {
-                Utils.DebugLog($"[MATCH END] -> Player {winner} achieved ultimate victory! Ending match.");
-                TransitionToState(RoundState.MatchOver, _matchSettings.MatchOverBufferDuration);
-            }
-            else
-            {
-                TransitionToState(RoundState.RoundOver, _matchSettings.RoundOverBufferDuration);
-            }
         }
-        else
-        {
-            Utils.DebugLog($"[SERVER] -> Cannot find winning player");
-            TransitionToState(RoundState.RoundOver, _matchSettings.RoundOverBufferDuration);
-        }
+        
+        TransitionToState(RoundState.RoundOver, _matchSettings.RoundOverBufferDuration);
     }
 
     public void SetRoundWinner(PlayerRef winnerId)
@@ -516,5 +490,20 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
         }
 
         return count;
+    }
+
+    /// <summary>
+    /// call this when exit game btn is clicked
+    /// </summary>
+    public void ShutdownAndDestroy()
+    {
+        Debug.Log("[MATCH ENGINE] -> Main menu return detected. Shutting down Match Manager systems.");
+
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+
+        Destroy(gameObject);
     }
 }

@@ -1052,7 +1052,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
         _mainCollider.enabled = false;
         _rb.isKinematic = true;
-        _rb.linearVelocity = Vector3.zero;
 
         if (_allChildRigidbodies == null) return;
 

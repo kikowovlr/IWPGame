@@ -15,6 +15,7 @@ public class PlayerEliminationHandler : NetworkBehaviour
 
     private PlayerHealthHandler _healthHandler;
     private NetworkPlayerController _playerController;
+    private PlayerComponentRegistry _registry;
 
     // events
     public static event Action<PlayerEliminationHandler> OnPlayerEliminated; // for showing local UI screen, triggering gray screen
@@ -22,23 +23,18 @@ public class PlayerEliminationHandler : NetworkBehaviour
 
     private void Awake()
     {
-        PlayerComponentRegistry registry = transform.root.GetComponent<PlayerComponentRegistry>();
-        if (registry != null)
+        _registry = transform.root.GetComponent<PlayerComponentRegistry>();
+        if (_registry != null)
         {
-            _healthHandler = registry.Health;
-            _playerController = registry.Controller;
+            _healthHandler = _registry.Health;
+            _playerController = _registry.Controller;
         }
     }
 
     public override void Spawned()
     {
         // init hearts on spawned
-        if (Object.HasStateAuthority)
-        {
-            CurrentLives = _maxLives;
-            IsEliminated = false;
-            IsSpectatorTransitionComplete = false;
-        }
+        ResetLivesToMax();
     }
 
     /// <summary>
@@ -84,7 +80,12 @@ public class PlayerEliminationHandler : NetworkBehaviour
         {
             OnPlayerEliminated?.Invoke(this);
             HandleLocalElimination();
+
+            if (!IsSpectatorTransitionComplete)
+                return;
         }
+        
+        _registry.VisualsOverrider.EvaluateVisualState(!IsEliminated);
     }
 
     /// <summary>
@@ -110,6 +111,10 @@ public class PlayerEliminationHandler : NetworkBehaviour
 
     public void ResetLivesToMax()
     {
+        if (!Object.HasStateAuthority) return;
+
         CurrentLives = _maxLives;
+        IsEliminated = false;
+        IsSpectatorTransitionComplete = false;
     }
 }

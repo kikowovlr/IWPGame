@@ -19,5 +19,5 @@ MonoBehaviour:
   _crownsToWinMatch: 3
   _podiumSceneRef:
     _sceneAsset: {fileID: 102900000, guid: 9568989c9f1abe043ba9010dc469b308, type: 3}
-    _scenePath: 
-    _sceneName: 
+    _scenePath: Assets/Scenes/EndGamePodiumScene.unity
+    _sceneName: EndGamePodiumScene

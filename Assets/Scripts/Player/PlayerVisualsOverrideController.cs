@@ -10,8 +10,8 @@ public class PlayerVisualsOverrideController : NetworkBehaviour
     private GameObject _activeCharacterVisualRoot;
     private NetworkPlayerController _playerController;
 
-    //[Networked, OnChangedRender(nameof(OnVisualStateChanged))]
-    //private NetworkBool IsVisualsEnabled { get; set; } = true;
+    [Networked, OnChangedRender(nameof(OnVisualStateChanged))]
+    private NetworkBool IsVisualsEnabled { get; set; } = true;
 
     private void Awake()
     {
@@ -34,6 +34,15 @@ public class PlayerVisualsOverrideController : NetworkBehaviour
         PlayerEliminationHandler.OnPlayerSpectatorReady -= HandleSpectatorReady;
     }
 
+    public override void Spawned()
+    {
+        ToggleSuppressionGating(!IsVisualsEnabled);
+        if (_activeCharacterVisualRoot != null)
+        {
+            _activeCharacterVisualRoot.SetActive(IsVisualsEnabled);
+        }
+    }
+
     public void UpdateActiveCharacterVisualReference(GameObject visualRoot)
     {
         _activeCharacterVisualRoot = visualRoot;
@@ -43,12 +52,16 @@ public class PlayerVisualsOverrideController : NetworkBehaviour
     {
         if (handler.Object != this.Object) return; // ensure only this player handles their own death by checking network object
 
+        ToggleSuppressionGating(true);
+    }
+
+    private void ToggleSuppressionGating(bool suppress)
+    {
         // shut down vfx and indicators
         if (_statusEffectManager != null)
-            _statusEffectManager.SuppressVisuals = true;
-
+            _statusEffectManager.SuppressVisuals = suppress;
         if (_abilityVisuals != null)
-            _abilityVisuals.SuppressVisuals = true;
+            _abilityVisuals.SuppressVisuals = suppress;
     }
 
     private void HandleSpectatorReady(PlayerEliminationHandler handler)
@@ -70,21 +83,47 @@ public class PlayerVisualsOverrideController : NetworkBehaviour
     /// <summary>
     /// call this from game manager when a new round begins
     /// activates all visuals again
-    /// </summary>
+    /// </summary>  
     public void EnableVisuals()
     {
-        if (_statusEffectManager != null) _statusEffectManager.SuppressVisuals = false;
-        if (_abilityVisuals != null) _abilityVisuals.SuppressVisuals = false;
+        if (!Object.HasStateAuthority) return;
+
+        // setting this fires OnVisualStateChanged for all clients
+        if (IsVisualsEnabled)
+        {
+            EvaluateVisualState(true);
+        }
+        else
+        {
+            IsVisualsEnabled = true;
+        }
+    }
+
+    private void OnVisualStateChanged()
+    {
+        EvaluateVisualState(IsVisualsEnabled);
+    }
+
+    public void EvaluateVisualState(bool areVisualsActive)
+    {
+        ToggleSuppressionGating(!areVisualsActive);
 
         if (_activeCharacterVisualRoot != null)
         {
-            _activeCharacterVisualRoot.SetActive(true);
+            _activeCharacterVisualRoot.SetActive(areVisualsActive);
         }
 
         if (_playerController != null)
         {
-            _playerController.EnableAllRagdollColliders();
-            _playerController.Recover(playAnim: false);
+            if (areVisualsActive)
+            {
+                _playerController.EnableAllRagdollColliders();
+                _playerController.Recover(playAnim: false);
+            }
+            else
+            {
+                _playerController.DisableAllRigidbodyColliders();
+            }
         }
     }
 }

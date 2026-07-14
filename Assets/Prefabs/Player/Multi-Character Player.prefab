@@ -251,7 +251,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61167e164cff9944daa035493c8718b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerEliminationHandler
-  _maxLives: 3
+  _maxLives: 1
   _spectatorTransitionDuration: 6
   _CurrentLives: 0
   _IsEliminated: 0

@@ -9,14 +9,20 @@ public class LeaderboardManager : MonoBehaviour
     public static LeaderboardManager Instance { get; private set; }
 
     private List<LeaderboardItemData> _sortedLeaderboard = new List<LeaderboardItemData>();
+    public List<LeaderboardItemData> GetSortedLeaderboard => _sortedLeaderboard;
 
     // events
     public static Action OnLeaderboardUpdated;
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else 
+            Destroy(gameObject);
     }
 
     private void OnEnable()
@@ -30,6 +36,7 @@ public class LeaderboardManager : MonoBehaviour
         NetworkPlayerStats.OnPlayerCrownsChanged -= RecalculateLeaderboardPlacements;
         NetworkPlayerStats.OnPlayerNameSynchronized -= TriggerLeaderboardRecalculation;
     }
+
 
     /// <summary>
     /// sorts leaderboard everytime a player's crown count changes
@@ -88,7 +95,6 @@ public class LeaderboardManager : MonoBehaviour
 
     public void InitialiseLeaderboard()
     {
-        Utils.DebugLog("[LEADERBOARD] -> Running baseline initialization match standings mapping.");
         RecalculateLeaderboardPlacements(PlayerRef.None, 0);
     }
 
@@ -98,5 +104,18 @@ public class LeaderboardManager : MonoBehaviour
         RecalculateLeaderboardPlacements(PlayerRef.None, 0);
     }
 
-    public List<LeaderboardItemData> GetSortedLeaderboard => _sortedLeaderboard;
+    /// <summary>
+    /// clean up instance, call when exiting to main menu
+    /// </summary>
+    public void ShutdownAndDestroy()
+    {
+        Debug.Log("[LEADERBOARD] -> Shutting down and clearing persistent stats.");
+
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+
+        Destroy(gameObject); 
+    }
 }

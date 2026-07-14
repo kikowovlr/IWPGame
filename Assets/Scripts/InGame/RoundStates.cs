@@ -219,17 +219,50 @@ public class RoundOverState : IRoundState
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
         }
 
-        // fetch current leaderboard -- not updated with winner yet
-        List<LeaderboardItemData> snapshot = new List<LeaderboardItemData>(
-            LeaderboardManager.Instance.GetSortedLeaderboard
-        );
+        PlayerRef winner = manager.LastRoundWinner;
+        List<LeaderboardItemData> snapshot = new List<LeaderboardItemData>();
+        var runner = manager.Object.Runner;
 
-        // display end of round UI
+        // reconstruct a raw snapshot directly from networked properties
+        foreach (PlayerRef player in runner.ActivePlayers)
+        {
+            if (runner.TryGetPlayerObject(player, out NetworkObject playerObj))
+            {
+                PlayerComponentRegistry registry = playerObj.GetComponent<PlayerComponentRegistry>();
+                if (registry != null && registry.Stats != null)
+                {
+                    string pName = !string.IsNullOrEmpty(registry.Stats.PlayerName)
+                        ? registry.Stats.PlayerName
+                        : $"Player {player.PlayerId}";
+
+                    Sprite pIcon = (registry.ActiveCharacterLinker != null && registry.ActiveCharacterLinker._characterData != null)
+                        ? registry.ActiveCharacterLinker._characterData.CharacterIcon
+                        : null;
+
+                    int currentCrowns = registry.Stats.CrownCount;
+
+                    // If the client's network buffer already received the updated crown count 
+                    // BEFORE OnStateEnter fires, we safely step it down by 1 to match the host's timeline.
+                    if (player == winner && !manager.Object.HasStateAuthority && currentCrowns > 0)
+                    {
+                        currentCrowns -= 1;
+                    }
+
+                    snapshot.Add(new LeaderboardItemData(player, pName, pIcon, currentCrowns));
+                }
+            }
+        }
+
+        snapshot = snapshot
+            .OrderByDescending(item => item.CrownCount)
+            .ThenBy(item => item.PlayerReference.PlayerId)
+            .ToList();
+
         if (manager.RoundEndDisplay != null)
         {
             manager.RoundEndDisplay.ShowRoundOverSequence(
                 snapshot,
-                manager.LastRoundWinner,
+                winner,
                 manager.CurrentRoundNumber
             );
         }
@@ -260,13 +293,39 @@ public class RoundOverState : IRoundState
     {
         Debug.Log("[MATCH ENGINE] -> Exit RoundOver State.");
 
-        // dont remove display if match over
-        if (manager.IsMatchOver())
-            return;
-
         if (manager.RoundEndDisplay != null)
             manager.RoundEndDisplay.gameObject.SetActive(false);
+    }
 
+
+    private bool WillMatchBeOver(GameManager manager)
+    {
+        if (manager.IsMatchOver())
+            return true;
+
+        // see if pending round winner about to hit crown win threshold
+        PlayerRef winner = manager.LastRoundWinner;
+        if (winner != PlayerRef.None && manager.Settings != null)
+        {
+            // Find the player's current stats component directly
+            if (manager.Object.Runner.TryGetPlayerObject(winner, out NetworkObject playerObj))
+            {
+                PlayerComponentRegistry registry = playerObj.GetComponent<PlayerComponentRegistry>();
+                if (registry != null && registry.Stats != null)
+                {
+                    int currentCrowns = registry.Stats.CrownCount;
+                    int targetToWin = manager.Settings.CrownsToWinMatch;
+
+                    if (currentCrowns >= targetToWin || (currentCrowns + 1) >= targetToWin)
+                    {
+                        Debug.Log($"[MATCH ENGINE EXIT GUARD] -> Match termination detected early for Player {winner.PlayerId}. Guarding UI display closure.");
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }
 

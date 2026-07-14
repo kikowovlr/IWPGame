@@ -56,6 +56,13 @@ public class RoundEndDisplayController : MonoBehaviour
             _leaderboardContainer.SetActive(false);
         }
 
+        int historicalWinnerCrowns = 0;
+        var winnerData = oldStandings.FirstOrDefault(item => item.PlayerReference == roundWinner);
+        if (winnerData != null)
+        {
+            historicalWinnerCrowns = winnerData.CrownCount;
+        }
+
         // populate rows based on old standings
         for (int i = 0; i < oldStandings.Count; i++)
         {
@@ -71,11 +78,28 @@ public class RoundEndDisplayController : MonoBehaviour
             }
         }
 
+        List<LeaderboardItemData> newStandings = CalculateSimulatedStandings(oldStandings, roundWinner);
+
         // show animated changes
-        StartCoroutine(LeaderboardUpdateSequence(roundWinner));
+        StartCoroutine(LeaderboardUpdateSequence(roundWinner, historicalWinnerCrowns, newStandings));
     }
 
-    private IEnumerator LeaderboardUpdateSequence(PlayerRef winner)
+    private List<LeaderboardItemData> CalculateSimulatedStandings(List<LeaderboardItemData> baseStandings, PlayerRef winner)
+    {   
+        List<LeaderboardItemData> simulated = baseStandings.Select(item => new LeaderboardItemData(
+            item.PlayerReference,
+            item.PlayerName, 
+            item.CharacterIcon, 
+            item.PlayerReference == winner ? item.CrownCount + 1 : item.CrownCount 
+        )).ToList();
+
+        return simulated
+                    .OrderByDescending(item => item.CrownCount)
+                    .ThenBy(item => item.PlayerReference.PlayerId)
+                    .ToList();
+    }
+
+    private IEnumerator LeaderboardUpdateSequence(PlayerRef winner, int winnerPastCrownCount, List<LeaderboardItemData> newStandings)
     {
         yield return new WaitForSeconds(_showLBDelay);
 
@@ -91,22 +115,12 @@ public class RoundEndDisplayController : MonoBehaviour
         yield return new WaitForSeconds(_delayUntilLBUpdate);
 
         LeaderboardRowUI winnerRow = _spawnedRows.Find(r => r.TargetPlayer == winner);
-        if (winnerRow != null)
+        if (winnerRow != null && winner != PlayerRef.None)
         {
-            // decide which crown slot to fill
-            var absoluteDataMatch = LeaderboardManager.Instance.GetSortedLeaderboard
-                .FirstOrDefault(item => item.PlayerReference == winner); // return first match, if cannot find, returns a default null value
-                
-            if (absoluteDataMatch != null)
-            {
-                int oldCrownIndex = Mathf.Max(0, absoluteDataMatch.CrownCount - 1);
-                winnerRow.AnimateNewCrown(oldCrownIndex);
-            }
+            winnerRow.AnimateNewCrown(winnerPastCrownCount);
         }
 
         // resort n slide rows based on fresh timeline data
-        List<LeaderboardItemData> newStandings = LeaderboardManager.Instance.GetSortedLeaderboard;
-
         for (int newIndex = 0; newIndex < newStandings.Count; newIndex++)
         {
             PlayerRef targetPlayer = newStandings[newIndex].PlayerReference;
@@ -118,7 +132,6 @@ public class RoundEndDisplayController : MonoBehaviour
             {
                 // calculate new position
                 float targetY = -newIndex * _rowSpacingY;
-
                 rowToMove.AnimateToNewPosition(targetY, newIndex + 1, _animationDuration);
             }
         }

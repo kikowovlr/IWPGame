@@ -51,4 +51,14 @@ public class MatchSettings : ScriptableObject
     public float MatchOverBufferDuration => _matchOverBufferDuration;
     public int CrownsToWinMatch => _crownsToWinMatch;
     public SceneReference PodiumScene => _podiumSceneRef;
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (_podiumSceneRef != null)
+        {
+            _podiumSceneRef.OnValidate();
+        }
+    }
+#endif
 }
