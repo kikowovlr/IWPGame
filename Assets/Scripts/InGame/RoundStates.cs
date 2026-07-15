@@ -296,37 +296,6 @@ public class RoundOverState : IRoundState
         if (manager.RoundEndDisplay != null)
             manager.RoundEndDisplay.gameObject.SetActive(false);
     }
-
-
-    private bool WillMatchBeOver(GameManager manager)
-    {
-        if (manager.IsMatchOver())
-            return true;
-
-        // see if pending round winner about to hit crown win threshold
-        PlayerRef winner = manager.LastRoundWinner;
-        if (winner != PlayerRef.None && manager.Settings != null)
-        {
-            // Find the player's current stats component directly
-            if (manager.Object.Runner.TryGetPlayerObject(winner, out NetworkObject playerObj))
-            {
-                PlayerComponentRegistry registry = playerObj.GetComponent<PlayerComponentRegistry>();
-                if (registry != null && registry.Stats != null)
-                {
-                    int currentCrowns = registry.Stats.CrownCount;
-                    int targetToWin = manager.Settings.CrownsToWinMatch;
-
-                    if (currentCrowns >= targetToWin || (currentCrowns + 1) >= targetToWin)
-                    {
-                        Debug.Log($"[MATCH ENGINE EXIT GUARD] -> Match termination detected early for Player {winner.PlayerId}. Guarding UI display closure.");
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
 }
 
 // someone hits 3 crowns, "GAME OVER" UI, transition to win screen podium
@@ -374,15 +343,17 @@ public class MatchOverState : IRoundState
             int sceneBuildIndex = SceneUtility.GetBuildIndexByScenePath(targetPath);
 
             if (sceneBuildIndex != -1)
-            {
-                Debug.Log($"[SERVER] -> Dynamically resolved index ({sceneBuildIndex}) for path: {targetPath}");
-                manager.Object.Runner.LoadScene(SceneRef.FromIndex(sceneBuildIndex), LoadSceneMode.Single);
-            }
-            else
-            {
-                Debug.LogError($"[ERROR] -> Scene at path '{targetPath}' is missing from your Build Settings list!");
-            }
+                manager.StartCoroutine(TransitionAndLoad(manager, sceneBuildIndex));
         }
+    }
+
+    private IEnumerator TransitionAndLoad(GameManager manager, int sceneBuildIndex)
+    {
+        // tell all clients to play transition
+        if (LevelLoader.Instance != null)
+            yield return manager.StartCoroutine(LevelLoader.Instance.FadeToBlack()); // transition call
+
+        manager.Object.Runner.LoadScene(SceneRef.FromIndex(sceneBuildIndex), LoadSceneMode.Single);
     }
         
     public void OnStateExit(GameManager manager)
