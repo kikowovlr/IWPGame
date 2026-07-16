@@ -18,6 +18,12 @@ public class MainMenuUIController : MonoBehaviour
     [SerializeField] private TMP_InputField _nameInputField;
     private const string NAME_PREFS_KEY = "SavedPlayerName";
 
+    private void Awake()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
     private void Start()
     {
         // initial UI

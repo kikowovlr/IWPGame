@@ -17,19 +17,16 @@ public class RespawnHandler : NetworkBehaviour
         if (_registry != null)
             _registry.VisualsOverrider.EnableVisuals();
 
-        if (!Object.HasStateAuthority) return;
+        transform.position = position;
+        transform.rotation = rotation;
 
-        // force photon fusion network layers to snap immediately
-        NetworkRigidbody3D rb = _registry.Controller.NetworkedRb;
-
-        if (rb != null)
+        if (Object.HasStateAuthority)
         {
-            rb.Teleport(position, rotation);
-        }
-        else
-        {
-            transform.position = position;
-            transform.rotation = rotation;
+            NetworkRigidbody3D rb = _registry.Controller.NetworkedRb;
+            if (rb != null)
+            {
+                rb.Teleport(position, rotation);
+            }
         }
     }
 }

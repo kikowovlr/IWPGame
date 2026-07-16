@@ -35,4 +35,9 @@ public class SpawnManager : MonoBehaviour
 
         return selectedPoints;
     }
+
+    public List<Transform> GetAllSpawnPoints()
+    {
+        return new List<Transform>(_spawnPoints);
+    }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class LeaderboardManager : MonoBehaviour
+public class LeaderboardManager : MonoBehaviour, ICleanup
 {
     public static LeaderboardManager Instance { get; private set; }
 
@@ -104,18 +104,12 @@ public class LeaderboardManager : MonoBehaviour
         RecalculateLeaderboardPlacements(PlayerRef.None, 0);
     }
 
-    /// <summary>
-    /// clean up instance, call when exiting to main menu
-    /// </summary>
-    public void ShutdownAndDestroy()
+    public static void ResetInstance()
     {
-        Debug.Log("[LEADERBOARD] -> Shutting down and clearing persistent stats.");
+        Instance = null;
+    }
 
-        if (Instance == this)
-        {
-            Instance = null;
-        }
-
-        Destroy(gameObject); 
+    public void Cleanup()
+    {
     }
 }

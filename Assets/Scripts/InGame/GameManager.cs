@@ -1,4 +1,6 @@
 using Fusion;
+using Fusion.Addons.Physics;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,7 +9,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// centralised game manager script to handle rounds and games
 /// </summary>
-public class GameManager : NetworkBehaviour, IPlayerJoined
+public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
 {
     public static GameManager Instance { get; private set; }
 
@@ -280,19 +282,15 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public void ResetRoundEntities()
     {
         if (!Object.HasStateAuthority) return;
 
         var activePlayers = Object.Runner.ActivePlayers.ToList();
+        _localLivingPlayers.Clear(); // clear old list
 
         // grab randomised spawn pos
-        List<Transform> assignedSpawnPoints = SpawnManager.Instance.GetRandomisedSpawnPoints(activePlayers.Count);
-
-        _localLivingPlayers.Clear(); // clear old list
+        List<Transform> allSpawnPoints = SpawnManager.Instance.GetAllSpawnPoints();
 
         for (int i = 0; i < activePlayers.Count; i++)
         {
@@ -302,25 +300,32 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
             {
                 TrackPlayer(playerRef);
 
-                Transform targetTransform = assignedSpawnPoints[i];
-
-                if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
+                if (i < allSpawnPoints.Count)
                 {
-                    if (registry.RespawnHandler != null)
-                    {
-                        registry.RespawnHandler.TeleportToSpawnPoint(targetTransform.position, targetTransform.rotation);
-                    }
-
-                    if (registry.Health != null)
-                    {
-                        registry.Health.ResetHealthToMax();
-                    }
-
-                    if (registry.Elimination != null)
-                    {
-                        registry.Elimination.ResetLivesToMax();
-                    }
+                    Transform targetTransform = allSpawnPoints[i];
+                    TeleportAndResetPlayer(playerObj, targetTransform);
                 }
+            }
+        }
+    }
+
+    private void TeleportAndResetPlayer(NetworkObject playerObj, Transform targetTransform)
+    {
+        if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
+        {
+            if (registry.RespawnHandler != null)
+            {
+                registry.RespawnHandler.TeleportToSpawnPoint(targetTransform.position, targetTransform.rotation);
+            }
+
+            if (registry.Health != null)
+            {
+                registry.Health.ResetHealthToMax();
+            }
+
+            if (registry.Elimination != null)
+            {
+                registry.Elimination.ResetLivesToMax();
             }
         }
     }
@@ -469,7 +474,51 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
     {
         if (!Object.HasStateAuthority) return;
 
+        if (CurrentRoundState == RoundState.Setup)
+        {
+            StartCoroutine(TeleportLateJoinerDelayed(player));
+        }
+
         TrackPlayer(player);
+    }
+
+    private IEnumerator TeleportLateJoinerDelayed(PlayerRef player)
+    {
+        float timeout = 2f;
+        float elapsed = 0f;
+        NetworkObject playerObj = null;
+
+        // Wait until the spawned Player Object is linked and registered by Fusion
+        while (playerObj == null && elapsed < timeout)
+        {
+            Runner.TryGetPlayerObject(player, out playerObj);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (playerObj != null)
+        {
+            // 1. Find this player's specific stable index in the match
+            int playerIndex = -1;
+            for (int i = 0; i < _activePlayersInRound.Length; i++)
+            {
+                if (_activePlayersInRound[i] == player)
+                {
+                    playerIndex = i;
+                    break;
+                }
+            }
+
+            // 2. Get the master list of spawn points
+            List<Transform> allSpawnPoints = SpawnManager.Instance.GetAllSpawnPoints();
+
+            // 3. Teleport them to their dedicated index spawn point
+            if (playerIndex != -1 && playerIndex < allSpawnPoints.Count)
+            {
+                Transform spawnPoint = allSpawnPoints[playerIndex];
+                TeleportAndResetPlayer(playerObj, spawnPoint);
+            }
+        }
     }
 
     public bool IsCurrentlyOnPodiumScene()
@@ -492,18 +541,39 @@ public class GameManager : NetworkBehaviour, IPlayerJoined
         return count;
     }
 
-    /// <summary>
-    /// call this when exit game btn is clicked
-    /// </summary>
-    public void ShutdownAndDestroy()
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_PlayTransitionOut()
     {
-        Debug.Log("[MATCH ENGINE] -> Main menu return detected. Shutting down Match Manager systems.");
+        if (LevelLoader.Instance != null)
+            StartCoroutine(PlayLocalTransition());
+    }
 
-        if (Instance == this)
+    private IEnumerator PlayLocalTransition()
+    {
+        yield return LevelLoader.Instance.TransitionOut();
+
+        if (Runner != null)
         {
-            Instance = null;
+            foreach (var player in Runner.ActivePlayers)
+            {
+                if (Runner.TryGetPlayerObject(player, out NetworkObject playerObj))
+                {
+                    var nrb = playerObj.GetComponent<NetworkRigidbody3D>();
+                    if (nrb != null)
+                    {
+                        nrb.enabled = false;
+                    }
+                }
+            }
         }
+    }
 
-        Destroy(gameObject);
+    public static void ResetInstance()
+    {
+        Instance = null;
+    }
+
+    public void Cleanup()
+    {
     }
 }

@@ -193,7 +193,9 @@ public class PlayerHealthHandler : NetworkBehaviour
 
     private void Knockout()
     {
-        if (_eliminationHandler != null)
+        bool isPodiumScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Podium");
+
+        if (_eliminationHandler != null && !isPodiumScene)
             _eliminationHandler.DeductLife();   
 
         // calculate dynamic duration -> negative health, longer knockedout time

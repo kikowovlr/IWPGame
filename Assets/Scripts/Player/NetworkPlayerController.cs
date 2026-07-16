@@ -72,7 +72,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [SerializeField] private float _rideHeight = 0.75f; // ideal dist from player center to ground
     [SerializeField] private float _rideSpringStrength = 200f; // how forcefully it snaps back up to ride height
     [SerializeField] private float _rideSpringDampener = 20f; // prevents character from bouncing
+    [SerializeField] private float _normalSmoothSpeed = 15f;
     private Vector3 _groundNormal = Vector3.up;
+    private Vector3 _smoothedGroundNormal = Vector3.up;
 
     //Raycasts
     private readonly RaycastHit[] _raycastHits = new RaycastHit[10];
@@ -540,8 +542,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 _rb.linearVelocity = new Vector3(horizontalVelocity.x, currentVelocity.y, horizontalVelocity.z);
             }
         }
-
-        //_rb.angularVelocity = Vector3.MoveTowards(_rb.angularVelocity, Vector3.zero, _brakeStrength * Runner.DeltaTime);
     }
 
     public override void Render()
@@ -1210,6 +1210,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public override void Spawned()
     {
         base.Spawned();
+        DontDestroyOnLoad(gameObject);
 
         Transform finalCameraTarget = _cameraTarget != null ? _cameraTarget : this.transform;
 

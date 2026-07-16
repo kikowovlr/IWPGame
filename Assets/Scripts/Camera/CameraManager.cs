@@ -26,6 +26,9 @@ public class CameraManager : MonoBehaviour
     private CameraMode _currentMode = CameraMode.StaticOverview;
     private SpectatorViewMode _currentViewMode = SpectatorViewMode.Overview;
 
+    private HashSet<string> _cursorRequests = new HashSet<string>(); // store requests for cursor -> cursor only disappears if all stop requesting
+    public bool IsCursorVisible => _cursorRequests.Count > 0;
+
     // events
     public static event Action OnCameraSwapRequested; // flag to signal spectator input for camera swap
     public static event Action OnCameraCutExecuted; // flag to signal the actual camera swap
@@ -132,19 +135,21 @@ public class CameraManager : MonoBehaviour
         _spectatorCam.Priority = (mode == CameraMode.SpectatingPlayer) ? 10 : 0;
         _staticSpectatorCam.Priority = (mode == CameraMode.StaticOverview) ? 10 : 0;
 
-        // handle mouse cursor locking based on mode
-        if (mode == CameraMode.StaticOverview)
-        {
-            // free cursor
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else
-        {
-            // lock cursor n hide to allow for free camera movement
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        //// handle mouse cursor locking based on mode
+        //if (mode == CameraMode.StaticOverview)
+        //{
+        //    // free cursor
+        //    Cursor.lockState = CursorLockMode.None;
+        //    Cursor.visible = true;
+        //}
+        //else
+        //{
+        //    // lock cursor n hide to allow for free camera movement
+        //    Cursor.lockState = CursorLockMode.Locked;
+        //    Cursor.visible = false;
+        //}
+
+        UpdateCursorState();
 
         // identify active cam target
         CinemachineCamera activeCam = null;
@@ -384,12 +389,6 @@ public class CameraManager : MonoBehaviour
                 }
             }
 
-        //// ensure input is enabled if we arent in gameplay
-        //if (!_axisController.enabled && _currentMode != CameraMode.Gameplay)
-        //{
-        //    _axisController.enabled = true;
-        //}
-
         SetCinemachineInputLocked(shouldLockCamera);
     }
 
@@ -417,5 +416,34 @@ public class CameraManager : MonoBehaviour
     {
         if (_brain != null)
             _brain.DefaultBlend = blend;
+    }
+
+    public void RequestCursorVisible(string requesterId, bool visible)
+    {
+        if (visible)
+            _cursorRequests.Add(requesterId);
+        else
+            _cursorRequests.Remove(requesterId);
+
+        UpdateCursorState();
+    }
+
+    private void UpdateCursorState()
+    {
+        bool showCursor = IsCursorVisible || _currentMode != CameraMode.Gameplay;
+
+        Cursor.lockState = showCursor ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = showCursor;
+    }
+
+    private void OnDestroy()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 }

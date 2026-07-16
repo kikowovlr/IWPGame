@@ -1,4 +1,6 @@
 using Fusion;
+using Fusion.Addons.Physics;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -302,6 +304,7 @@ public class RoundOverState : IRoundState
 public class MatchOverState : IRoundState
 {
     public RoundState StateType => RoundState.MatchOver;
+    private bool _hasStartedTransition = false;
 
     public void OnStateEnter(GameManager manager)
     {
@@ -336,8 +339,10 @@ public class MatchOverState : IRoundState
     {
         if (!manager.Object.HasStateAuthority) return;
 
-        if (manager.IsStateTimerExpired)
+        if (manager.IsStateTimerExpired && !_hasStartedTransition)
         {
+            _hasStartedTransition = true;
+
             // grab path of scene
             string targetPath = manager.Settings.PodiumScene.ScenePath;
             int sceneBuildIndex = SceneUtility.GetBuildIndexByScenePath(targetPath);
@@ -350,8 +355,9 @@ public class MatchOverState : IRoundState
     private IEnumerator TransitionAndLoad(GameManager manager, int sceneBuildIndex)
     {
         // tell all clients to play transition
-        if (LevelLoader.Instance != null)
-            yield return manager.StartCoroutine(LevelLoader.Instance.FadeToBlack()); // transition call
+        manager.RPC_PlayTransitionOut();
+
+        yield return new WaitForSeconds(LevelLoader.Instance.TransitionTime);
 
         manager.Object.Runner.LoadScene(SceneRef.FromIndex(sceneBuildIndex), LoadSceneMode.Single);
     }
