@@ -545,11 +545,11 @@ MonoBehaviour:
   _TargetSpeedMultiplier: 1
   _speedLerpRate: 2
   _jumpForce: 15
-  _gravity: 10
+  _gravity: 13
   _jumpCooldown: 0.15
   _groundCheckRadius: 0.05
   _groundCheckDist: 0.2
-  _unconsciousMass: 0.1
+  _unconsciousMass: 0.15
   _maxSlopeAngle: 55
   _slopeForceMultiplier: 4
   _stickForce: 40
@@ -557,6 +557,9 @@ MonoBehaviour:
   _rideHeight: 0.75
   _rideSpringStrength: 200
   _rideSpringDampener: 20
+  _normalSmoothSpeed: 15
+  _idleAnchorSpringStrength: 100
+  _idleAnchorDampening: 20
   _NetworkPhysicsSyncedRotation: []
   _animationSpeedDamp: 2
   HoldThreshold: 0.2

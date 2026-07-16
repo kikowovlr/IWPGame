@@ -22,6 +22,7 @@ public struct AbilityState : INetworkStruct
     public NetworkBool _isCharging;
     public NetworkBool _isDashing;
     public float _dashDurationTimer;
+    public int _noFloorTickCount;
 
     // to keep track of hit targets
     // fixed capacity array to avoid heap garbage, will only store the last 8 hit targets

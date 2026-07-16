@@ -63,6 +63,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private bool _isRunning;
     private bool _isKnockedOut = false; // == non-active ragdoll
     private bool _isGrabbingActive = false;
+    public bool IsGrounded => _isGrounded;
 
     //Slope handling
     [SerializeField] private float _maxSlopeAngle = 55f;
@@ -73,8 +74,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [SerializeField] private float _rideSpringStrength = 200f; // how forcefully it snaps back up to ride height
     [SerializeField] private float _rideSpringDampener = 20f; // prevents character from bouncing
     [SerializeField] private float _normalSmoothSpeed = 15f;
+    [SerializeField] private float _idleAnchorSpringStrength = 100f;
+    [SerializeField] private float _idleAnchorDampening = 20f;
     private Vector3 _groundNormal = Vector3.up;
     private Vector3 _smoothedGroundNormal = Vector3.up;
+    private Vector3 _idleAnchorPosition;
+    private bool _hasIdleAnchor = false;
+
+    public Vector3 GroundNormal => _groundNormal;
 
     //Raycasts
     private readonly RaycastHit[] _raycastHits = new RaycastHit[10];
@@ -165,6 +172,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private void Awake()
     {
         _initialJointRotation = _mainJoint.transform.localRotation;
+        _rb.useGravity = false;
 
         Registry = GetComponent<PlayerComponentRegistry>();
         if (Registry != null)
@@ -312,7 +320,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 }
 
                 // MOVEMENT GATE
-                if (IsInPhysicsRecovery)
+                bool abilityControllingVelocity = _equippedAbility != null && CurrentAbilityState._isDashing;
+
+                if (abilityControllingVelocity)
+                {
+                    // ability owns velocity, dont apply idle brakes
+                    _hasIdleAnchor = false;
+                    targetAnimSpeed = 1.0f;
+                }
+                else if (IsInPhysicsRecovery)
                 {
                     targetAnimSpeed = 0f;
                 }
@@ -364,11 +380,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     // if current ability is requesting for movement
                     if (CurrentAbilityState._isDashing)
                     {
-                        // keep current y vel
-                        float currentVerticalY = _rb.linearVelocity.y;
                         Vector3 finalVelocity = CurrentAbilityState._customVelocity;
-                        finalVelocity.y = currentVerticalY;
-
+                        // only fall back to gravity's vertical velocity if airborne (ability doesn't know about falling)
+                        if (!_isGrounded)
+                        {
+                            finalVelocity.y = _rb.linearVelocity.y;
+                        }
                         _rb.linearVelocity = finalVelocity;
                     }
                 }
@@ -410,11 +427,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
     private void ProcessInputMovement(NetworkInputData networkInputData, float inputMagnitude)
     {
+        _hasIdleAnchor = false; // clear anchor while actively moving
+
         Vector3 moveDir = CalculateMoveDirection(networkInputData);
         HandleRotation(moveDir);
 
         // calculate max speed based on speed multiplier
         float dynamicMaxSpeed = _maxSpeed * CurrentSpeedMultiplier;
+
+        // counter velocity that isnt aligned with where player is going
+        // prevents diagonal carry-overs when input dir flips
+        Vector3 horizontalVel = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+        Vector3 desiredFlatDir = new Vector3(moveDir.x, 0f, moveDir.z).normalized;
+        Vector3 lateralVel = horizontalVel - Vector3.Project(horizontalVel, desiredFlatDir);
+        _rb.AddForce(-lateralVel * _brakeStrength, ForceMode.Force);
 
         if (_rb.linearVelocity.magnitude < dynamicMaxSpeed * inputMagnitude)
         {
@@ -528,19 +554,37 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             {
                 // stop horizontal sliding on hills
                 _rb.linearVelocity = new Vector3(0f, _rb.linearVelocity.y, 0f);
-                //_rb.angularVelocity = Vector3.zero;
 
                 // counteract gravity
-                _rb.AddForce(-Physics.gravity * _rb.mass, ForceMode.Force);
+                _rb.AddForce(Vector3.up * _gravity * _rb.mass, ForceMode.Force);
+
+                // lock an anchor the moment we go idle on a slope
+                if (!_hasIdleAnchor)
+                {
+                    _idleAnchorPosition = _rb.position;
+                    _hasIdleAnchor = true;
+                }
+
+                // spring back toward anchor if there is residual drift
+                Vector3 offset = _idleAnchorPosition - _rb.position;
+                offset.y = 0f;
+
+                Vector3 correctiveForce = (offset * _idleAnchorSpringStrength) - (currentVelocity * _idleAnchorDampening);
+                _rb.AddForce(correctiveForce, ForceMode.Force);
             }
             else
             {
+                _hasIdleAnchor = false;
                 // deceleration on flat ground
                 Vector3 horizontalVelocity = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
                 // brake
                 horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, _brakeStrength * Runner.DeltaTime);
                 _rb.linearVelocity = new Vector3(horizontalVelocity.x, currentVelocity.y, horizontalVelocity.z);
             }
+        }
+        else
+        {
+            _hasIdleAnchor = false;
         }
     }
 
@@ -572,7 +616,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     {
         // assume we are not grounded
         _isGrounded = false;
-        _groundNormal = Vector3.up;
         Vector3 castOrigin = _rb.position + (Vector3.up * 0.2f);
 
         // check if we are grounded
@@ -601,8 +644,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         if (foundValidHit)
         {
             _isGrounded = true;
-            _groundNormal = _groundHit.normal;
+            // smooth normal instead of micro bumps due to uneven floor
+            _smoothedGroundNormal = Vector3.Slerp(_smoothedGroundNormal, _groundHit.normal, Runner.DeltaTime * _normalSmoothSpeed);
         }
+        else
+        {
+            _smoothedGroundNormal = Vector3.Slerp(_smoothedGroundNormal, Vector3.up, Runner.DeltaTime * _normalSmoothSpeed);
+        }
+
+        _groundNormal = _smoothedGroundNormal;
     }
 
     private void ApplyGravity()
@@ -647,8 +697,13 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         // if grounded, tilt dir to match slope of ground
         if (_isGrounded && rawMoveDir.sqrMagnitude > 0.01f)
         {
-            Vector3 slopeMoveDir = Vector3.ProjectOnPlane(rawMoveDir, _groundNormal).normalized;
-            return slopeMoveDir * rawMoveDir.magnitude; // keep input scaling accurate
+            float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
+
+            if (slopeAngle > 3f)
+            {
+                Quaternion slopeRotation = Quaternion.FromToRotation(Vector3.up, _groundNormal);
+                return slopeRotation * rawMoveDir; // keep input scaling accurate
+            }
         }
 
         return rawMoveDir;

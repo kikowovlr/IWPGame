@@ -35,6 +35,7 @@ public class RamAbilitySO : AbilitySO
     [Header("Braking")]
     [SerializeField] private LayerMask _floorLayer;
     [SerializeField] private float _edgeCheckDistance = 1.5f; // how far ahead to look for ledge
+    [SerializeField] private float _sphereCastRadius = 0.25f;
 
     [Header("Collision Settings")]
     [SerializeField] private float _range = 2f;
@@ -63,6 +64,7 @@ public class RamAbilitySO : AbilitySO
 
         state._isDashing = false;
         state._chargeTime = 0f;
+        state._noFloorTickCount = 0;
 
         player.Registry.Health.ResetAccumulatedDamageCounter();
 
@@ -179,8 +181,6 @@ public class RamAbilitySO : AbilitySO
                 Vector3 knockbackDir = (enemy.transform.position - player.transform.position).normalized;
                 knockbackDir.y = 1.5f; // lift slightly
 
-                Utils.DebugLog($"[Goat Ram] Box Impact on {enemy.name}! Applied Force: {finalKnockback}");
-
                 Vector3 finalForceVector = knockbackDir * finalKnockback;
                 enemy.ApplyKnockback(finalForceVector, ForceMode.Impulse);
 
@@ -255,19 +255,32 @@ public class RamAbilitySO : AbilitySO
 
         Gizmos.matrix = oldMatrix;
 
-        // ray
-        Vector3 rayOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.2f);
-        Vector3 rayDirection = Vector3.down * 2.0f;
-        if (state._isDashing)
+        // ledge / floor-ahead spherecast visualization
+        Vector3 sphereOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.3f);
+        float sphereRadius = _sphereCastRadius; // keep in sync with CheckFloorAhead
+        float castLength = _edgeCheckDistance;    // keep in sync with CheckFloorAhead
+
+        bool hit = Physics.SphereCast(sphereOrigin, sphereRadius, Vector3.down, out RaycastHit hitInfo, castLength, _floorLayer);
+
+        // color reflects real detection result — green = floor found, red = ledge (no floor)
+        Color castColor = hit ? new Color(0f, 1f, 0f, 0.5f) : new Color(1f, 0f, 0f, 0.6f);
+
+        Gizmos.color = castColor;
+        Gizmos.DrawWireSphere(sphereOrigin, sphereRadius);
+
+        Vector3 sphereEnd = hit
+            ? sphereOrigin + (Vector3.down * hitInfo.distance)
+            : sphereOrigin + (Vector3.down * castLength);
+
+        Gizmos.DrawWireSphere(sphereEnd, sphereRadius);
+        Gizmos.DrawLine(sphereOrigin, sphereEnd);
+
+        // show consecutive-miss debounce count as a quick visual — more filled = closer to triggering a real ledge stop
+        if (!hit)
         {
-            Gizmos.color = Color.yellow; // High visibility neon yellow warning ray while active!
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(sphereOrigin + Vector3.up * 0.1f, sphereOrigin + Vector3.up * (0.1f + state._noFloorTickCount * 0.15f));
         }
-        else
-        {
-            Gizmos.color = new Color(1f, 1f, 0f, 0.25f); // Soft, faded yellow when parked
-        }
-        Gizmos.DrawLine(rayOrigin, rayOrigin + rayDirection);
-        Gizmos.DrawWireSphere(rayOrigin + rayDirection, 0.05f);
     }
 
     /// <summary>
@@ -299,26 +312,44 @@ public class RamAbilitySO : AbilitySO
             state._dashDurationTimer -= player.Runner.DeltaTime;
 
             // braking system
-            Vector3 rayOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.2f); // move up a bit to ensure not always colliding with floor below fit
-            bool isFloorAhead = player.Runner.GetPhysicsScene().Raycast(rayOrigin, Vector3.down, 2.0f, _floorLayer);
+            bool isFloorAhead = CheckFloorAhead(player);
+
+            if (!isFloorAhead)
+                state._noFloorTickCount++;
+            else
+                state._noFloorTickCount = 0;
+
+            const int ledgeConfirmTicks = 3;
+            bool realLedge = state._noFloorTickCount >= ledgeConfirmTicks;
 
             // calculate ram power
             float chargePercent = Mathf.Clamp01(state._chargeTime / _maxChargeTime);
             float targetMoveSpeed = _baseRamSpeed * Mathf.Lerp(1f, _maxRamSpeedMultiplier, chargePercent);
 
-            // no floor ahead - try halting
-            if (!isFloorAhead)
+            // floor ahead - try halting
+            if (!realLedge)
             {
-                Utils.DebugLogWarning("[Goat Ram] LEDGE DETECTED! Deploying safety skids!");
+                Utils.DebugLog("[Goat Ram] LEDGE DETECTED! Deploying safety skids!");
                 state._dashDurationTimer -= player.Runner.DeltaTime * 3f; // expire dash faster 
                 targetMoveSpeed *= 0.1f; // force velocity drop
-
-                // todo - add audio & visual
                 player.Animator.SetBool(_activeBool, false);
             }
 
             // apply velocity
-            Vector3 dashVelocity = player.transform.forward * targetMoveSpeed;
+            Vector3 forwardFlat = player.transform.forward;
+            Vector3 dashDir = forwardFlat;
+
+            if (player.IsGrounded && forwardFlat.sqrMagnitude > 0.01f)
+            {
+                float slopeAngle = Vector3.Angle(Vector3.up, player.GroundNormal);
+                if (slopeAngle > 3f)
+                {
+                    Quaternion slopeRotation = Quaternion.FromToRotation(Vector3.up, player.GroundNormal);
+                    dashDir = slopeRotation * forwardFlat;
+                }
+            }
+
+            Vector3 dashVelocity = dashDir * targetMoveSpeed;
             state._customVelocity = dashVelocity;
 
             if (state._dashDurationTimer < 0f)
@@ -340,5 +371,22 @@ public class RamAbilitySO : AbilitySO
             indicator.ConfigureIndicator(_indicatorData, _indicatorLength, _indicatorWidth, true);
             indicator.UpdateIndicatorFill(0f); // start at 0 fill
         }
+    }
+
+    private bool CheckFloorAhead(NetworkPlayerController player)
+    {
+        Vector3 rayOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.3f);
+
+        // spherecast instead of a thin ray — forgiving of small bumps/dips/gaps in the mesh
+        bool hit = player.Runner.GetPhysicsScene().SphereCast(
+            rayOrigin,
+            _sphereCastRadius,                 // radius — tune to terrain's bump size
+            Vector3.down,
+            out RaycastHit hitInfo,
+            _edgeCheckDistance,                  // longer reach so real downhill slopes don't get lost
+            _floorLayer
+        );
+
+        return hit;
     }
 }
