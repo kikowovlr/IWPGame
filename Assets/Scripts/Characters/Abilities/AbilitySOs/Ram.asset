@@ -24,14 +24,14 @@ MonoBehaviour:
   BlockJumping: 1
   BlockSprinting: 1
   _indicatorData: {fileID: 11400000, guid: a74ae3b97bf8fe34e9bf95858e3e417e, type: 2}
-  _maxChargeTime: 3
+  _maxChargeTime: 2.3
   _damageTakenMultiplier: 0.5
   _maxDamageBeforeCancel: 5
   _cancelStunDuration: 3
-  _maxRamDuration: 0.3
-  _baseRamSpeed: 1.2
-  _maxRamSpeedMultiplier: 5
-  _baseKnockbackForce: 3.2
+  _maxRamDuration: 0.5
+  _baseRamSpeed: 1.5
+  _maxRamSpeedMultiplier: 4
+  _baseKnockbackForce: 2.6
   _hitLayer:
     serializedVersion: 2
     m_Bits: 384
@@ -39,6 +39,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   _edgeCheckDistance: 0.8
+  _sphereCastRadius: 0.25
+  _castOriginHeight: 0.8
+  _downwardCastLength: 2
   _range: 1
   _boxHeight: 0.4
   _boxDepth: 0.3

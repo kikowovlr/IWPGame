@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-2950337046359877177
+--- !u!114 &-8015493335712605553
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
   version: 10
 --- !u!21 &2100000
 Material:
@@ -20,8 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Test
-  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
+  m_Name: GooOcean_mat
+  m_Shader: {fileID: -6465566751694194690, guid: bc57513aab4880640ab3ef62c0294be5, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -29,9 +29,8 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
-  stringTagMap:
-    RenderType: Opaque
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
   m_LockedProperties: 
@@ -96,6 +95,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Absorption_Coefficient: 0.08
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
@@ -106,32 +106,66 @@ Material:
     - _ClearCoatSmoothness: 0
     - _Cull: 2
     - _Cutoff: 0.5
+    - _Depth: 75.2
+    - _Depth_Fade_Distance: 1
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
+    - _Flow_Direction: 0
+    - _Flow_Noise_Scale: 0
+    - _Flow_Speed: 2
+    - _Foam_Amount: 1
+    - _Foam_Cutoff: 1.83
+    - _Foam_Mask: 10.1
+    - _Foam_Scale: 24.3
+    - _Foam_Speed: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _Light_Mask: 1
+    - _Light_Scale: 97.16
+    - _Light_Speed: 1
     - _Metallic: 0
+    - _Object_Color_Value: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
+    - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _Refraction_Speed: 0.05
+    - _Refraction_Strength: 0.01
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
+    - _Strength: 19.2
     - _Surface: 0
+    - _Wave_Scale: 0.00001
+    - _Wave_Speed: 10
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.9169811, g: 0.26125312, b: 0.4504318, a: 1}
-    - _Color: {r: 0.9169811, g: 0.2612531, b: 0.45043176, a: 1}
+    - _Absorption_Color: {r: 0.5471698, g: 0.25035602, b: 0.25035602, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Deep_Color: {r: 0.3949359, g: 0.52865905, b: 0.6698113, a: 0.62352943}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _F_Color: {r: 0.4143824, g: 0.7707499, b: 0.9056604, a: 1}
+    - _Flow_Color: {r: 0, g: 0, b: 0, a: 0}
+    - _Foam_Color: {r: 2.8613825, g: 0, b: 4, a: 1}
+    - _Foam_Scale: {r: 0, g: 0, b: 0, a: 0}
+    - _Light_Color: {r: 1, g: 0.6900487, b: 0.5424528, a: 1}
+    - _Main_Color: {r: 0.6231251, g: 0.1543253, b: 0.6415094, a: 1}
+    - _Main_Color_1: {r: 0, g: 0.11624167, b: 0.7924528, a: 1}
+    - _Refraction_XY_Scale: {r: 0, g: 0, b: 0, a: 0}
+    - _Shallow_Color: {r: 0.13656996, g: 0.6846715, b: 0.8773585, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _Surface_Color: {r: 0.48627448, g: 1, b: 0.8941177, a: 0.45490196}
+    - _UV: {r: 0, g: 0, b: 0, a: 0}
+    - _Water_Color: {r: 0.71065545, g: 0.44010326, b: 0.8113208, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

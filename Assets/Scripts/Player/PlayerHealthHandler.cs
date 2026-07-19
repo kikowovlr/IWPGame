@@ -154,7 +154,6 @@ public class PlayerHealthHandler : NetworkBehaviour
         if (targetRb != null)
         {
             targetRb.AddForceAtPosition(force, point, ForceMode.Impulse);
-            //Utils.DebugLog($"[PHYSICS NETWORK] Successfully synchronized blast to local bone: {boneName}");
         }
         else
         {
@@ -163,7 +162,6 @@ public class PlayerHealthHandler : NetworkBehaviour
             if (rootNetworkRb != null && rootNetworkRb.Rigidbody != null)
             {
                 rootNetworkRb.Rigidbody.AddForceAtPosition(force, point, ForceMode.Impulse);
-                //Utils.DebugLog($"[PHYSICS NETWORK] Bone not found. Safely fell back to Root NetworkRigidbody3D.");
             }
         }
     }
@@ -221,6 +219,33 @@ public class PlayerHealthHandler : NetworkBehaviour
 
         _playerController.Recover();
         CurrentHealth = _maxHealth;
+    }
+
+    /// <summary>
+    /// use for environmental death source with no attacker/impact point
+    /// </summary>
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void Rpc_EnvironmentalKill()
+    {
+        if (_playerController.IsKnockedOut) return;
+
+        CurrentHealth = 0f;
+        Knockout();
+    }
+
+    /// <summary>
+    /// use for environmental eliminate
+    /// </summary>
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void Rpc_EnvironmentalEliminate()
+    {
+        if (_eliminationHandler != null && _eliminationHandler.IsEliminated) return;
+
+        CurrentHealth = 0f;
+        _playerController.Knockout();
+
+        if (_eliminationHandler != null)
+            _eliminationHandler.Eliminate();
     }
 
     private void OnHealthChanged()

@@ -148,6 +148,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     // input blocking
     // this clears and rebuilds at the top of every network tick
     public InputRestrictions ActiveRestrictions { get; private set; } = InputRestrictions.None;
+    private PlayerBuoyancy _buoyancy;
+    private GooExposure _goo;
 
     [Header("Camera Target")]
     [SerializeField] private Transform _cameraTarget;
@@ -180,6 +182,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             _punchHandler = Registry.Punch;
             _kickHandler = Registry.Kick;
             _headbuttHandler = Registry.Headbutt;
+            _buoyancy = Registry.Buoyancy;
+            _goo = Registry.Goo;
         }
     }
 
@@ -256,6 +260,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public override void FixedUpdateNetwork()
     {
         CheckForGround();
+        _buoyancy.UpdateSubmersionState();
 
         // only host can do this
         if (Object.HasStateAuthority) // means we are controlling object
@@ -271,7 +276,16 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
 
             if (!IsKnockedOut)
-                ApplyGravity();
+            {
+                if (_buoyancy.IsSubmerged)
+                {
+                    _buoyancy.ApplyBuoyancy();
+                }
+                else
+                {
+                    ApplyGravity();
+                }
+            }
             else
                 // apply downward gravity when unconscious so their dead weight falls naturally
                 _rb.AddForce(Vector3.down * _gravity, ForceMode.Force);
@@ -286,6 +300,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
         // holds the target anim float
         float targetAnimSpeed = 0f;
+        bool fedGooThisTick = false;
 
         // always update active combat states
         // -> ensures that this is updated on clients since punch timer is not networked
@@ -327,6 +342,22 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     // ability owns velocity, dont apply idle brakes
                     _hasIdleAnchor = false;
                     targetAnimSpeed = 1.0f;
+                }
+                else if (_buoyancy.IsSubmerged)
+                {
+                    _goo.ApplyExposure(_buoyancy.WaterGooRate);
+
+                    if (inputMagnitude > InputThreshold)
+                    {
+                        targetAnimSpeed = _walkInputScale;
+                        _buoyancy.ApplySwimMovement(networkInputData._cameraRelativeMoveDir, inputMagnitude, _maxSpeed, _movementForce, CurrentSpeedMultiplier);
+                        HandleRotation(networkInputData._cameraRelativeMoveDir);
+                    }
+                    else
+                    {
+                        _hasIdleAnchor = false;
+                        targetAnimSpeed = 0f; // water drag handles deceleration on its own
+                    }
                 }
                 else if (IsInPhysicsRecovery)
                 {
@@ -413,15 +444,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
             UpdateAnimations(_smoothedInputSpeed);
 
-            // TODO
-            // check if it is falling too far below map
-            if (transform.position.y < -10)
-                _networkRb3D.Teleport(Vector3.zero, Quaternion.identity);
-
             foreach (HandGrabHandler handGrabHandler in _handGrabHandlers)
             {
                 handGrabHandler.UpdateState();
             }
+
+            _goo.EndTick();
         }
     }
 

@@ -13,6 +13,8 @@ public class PlayerComponentRegistry : MonoBehaviour
     [SerializeField] private PlayerVisualsOverrideController _visualOverrideController;
     [SerializeField] private NetworkPlayerStats _playerStats;
     [SerializeField] private RespawnHandler _respawnHandler;
+    [SerializeField] private PlayerBuoyancy _buoyancy;
+    [SerializeField] private GooExposure _gooExposure;
 
     public NetworkPlayerController Controller => _playerController;
     public PlayerHealthHandler Health => _healthHandler;
@@ -26,6 +28,8 @@ public class PlayerComponentRegistry : MonoBehaviour
     public NetworkPlayerStats Stats => _playerStats;
     public CharacterComponentLinker ActiveCharacterLinker { get; private set; }
     public RespawnHandler RespawnHandler => _respawnHandler;
+    public PlayerBuoyancy Buoyancy => _buoyancy;
+    public GooExposure Goo => _gooExposure;
 
     private void Awake()
     {

@@ -36,6 +36,8 @@ public class RamAbilitySO : AbilitySO
     [SerializeField] private LayerMask _floorLayer;
     [SerializeField] private float _edgeCheckDistance = 1.5f; // how far ahead to look for ledge
     [SerializeField] private float _sphereCastRadius = 0.25f;
+    [SerializeField] private float _castOriginHeight = 0.5f;
+    [SerializeField] private float _downwardCastLength = 2.0f;
 
     [Header("Collision Settings")]
     [SerializeField] private float _range = 2f;
@@ -256,9 +258,9 @@ public class RamAbilitySO : AbilitySO
         Gizmos.matrix = oldMatrix;
 
         // ledge / floor-ahead spherecast visualization
-        Vector3 sphereOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.3f);
-        float sphereRadius = _sphereCastRadius; // keep in sync with CheckFloorAhead
-        float castLength = _edgeCheckDistance;    // keep in sync with CheckFloorAhead
+        Vector3 sphereOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * _castOriginHeight);
+        float sphereRadius = _sphereCastRadius;
+        float castLength = _downwardCastLength;  
 
         bool hit = Physics.SphereCast(sphereOrigin, sphereRadius, Vector3.down, out RaycastHit hitInfo, castLength, _floorLayer);
 
@@ -327,7 +329,7 @@ public class RamAbilitySO : AbilitySO
             float targetMoveSpeed = _baseRamSpeed * Mathf.Lerp(1f, _maxRamSpeedMultiplier, chargePercent);
 
             // floor ahead - try halting
-            if (!realLedge)
+            if (realLedge)
             {
                 Utils.DebugLog("[Goat Ram] LEDGE DETECTED! Deploying safety skids!");
                 state._dashDurationTimer -= player.Runner.DeltaTime * 3f; // expire dash faster 
@@ -375,7 +377,7 @@ public class RamAbilitySO : AbilitySO
 
     private bool CheckFloorAhead(NetworkPlayerController player)
     {
-        Vector3 rayOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * 0.3f);
+        Vector3 rayOrigin = player.transform.position + (player.transform.forward * _edgeCheckDistance) + (Vector3.up * _castOriginHeight);
 
         // spherecast instead of a thin ray — forgiving of small bumps/dips/gaps in the mesh
         bool hit = player.Runner.GetPhysicsScene().SphereCast(
@@ -383,7 +385,7 @@ public class RamAbilitySO : AbilitySO
             _sphereCastRadius,                 // radius — tune to terrain's bump size
             Vector3.down,
             out RaycastHit hitInfo,
-            _edgeCheckDistance,                  // longer reach so real downhill slopes don't get lost
+            _downwardCastLength,                  // longer reach so real downhill slopes don't get lost
             _floorLayer
         );
 

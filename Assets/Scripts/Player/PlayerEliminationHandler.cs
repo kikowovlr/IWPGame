@@ -59,6 +59,17 @@ public class PlayerEliminationHandler : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// doesnt care about how many lives, just eliminate straight away
+    /// </summary>
+    public void Eliminate()
+    {
+        if (!Object.HasStateAuthority || IsEliminated) return;
+
+        IsEliminated = true;
+        SpectatorTransitionTimer = TickTimer.CreateFromSeconds(Runner, _spectatorTransitionDuration);
+    }
+
     public override void FixedUpdateNetwork()
     {
         if (Object.HasStateAuthority && IsEliminated && !IsSpectatorTransitionComplete)
