@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c46555378786c994caf7b4f764719664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthHandler
-  _maxHealth: 10
+  _maxHealth: 100
   _knockedDownDamageMultiplier: 0.3
   _baseKnockoutTime: 3
   _maxKnockoutTime: 8
