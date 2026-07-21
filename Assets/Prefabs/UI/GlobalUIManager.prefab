@@ -595,10 +595,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d764ab6ebd8324245ba8ce3ccd6c0cc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TransitionUIManager
-  _mapLoadingPanel: {fileID: 2148990114075510972}
+  _loadingPanel: {fileID: 2148990114075510972}
+  _loadingTitle: {fileID: 4756479316810343303}
   _loadingStatusText: {fileID: 5328804892041089271}
   _roundPanel: {fileID: 2620627046287524442}
   _roundText: {fileID: 5227021669968184149}
+  _loadingBackgroundImage: {fileID: 1821332979932537487}
+  _connectingBackground: {fileID: 21300000, guid: a908bb4b3ecaa974ebf3132467261c80, type: 3}
+  _mapLoadingBackground: {fileID: 21300000, guid: a908bb4b3ecaa974ebf3132467261c80, type: 3}
 --- !u!114 &8730651535037549818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -735,6 +739,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
+--- !u!114 &1821332979932537487 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7486774775943569756, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
+  m_PrefabInstance: {fileID: 9124558170951091155}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2148990114075510972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!224 &2137118286891457406 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7136059771274500269, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
@@ -745,6 +760,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7165876064896519023, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
   m_PrefabInstance: {fileID: 9124558170951091155}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &4756479316810343303 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4369223858064236628, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
+  m_PrefabInstance: {fileID: 9124558170951091155}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!114 &5328804892041089271 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3986607744212046628, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}

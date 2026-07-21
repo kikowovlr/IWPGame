@@ -460,7 +460,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: JOIN GAME
+  m_text: JOIN LOBBY
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 999e794f4db003c448115dd98df01478, type: 2}
   m_sharedMaterial: {fileID: -5924541798813747028, guid: 999e794f4db003c448115dd98df01478, type: 2}
@@ -1147,7 +1147,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: HOST GAME
+  m_text: CREATE LOBBY
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 999e794f4db003c448115dd98df01478, type: 2}
   m_sharedMaterial: {fileID: -5924541798813747028, guid: 999e794f4db003c448115dd98df01478, type: 2}

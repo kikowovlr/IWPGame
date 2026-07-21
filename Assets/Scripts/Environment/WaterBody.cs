@@ -63,12 +63,12 @@ public class WaterBody : MonoBehaviour
         return found;
     }
 
-#if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
-    {
-        RecalculateBounds();
-        Gizmos.color = Color.aquamarine;
-        Gizmos.DrawCube(_worldBounds.center, _worldBounds.size);
-    }
-#endif
+//#if UNITY_EDITOR
+//    private void OnDrawGizmosSelected()
+//    {
+//        RecalculateBounds();
+//        Gizmos.color = Color.aquamarine;
+//        Gizmos.DrawCube(_worldBounds.center, _worldBounds.size);
+//    }
+//#endif
 }

@@ -13,6 +13,7 @@ public static class PlayerRegistry
 
     // local client lookup map matching network ids to the player root obj 
     private static readonly Dictionary<PlayerRef, Transform> _playerAvatarTransforms = new Dictionary<PlayerRef, Transform>();
+    private static readonly Dictionary<Transform, PlayerDrowning> _drowningByPivot = new Dictionary<Transform, PlayerDrowning>();
 
     public static void RegisterLocalPlayerTransform(Transform transform)
     {
@@ -51,5 +52,22 @@ public static class PlayerRegistry
         }
 
         return null;
+    }
+
+    public static void RegisterDrowning(Transform cameraPivot, PlayerDrowning drowning)
+    {
+        if (cameraPivot != null)
+            _drowningByPivot[cameraPivot] = drowning;
+    }
+
+    public static void UnregisterDrowning(Transform cameraPivot)
+    {
+        if (cameraPivot != null)
+            _drowningByPivot.Remove(cameraPivot);
+    }
+
+    public static PlayerDrowning GetDrowning(Transform cameraPivot)
+    {
+        return cameraPivot != null && _drowningByPivot.TryGetValue(cameraPivot, out var d) ? d : null;
     }
 }

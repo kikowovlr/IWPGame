@@ -56,11 +56,17 @@ public class HandGrabHandler : NetworkBehaviour
     // states
     private GrabState _currentGrabState = GrabState.None;
 
+    // climbing
+    private bool _isClimbing;
+    private Vector3 _climbSurfaceNormal;
+
     // references
     NetworkPlayerController _networkPlayer;
 
     // getters
     public bool IsGrabbingSomething => _grabJoint != null;
+    public bool IsClimbing => _isClimbing;
+    public Vector3 ClimbSurfaceNormal => _climbSurfaceNormal;
 
     private void Awake()
     {
@@ -104,7 +110,7 @@ public class HandGrabHandler : NetworkBehaviour
                 // dynamically clamp the IK target directly to the surface contact zone
                 if (_grabbedCollider != null)
                 {
-                    Vector3 carryLookPoint = _grabbedCollider.ClosestPoint(transform.position);
+                    Vector3 carryLookPoint = GetClosestPointSafe(_grabbedCollider ,transform.position);
                     _handIKTarget.position = ClampTargetToArmLength(carryLookPoint);
                 }
                 else
@@ -129,7 +135,7 @@ public class HandGrabHandler : NetworkBehaviour
                     _animator.SetBool("IsCarrying", false);
 
                     // Calculate closest point on target and clamp it within arm length
-                    Vector3 rawTargetPoint = _trackedTarget.ClosestPoint(transform.position);
+                    Vector3 rawTargetPoint = GetClosestPointSafe(_trackedTarget, transform.position);
                     _targetIKPosition = ClampTargetToArmLength(rawTargetPoint);
                     _handIKTarget.position = _targetIKPosition;
 
@@ -202,8 +208,8 @@ public class HandGrabHandler : NetworkBehaviour
         if (!_throwCooldownTimer.ExpiredOrNotRunning(Runner))
             return false;
 
-        // temporarily increase mass of hand
-        _rb.mass = otherRb.mass * 2.0f;
+            // temporarily increase mass of hand
+            _rb.mass = otherRb.mass * 2.0f;
 
         _grabbedCollider = other;
         Physics.IgnoreCollision(_handCollider, _grabbedCollider, true);
@@ -284,7 +290,8 @@ public class HandGrabHandler : NetworkBehaviour
             {
                 if (hit.transform.root == transform.root) 
                     continue;
-                if (!hit.TryGetComponent(out Rigidbody _)) 
+
+                if (!hit.TryGetComponent(out Rigidbody _))
                     continue;
 
                 // skip this obj entirely if it forces the hand to cross the body to reach it
@@ -358,7 +365,7 @@ public class HandGrabHandler : NetworkBehaviour
     /// </summary>
     public bool IsHoldingObject(Rigidbody targetRb)
     {
-        if (targetRb == null || _grabJoint == null)
+        if (targetRb == null || _grabJoint == null || _grabJoint.connectedBody == null)
             return false;
 
         return _grabJoint.connectedBody.transform.root == targetRb.transform.root;
@@ -412,6 +419,7 @@ public class HandGrabHandler : NetworkBehaviour
     private void ReleaseGrab(bool wantToThrow)
     {
         _currentGrabState = GrabState.None;
+        _isClimbing = false;
         _handIKConstraint.weight = Mathf.MoveTowards(_handIKConstraint.weight, 0f, Runner.DeltaTime * _ikBlendSpeed);
         RelaxArm(false);
 
@@ -438,6 +446,47 @@ public class HandGrabHandler : NetworkBehaviour
         // change animation state
         _animator.SetBool("IsCarrying", false);
         _animator.SetBool("IsGrabbing", false);
+    }
+
+    /// <summary>
+    /// force hand to release grabbed obj
+    /// </summary>
+    public void ForceRelease() => ReleaseGrab(false);
+
+    /// <summary>
+    /// raycast toward the collider's center to find a real surface point for non-convex colliders
+    /// </summary>
+    private Vector3 GetClosestPointSafe(Collider col, Vector3 fromPosition)
+    {
+        bool isNonConvexMesh = col is MeshCollider meshCol && !meshCol.convex;
+
+        if (!isNonConvexMesh)
+            return col.ClosestPoint(fromPosition);
+
+        if (TryGetSurfaceHit(col, fromPosition, out RaycastHit hit))
+            return hit.point;
+
+        return col.ClosestPointOnBounds(fromPosition);
+    }
+
+    private bool TryGetSurfaceHit(Collider col, Vector3 fromPosition, out RaycastHit hit)
+    {
+        Vector3 dir = (col.bounds.center - fromPosition);
+        if (dir.sqrMagnitude < 0.0001f)
+        {
+            hit = default;
+            return false;
+        }
+        dir.Normalize();
+
+        Ray ray = new Ray(fromPosition, dir);
+        float maxDist = _maxArmReach + 0.5f; // hand is already this close to grab range — a real hit should land well within this
+
+        if (col.Raycast(ray, out hit, maxDist))
+            return true; // if it passed through a hole, it likely wouldn't hit within this short a distance anyway
+
+        hit = default;
+        return false;
     }
 
     private void OnDrawGizmos()

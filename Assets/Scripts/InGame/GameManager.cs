@@ -38,6 +38,8 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     [SerializeField] private RoundEndDisplayController _roundEndDisplayController;
     [HideInInspector] [Networked] public PlayerRef LastRoundWinner { get; private set; } = PlayerRef.None;
 
+    [SerializeField] private IslandBreakManager _islandBreakManager;
+
     // getters
     public MatchSettings Settings => _matchSettings;
     public RoundState GetCurrentRoundState() => CurrentRoundState;
@@ -105,21 +107,11 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
             initialRoundState.OnStateEnter(this);
         }
 
-        // TODO: FOR DEBUGGING - SKIPS SETUP
-        //_lastTrackedState = RoundState.RoundActive;
-
         // force UI update if server has activated round UI screen
         if (IsSetupUIActive)
         {
             OnSetupUIStateChanged();
         }
-
-        //// TODO: FOR DEBUGGING - SKIPS SETUP
-        //if (Object.HasStateAuthority)
-        //{
-        //    SetGlobalInputRestrictions(InputRestrictions.None);
-        //    TransitionToState(RoundState.RoundActive);
-        //}
     }
 
     public override void FixedUpdateNetwork()
@@ -307,6 +299,9 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
                 }
             }
         }
+
+        if (_islandBreakManager != null)
+            _islandBreakManager.ResetAllPieces();
     }
 
     private void TeleportAndResetPlayer(NetworkObject playerObj, Transform targetTransform)
@@ -326,6 +321,11 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
             if (registry.Elimination != null)
             {
                 registry.Elimination.ResetLivesToMax();
+            }
+
+            if (registry.Drowning != null)
+            {
+                registry.Drowning.ResetDrownState();
             }
         }
     }
@@ -353,7 +353,11 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
 
     private void OnSetupUIStateChanged()
     {
-        if (TransitionUIManager.Instance == null) return;
+        if (TransitionUIManager.Instance == null)
+        {
+            Debug.LogWarning("[GameManager] OnSetupUIStateChanged fired but TransitionUIManager.Instance is NULL");
+            return;
+        }
 
         if (IsSetupUIActive)
         {
@@ -437,10 +441,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
                 if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
                 {
                     if (registry.Stats != null && registry.Stats.CrownCount >= _matchSettings.CrownsToWinMatch)
-                    {
-                        Debug.Log($"[MATCH ENGINE] -> Match over condition met! Player {playerRef} hit the crown limit.");
                         return true;
-                    }
                 }
             }
         }
@@ -498,7 +499,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
 
         if (playerObj != null)
         {
-            // 1. Find this player's specific stable index in the match
+            // find this player's specific stable index in the match
             int playerIndex = -1;
             for (int i = 0; i < _activePlayersInRound.Length; i++)
             {
@@ -509,10 +510,10 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
                 }
             }
 
-            // 2. Get the master list of spawn points
+            // get the master list of spawn points
             List<Transform> allSpawnPoints = SpawnManager.Instance.GetAllSpawnPoints();
 
-            // 3. Teleport them to their dedicated index spawn point
+            // teleport them to their dedicated index spawn point
             if (playerIndex != -1 && playerIndex < allSpawnPoints.Count)
             {
                 Transform spawnPoint = allSpawnPoints[playerIndex];

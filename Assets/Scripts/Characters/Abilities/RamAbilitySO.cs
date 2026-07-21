@@ -306,6 +306,12 @@ public class RamAbilitySO : AbilitySO
             player.AddInputRestriction(currRestricitons);
         }
 
+        // allow cursor aiming every tick
+        if (player.Object.HasInputAuthority && CameraManager.Instance != null)
+        {
+            CameraManager.Instance.RequestCursorVisible("GoatRamAim", state._isCharging);
+        }
+
         if (!player.Object.HasStateAuthority) return;
 
         // ramming

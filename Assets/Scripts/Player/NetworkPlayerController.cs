@@ -150,6 +150,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public InputRestrictions ActiveRestrictions { get; private set; } = InputRestrictions.None;
     private PlayerBuoyancy _buoyancy;
     private GooExposure _goo;
+    private PlayerDrowning _drowning;
 
     [Header("Camera Target")]
     [SerializeField] private Transform _cameraTarget;
@@ -164,12 +165,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     // getters
     public bool IsKnockedOut => _isKnockedOut;
     public bool IsGrabbingActive => _isGrabbingActive;
+    public HandGrabHandler[] Hands => _handGrabHandlers;
     public NetworkRigidbody3D NetworkedRb => _networkRb3D;
     public Animator Animator => _animator;
     public Quaternion InitialJointRotation => _initialJointRotation;
     public PlayerComponentRegistry Registry { get; private set; }
     public ref AbilityState AbilityStateRef => ref CurrentAbilityState;
     public AbilitySO EquippedAbility => _equippedAbility;
+    public Transform CameraTarget => _cameraTarget != null ? _cameraTarget : transform;
 
     private void Awake()
     {
@@ -184,6 +187,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             _headbuttHandler = Registry.Headbutt;
             _buoyancy = Registry.Buoyancy;
             _goo = Registry.Goo;
+            _drowning = Registry.Drowning;
         }
     }
 
@@ -246,15 +250,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private void Update()
     {
         // TODO - TEMP DEBUG SWITCH: Runs locally in standard frame updates to catch key strokes perfectly
-        if (Object != null && Object.HasStateAuthority)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-                ExecuteCharacterPackageSwap(0);
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-                ExecuteCharacterPackageSwap(1);
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
-                ExecuteCharacterPackageSwap(2);
-        }
+        //if (Object != null && Object.HasStateAuthority)
+        //{
+        //    if (Input.GetKeyDown(KeyCode.Alpha1))
+        //        ExecuteCharacterPackageSwap(0);
+        //    else if (Input.GetKeyDown(KeyCode.Alpha2))
+        //        ExecuteCharacterPackageSwap(1);
+        //    else if (Input.GetKeyDown(KeyCode.Alpha3))
+        //        ExecuteCharacterPackageSwap(2);
+        //}
     }
 
     public override void FixedUpdateNetwork()
@@ -286,7 +290,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     ApplyGravity();
                 }
             }
-            else
+            else if (!_drowning.IsSinking)
                 // apply downward gravity when unconscious so their dead weight falls naturally
                 _rb.AddForce(Vector3.down * _gravity, ForceMode.Force);
         }
@@ -300,7 +304,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
         // holds the target anim float
         float targetAnimSpeed = 0f;
-        bool fedGooThisTick = false;
 
         // always update active combat states
         // -> ensures that this is updated on clients since punch timer is not networked
@@ -322,7 +325,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             {
                 // movement calculation
                 // if not sprinting, clamp input
-                //float inputMagnitude = networkInputData._movementInput.magnitude;
                 float inputMagnitude = networkInputData._cameraRelativeMoveDir.magnitude;
 
                 ProcessGrabPunchLogic(networkInputData._isPunchOrGrabPressed, inputMagnitude, networkInputData._isSprintPressed);
@@ -351,6 +353,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     {
                         targetAnimSpeed = _walkInputScale;
                         _buoyancy.ApplySwimMovement(networkInputData._cameraRelativeMoveDir, inputMagnitude, _maxSpeed, _movementForce, CurrentSpeedMultiplier);
+                        _buoyancy.ApplyShoreAssist(networkInputData._cameraRelativeMoveDir, inputMagnitude);
                         HandleRotation(networkInputData._cameraRelativeMoveDir);
                     }
                     else
@@ -421,7 +424,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     }
                 }
 
-                HandleJump(networkInputData);
+                // if climbing, do climb jump instead of normal jump
+                    HandleJump(networkInputData);
                 _prevPunchOrGrabPressed = networkInputData._isPunchOrGrabPressed;
             }
 
@@ -760,6 +764,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             _rb.linearVelocity = new Vector3(currentVel.x, 0f, currentVel.z);
 
             _rb.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
+            _animator.SetTrigger("Jump");
 
             _isJumpButtonPressed = false; //reset immediately
             _isGrounded = false;
@@ -770,6 +775,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     {
         _animator.SetFloat("MovementSpeed", animationValue);
         _animator.SetBool("IsKnockedOut", _isKnockedOut);
+        _animator.SetBool("IsGrounded", _isGrounded);
+        _animator.SetFloat("VerticalVelocity", _rb.linearVelocity.y);
+        _animator.SetBool("IsSubmerged", _buoyancy.IsSubmerged);
 
         // update joints rotation based on animation
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
@@ -1310,14 +1318,20 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         // make it easier to tell which player is which
         transform.name = $"P_{Object.Id}";
 
-        GameObject startingPackage = _characterPackages[_defaultCharacterIndex];
+        // TODO: character selection
+        if (Object.HasStateAuthority)
+        {
+            CharacterIndex = Random.Range(0, _characterPackages.Length);
+        }
+
+        GameObject startingPackage = _characterPackages[CharacterIndex];
         Animator startingAnimator = startingPackage.GetComponentInChildren<Animator>();
         if (startingAnimator != null)
         {
             startingAnimator.Update(0f);
         }
 
-        ExecuteCharacterPackageSwap(_defaultCharacterIndex);
+        ExecuteCharacterPackageSwap(CharacterIndex);
     }
 
     // prevent null ref when player dc/leave

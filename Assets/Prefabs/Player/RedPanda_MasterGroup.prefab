@@ -5451,6 +5451,9 @@ MonoBehaviour:
   _grabbableLayer:
     serializedVersion: 2
     m_Bits: 768
+  _climbableLayer:
+    serializedVersion: 2
+    m_Bits: 2176
   _ikBlendSpeed: 5
   _armJoint: {fileID: 4619047494065168759}
   _relaxedArmSpring: 20
@@ -6137,6 +6140,9 @@ MonoBehaviour:
   _grabbableLayer:
     serializedVersion: 2
     m_Bits: 768
+  _climbableLayer:
+    serializedVersion: 2
+    m_Bits: 2176
   _ikBlendSpeed: 5
   _armJoint: {fileID: 3357313361221953135}
   _relaxedArmSpring: 20

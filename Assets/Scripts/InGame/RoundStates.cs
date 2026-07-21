@@ -56,16 +56,6 @@ public class SetupState : IRoundState
 
     public void OnStateUpdate(GameManager manager)
     {
-        // TODO: test
-        if (manager.GetTotalRegisteredCount() < 2)
-        {
-            if (TransitionUIManager.Instance != null)
-            {
-                TransitionUIManager.Instance.UpdateLoadingStatus($"Waiting for players... ({manager.GetTotalRegisteredCount()}/2)");
-            }
-            return;
-        }
-
         if (!_hasStartedTimer)
         {
             // show round ui 

@@ -13,16 +13,18 @@ public class GooExposure : NetworkBehaviour
     [SerializeField] private float _recoveryRate = 0.15f;
     private bool _fedThisTick = false;
 
-    private NetworkPlayerController _controller;
     private PlayerHealthHandler _healthHandler;
+    private PlayerDrowning _drowning;
+    private PlayerBuoyancy _buoyancy;
 
     private void Awake()
     {
         PlayerComponentRegistry registry = transform.root.GetComponent<PlayerComponentRegistry>();
         if (registry != null)
         {
-            _controller = registry.Controller;
             _healthHandler = registry.Health;
+            _drowning = registry.Drowning;
+            _buoyancy = registry.Buoyancy;
         }
     }
 
@@ -52,6 +54,10 @@ public class GooExposure : NetworkBehaviour
 
     private void OnFullyConsumed()
     {
+        // sink to oceanfloor when dead and in water
+        if (_buoyancy.IsSubmerged)
+            _drowning.BeginSink();
+
         _healthHandler.Rpc_EnvironmentalEliminate();
         ExposureAmount = 0f;
     }

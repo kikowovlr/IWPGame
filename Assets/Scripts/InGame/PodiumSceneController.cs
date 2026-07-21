@@ -174,6 +174,6 @@ public class PodiumSceneController : MonoBehaviour
 
     private void OnDestroy()
     {
-        CameraManager.Instance.RequestCursorVisible("PodiumScene", false); // release req
+        CameraManager.Instance.RequestCursorVisible("EndGamePodiumScene", false); // release req
     }
 }

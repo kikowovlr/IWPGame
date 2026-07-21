@@ -24,7 +24,8 @@ using UnityEngine.UI;
 public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] NetworkPlayerController _networkPlayerPrefab;
-
+    [SerializeField] private String _mainMenuScene = "MainMenuScene";
+    public bool IsTransitioningToGameplay { get; set; } = false;
 
     // input is being collected by network player which is then sent to the host thru this fn
     public void OnInput(NetworkRunner runner, NetworkInput input)
@@ -36,18 +37,25 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
         input.Set(inputData);
     }
 
+    public void OnSceneLoadStart(NetworkRunner runner)
+    {
+        if (!IsTransitioningToGameplay) return;
+
+        if (TransitionUIManager.Instance != null)
+            TransitionUIManager.Instance.ShowMapLoadingScreen("Starting Match...");
+    }
+
     /// <summary>
     /// fires only after destination is reached
     /// </summary>
     public void OnSceneLoadDone(NetworkRunner runner)
     {
+        IsTransitioningToGameplay = false;
+
         if (!runner.IsServer) return;
-        Utils.DebugLog("[SPAWNER] -> Scene load complete. Moving existing players to their spawn points.");
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "EndGamePodiumScene")
-        {
-            Utils.DebugLog("[SPAWNER] -> Podium scene detected. Handing player placement control to PodiumSceneController.");
-            return; // EXIT! Let the podium controller do the work
-        }
+
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "GameScene")
+            return;
 
         foreach (var player in runner.ActivePlayers)
         {
@@ -71,8 +79,16 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
+        if (!UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Game")) return;
+
         if (runner.IsServer)
             SpawnPlayerAvatar(runner, player);
+    }
+
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        if (LobbyManager.Instance != null)
+            LobbyManager.Instance.UnregisterPlayer(player);
     }
 
     private void SpawnPlayerAvatar(NetworkRunner runner, PlayerRef player)
@@ -83,55 +99,6 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 
         runner.SetPlayerObject(player, spawnedObj);
     }
-
-    //public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
-    //{
-    //    //if (runner.IsServer)
-    //    //    SpawnPlayerAvatar(runner, player);
-    //}
-
-    //private void SpawnPlayerAvatar(NetworkRunner runner, PlayerRef player)
-    //{
-    //    // check if player alrdy exists
-    //    if (runner.TryGetPlayerObject(player, out _))
-    //    {
-    //        Debug.Log($"[SPAWNER] -> Player {player} already has an active avatar. Skipping spawn.");
-    //        return;
-    //    }
-
-    //    NetworkObject spawnedObj = runner.Spawn(_networkPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity, player);
-
-    //    runner.SetPlayerObject(player, spawnedObj);
-    //}
-
-    //public void SpawnAllPlayers(NetworkRunner runner)
-    //{
-    //    if (!runner.IsServer) return;
-
-    //    Debug.Log("[SPAWNER] -> Spawning all active players...");
-
-    //    foreach (var player in runner.ActivePlayers)
-    //    {
-    //        SpawnPlayerAvatar(runner, player);
-    //    }
-    //}
-
-    //public void OnSceneLoadDone(NetworkRunner runner)
-    //{
-    //    Debug.Log($"[SPAWNER] -> Scene load done. Initializing bootstrapper if present.");
-
-    //    // Find the bootstrapper specific to the newly loaded scene
-    //    SceneBootstrapper bootstrapper = FindAnyObjectByType<SceneBootstrapper>();
-
-    //    if (bootstrapper != null)
-    //    {
-    //        bootstrapper.InitializeScene(runner);
-    //    }
-    //    else
-    //    {
-    //        Debug.LogWarning("[SPAWNER] -> No SceneBootstrapper found in this scene.");
-    //    }
-    //}
 
     public void OnConnectedToServer(NetworkRunner runner)
     {
@@ -169,19 +136,11 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
     {
     }
 
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-    {
-    }
-
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)
     {
     }
 
     public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ArraySegment<byte> data)
-    {
-    }
-
-    public void OnSceneLoadStart(NetworkRunner runner)
     {
     }
 

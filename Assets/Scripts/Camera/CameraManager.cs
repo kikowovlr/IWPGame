@@ -135,20 +135,6 @@ public class CameraManager : MonoBehaviour
         _spectatorCam.Priority = (mode == CameraMode.SpectatingPlayer) ? 10 : 0;
         _staticSpectatorCam.Priority = (mode == CameraMode.StaticOverview) ? 10 : 0;
 
-        //// handle mouse cursor locking based on mode
-        //if (mode == CameraMode.StaticOverview)
-        //{
-        //    // free cursor
-        //    Cursor.lockState = CursorLockMode.None;
-        //    Cursor.visible = true;
-        //}
-        //else
-        //{
-        //    // lock cursor n hide to allow for free camera movement
-        //    Cursor.lockState = CursorLockMode.Locked;
-        //    Cursor.visible = false;
-        //}
-
         UpdateCursorState();
 
         // identify active cam target
@@ -341,13 +327,23 @@ public class CameraManager : MonoBehaviour
 
     private void SpectateTarget(Transform target)
     {
-        if (target != null && _spectatorCam != null)
-        {
-            _spectatorCam.Follow = target;
-            _spectatorCam.LookAt = target;
+        if (target == null || _spectatorCam == null) return;
 
-            SetCameraState(CameraMode.SpectatingPlayer);
-        }
+        Transform effectiveTarget = ResolveCameraTarget(target);
+
+        _spectatorCam.Follow = target;
+        _spectatorCam.LookAt = target;
+
+        SetCameraState(CameraMode.SpectatingPlayer);
+    }
+
+    private Transform ResolveCameraTarget(Transform playerPivot)
+    {
+        PlayerDrowning drowning = PlayerRegistry.GetDrowning(playerPivot);
+        if (drowning != null && drowning.IsSinking && drowning.CameraFollowProxy != null)
+            return drowning.CameraFollowProxy;
+
+        return playerPivot;
     }
 
     private void HandleTargetEliminated(PlayerEliminationHandler handler)
@@ -404,11 +400,13 @@ public class CameraManager : MonoBehaviour
         }
         else
         {
-            if (_currentMode == CameraMode.Gameplay)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
+            //if (_currentMode == CameraMode.Gameplay)
+            //{
+            //    Cursor.lockState = CursorLockMode.Locked;
+            //    Cursor.visible = false;
+            //}
+
+            UpdateCursorState();
         }
     }
 
@@ -434,6 +432,34 @@ public class CameraManager : MonoBehaviour
 
         Cursor.lockState = showCursor ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = showCursor;
+    }
+
+    /// <summary>
+    /// swap camera to track new target
+    /// used to hand off from sinking body to camera proxy
+    /// </summary>
+    public void SwapCameraFollowTarget(Transform oldTarget, Transform newTarget)
+    {
+        if (_gameplayCam != null && _gameplayCam.Follow == oldTarget)
+        {
+            _gameplayCam.Follow = newTarget;
+            _gameplayCam.LookAt = newTarget;
+        }
+
+        if (_spectatorCam != null && _spectatorCam.Follow == oldTarget)
+        {
+            _spectatorCam.Follow = newTarget;
+            _spectatorCam.LookAt = newTarget;
+        }
+    }
+
+    public void ResetCameraToPivot(Transform pivot)
+    {
+        if (_gameplayCam != null && _gameplayCam.Follow != pivot)
+        {
+            _gameplayCam.Follow = pivot;
+            _gameplayCam.LookAt = pivot;
+        }
     }
 
     private void OnDestroy()
