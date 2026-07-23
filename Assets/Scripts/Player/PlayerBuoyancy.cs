@@ -32,6 +32,7 @@ public class PlayerBuoyancy : NetworkBehaviour
     [SerializeField] private float _shoreAssistSphereCastRadius = 0.25f;
     [SerializeField] private float _shoreAssistSphereCastPullback = 0.4f;
     [SerializeField] private float _maxWallNormalDot = 0.6f; // check for angle of surface
+    [SerializeField] private float _maxBuoyancyForce = 100f;
 
     [Header("Shore Assist - Height Scaling")]
     [SerializeField] private bool _scaleForceByLedgeHeight = true;
@@ -87,6 +88,7 @@ public class PlayerBuoyancy : NetworkBehaviour
         float springForce = (compression * _buoyancySpringStrength) - (_rb.linearVelocity.y * _buoyancyDamping);
 
         if (springForce < 0f) springForce = 0f; // don't fight upward movement
+        springForce = Mathf.Min(springForce, _maxBuoyancyForce);
 
         _rb.AddForce(Vector3.up * springForce, ForceMode.Force);
         _rb.AddForce(-_rb.linearVelocity * _waterDrag, ForceMode.Force); // sluggish drag on all axes

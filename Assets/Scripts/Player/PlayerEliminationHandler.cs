@@ -95,7 +95,14 @@ public class PlayerEliminationHandler : NetworkBehaviour
             if (!IsSpectatorTransitionComplete)
                 return;
         }
-        
+        else
+        {
+            if (Object.HasInputAuthority && ScreenFXManager.Instance != null)
+            {
+                ScreenFXManager.Instance.ResetLocalPlayerVisuals();
+            }
+        }
+
         _registry.VisualsOverrider.EvaluateVisualState(!IsEliminated);
     }
 
@@ -106,7 +113,7 @@ public class PlayerEliminationHandler : NetworkBehaviour
     {
         if (Object.HasStateAuthority)
         {
-
+            _playerController.Knockout();
         }
         // TODO: show spectator UI
     }

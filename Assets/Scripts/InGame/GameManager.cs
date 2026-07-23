@@ -14,7 +14,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     public static GameManager Instance { get; private set; }
 
     public const int MAX_PLAYERS = 4;
-    [Networked, Capacity(MAX_PLAYERS)]
+    [Networked, Capacity(MAX_PLAYERS), OnChangedRender(nameof(OnActivePlayersChanged))]
     private NetworkArray<PlayerRef> _activePlayersInRound => default;
     private HashSet<PlayerRef> _localLivingPlayers = new HashSet<PlayerRef>(); // local tracking
     [HideInInspector] [Networked] public InputRestrictions GlobalRestrictions { get; private set; } = InputRestrictions.None;
@@ -91,14 +91,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
             }
         }
 
-        _localLivingPlayers.Clear();
-        for (int i = 0; i < _activePlayersInRound.Length; i++)
-        {
-            if (_activePlayersInRound[i] != PlayerRef.None)
-            {
-                _localLivingPlayers.Add(_activePlayersInRound[i]);
-            }
-        }
+        RebuildLocalLivingPlayers();
 
         _lastTrackedState = CurrentRoundState;
         if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState initialRoundState))
@@ -190,8 +183,6 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     /// </summary>
     public void TrackPlayer(PlayerRef playerRef)
     {
-        _localLivingPlayers.Add(playerRef);
-
         if (!Object.HasStateAuthority) return;
 
         // find empty slot in network array and assign player
@@ -212,14 +203,9 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     /// </summary>
     private void HandlePlayerEliminated(PlayerEliminationHandler handler)
     {
-        // extract network id
-        PlayerRef deadPlayerId = handler.Object.InputAuthority;
-
-        // remove locally
-        if (_localLivingPlayers.Contains(deadPlayerId))
-            _localLivingPlayers.Remove(deadPlayerId);
-
         if (!Object.HasStateAuthority) return;
+
+        PlayerRef deadPlayerId = handler.Object.InputAuthority;
 
         // remove from list
         for (int i = 0; i < _activePlayersInRound.Length; i++)
@@ -238,6 +224,21 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     public List<PlayerRef> GetLivingPlayerIDs()
     {
         return new List<PlayerRef>(_localLivingPlayers);
+    }
+
+    private void OnActivePlayersChanged()
+    {
+        RebuildLocalLivingPlayers();
+    }
+
+    private void RebuildLocalLivingPlayers()
+    {
+        _localLivingPlayers.Clear();
+        for (int i = 0; i < _activePlayersInRound.Length; i++)
+        {
+            if (_activePlayersInRound[i] != PlayerRef.None)
+                _localLivingPlayers.Add(_activePlayersInRound[i]);
+        }
     }
 
     /// <summary>
@@ -326,6 +327,16 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
             if (registry.Drowning != null)
             {
                 registry.Drowning.ResetDrownState();
+            }
+
+            if (playerObj.HasInputAuthority && ScreenFXManager.Instance != null)
+            {
+                ScreenFXManager.Instance.ResetLocalPlayerVisuals();
+            }
+
+            if (registry.Controller != null)
+            {
+                registry.Controller.Recover();
             }
         }
     }

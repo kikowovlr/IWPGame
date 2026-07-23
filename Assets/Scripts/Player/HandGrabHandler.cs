@@ -49,6 +49,7 @@ public class HandGrabHandler : NetworkBehaviour
     Rigidbody _rb;
     Collider _handCollider;
     Collider _grabbedCollider;
+    private NetworkPlayerController _heldPlayerRef;
     private float _originalHandMass;
     private Vector3 _targetIKPosition;
     private Collider _trackedTarget = null;
@@ -242,6 +243,12 @@ public class HandGrabHandler : NetworkBehaviour
         _grabJoint.projectionMode = JointProjectionMode.PositionAndRotation;
         _grabJoint.projectionDistance = 0.01f; // Snaps back if it stretches more than 1 centimeter
         _grabJoint.projectionAngle = 1f;
+
+        if (other.transform.root.TryGetComponent(out NetworkPlayerController otherPlayer))
+        {
+            otherPlayer.NotifyGrabbedByOther(true);
+            _heldPlayerRef = otherPlayer;
+        }
 
         // set animator to carrying
         _animator.SetBool("IsCarrying", true);
@@ -442,7 +449,13 @@ public class HandGrabHandler : NetworkBehaviour
             Destroy(_grabJoint);
             _rb.mass = _originalHandMass;
         }
-         
+
+        if (_heldPlayerRef != null)
+        {
+            _heldPlayerRef.NotifyGrabbedByOther(false);
+            _heldPlayerRef = null;
+        }
+
         // change animation state
         _animator.SetBool("IsCarrying", false);
         _animator.SetBool("IsGrabbing", false);

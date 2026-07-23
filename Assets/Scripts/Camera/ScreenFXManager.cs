@@ -28,6 +28,10 @@ public class ScreenFXManager : MonoBehaviour
     // events
     public static event Action OnPeakDarknessReached; // signals that blinkProgress == 1, screen is completely dark
 
+
+    private float _blinkStartTime = -1f;
+    [SerializeField] private float _maxBlinkSafetyDuration = 2f;
+
     private void Awake()
     {
         if (Instance == null)
@@ -61,6 +65,12 @@ public class ScreenFXManager : MonoBehaviour
             if (_blackAndWhiteMaterial != null)
                 _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, Mathf.Clamp01(_currentGrayscale));
         }
+
+        if (_isBlinking && Time.time - _blinkStartTime > _maxBlinkSafetyDuration)
+        {
+            _isBlinking = false;
+            if (_blinkMaterial != null) _blinkMaterial.SetFloat(_blinkProgressID, 0f);
+        }
     }
 
     private void HandleLocalPlayerEliminated(PlayerEliminationHandler handler)
@@ -90,7 +100,10 @@ public class ScreenFXManager : MonoBehaviour
     private void StartBlinkSequence()
     {
         if (!IsBlinking)
+        {
+            _blinkStartTime = Time.time;
             StartCoroutine(BlinkRoutine());
+        }
     }
 
     private IEnumerator BlinkRoutine()
@@ -146,12 +159,21 @@ public class ScreenFXManager : MonoBehaviour
         }
     }
 
+    public void ResetLocalPlayerVisuals()
+    {
+        _currentGrayscale = 0f;
+        _targetGrayscale = 0f;
+
+        if (_blackAndWhiteMaterial != null)
+            _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, 0f);
+
+        if (_blinkMaterial != null)
+            _blinkMaterial.SetFloat(_blinkProgressID, 0f);
+    }
+
     private void OnDestroy()
     {
         // reset shader on exit
-        if (_blinkMaterial != null)
-            _blinkMaterial.SetFloat(_blinkProgressID, 0f);
-        if (_blackAndWhiteMaterial != null)
-            _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, 0f);
+        ResetLocalPlayerVisuals();
     }
 }

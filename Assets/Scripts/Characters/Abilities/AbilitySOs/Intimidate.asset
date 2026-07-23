@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Intimidate
   m_EditorClassIdentifier: Assembly-CSharp::IntimidateAbilitySO
   _name: Intimidate
-  _baseCooldown: 2
+  _baseCooldown: 5
   _icon: {fileID: 0}
   _skillTrigger: SkillTrigger
   _releaseTrigger: SkillRelease
@@ -29,4 +29,5 @@ MonoBehaviour:
   _affectedLayer:
     serializedVersion: 2
     m_Bits: 256
+  _stunDuration: 5
   _flashDuration: 0.15

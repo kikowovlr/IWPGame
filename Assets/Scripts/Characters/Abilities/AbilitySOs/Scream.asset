@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Scream
   m_EditorClassIdentifier: Assembly-CSharp::ScreamAbilitySO
   _name: Scream
-  _baseCooldown: 2
+  _baseCooldown: 5
   _icon: {fileID: 0}
   _skillTrigger: SkillTrigger
   _releaseTrigger: SkillRelease
@@ -29,5 +29,5 @@ MonoBehaviour:
   _affectedLayer:
     serializedVersion: 2
     m_Bits: 256
-  _damage: 50
-  _knockbackForce: 3
+  _damage: 40
+  _knockbackForce: 5

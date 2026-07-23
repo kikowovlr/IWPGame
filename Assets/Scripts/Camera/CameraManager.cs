@@ -400,12 +400,6 @@ public class CameraManager : MonoBehaviour
         }
         else
         {
-            //if (_currentMode == CameraMode.Gameplay)
-            //{
-            //    Cursor.lockState = CursorLockMode.Locked;
-            //    Cursor.visible = false;
-            //}
-
             UpdateCursorState();
         }
     }
@@ -452,15 +446,6 @@ public class CameraManager : MonoBehaviour
             _spectatorCam.LookAt = newTarget;
         }
     }
-
-    //public void ResetCameraToPivot(Transform pivot)
-    //{
-    //    if (_gameplayCam != null && _gameplayCam.Follow != pivot)
-    //    {
-    //        _gameplayCam.Follow = pivot;
-    //        _gameplayCam.LookAt = pivot;
-    //    }
-    //}
 
     private void OnDestroy()
     {

@@ -109,6 +109,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private Rigidbody[] _allChildRigidbodies;
     private float[] _originalMasses;
     private PunchHandler _punchHandler;
+    private int _grabbedByOtherCount = 0;
 
     // kicking
     private KickHandler _kickHandler;
@@ -405,9 +406,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     }  
                 }
 
-                ProcessKickInput(networkInputData);
-                ProcessHeadbuttInput(networkInputData);
-
                 if (_equippedAbility != null)
                 {
                     // if current ability is requesting for movement
@@ -423,8 +421,13 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     }
                 }
 
-                // if climbing, do climb jump instead of normal jump
+                if (!_buoyancy.IsSubmerged)
+                {
+                    ProcessKickInput(networkInputData);
+                    ProcessHeadbuttInput(networkInputData);
                     HandleJump(networkInputData);
+                }
+
                 _prevPunchOrGrabPressed = networkInputData._isPunchOrGrabPressed;
             }
 
@@ -590,11 +593,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 _rb.AddForce(Vector3.up * _gravity * _rb.mass, ForceMode.Force);
 
                 // lock an anchor the moment we go idle on a slope
-                if (!_hasIdleAnchor)
+                if (!_hasIdleAnchor || IsBeingDraggedByOther)
                 {
                     _idleAnchorPosition = _rb.position;
                     _hasIdleAnchor = true;
                 }
+
+                if (IsBeingDraggedByOther)
+                    Debug.Log($"[Drag] {name}: anchor refreshed to {_idleAnchorPosition} (being dragged)");
 
                 // spring back toward anchor if there is residual drift
                 Vector3 offset = _idleAnchorPosition - _rb.position;
@@ -1188,6 +1194,17 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             }
         }
     }
+
+    public void NotifyGrabbedByOther(bool isGrabbed)
+    {
+        _grabbedByOtherCount = isGrabbed
+            ? _grabbedByOtherCount + 1
+            : Mathf.Max(0, _grabbedByOtherCount - 1);
+
+        Debug.Log($"[Drag] {name}: NotifyGrabbedByOther({isGrabbed}) → count={_grabbedByOtherCount}, IsBeingDraggedByOther={IsBeingDraggedByOther}");
+    }
+
+    public bool IsBeingDraggedByOther => _grabbedByOtherCount > 0;
 
     // spawner calls this then transmit info to host
     public NetworkInputData GetNetworkInput()

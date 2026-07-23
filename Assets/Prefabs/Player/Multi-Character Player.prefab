@@ -255,7 +255,7 @@ MonoBehaviour:
   _damage: 12
   _bodyForwardImpulse: 3
   _headThrustImpulse: 30
-  _knockbackForce: 4
+  _knockbackForce: 6
   _attackWindowDuration: 0.2
   _totalCycleTime: 0.45
   _cooldown: 1
@@ -621,7 +621,6 @@ MonoBehaviour:
   - {fileID: 61190307341830075}
   - {fileID: 6748015402955411278}
   - {fileID: 9121924289897987703}
-  _defaultCharacterIndex: 2
   _CharacterIndex: 0
   _maxKnockbackControlLockDuration: 0.5
   _cameraTarget: {fileID: 5392125363664024304}
@@ -1057,8 +1056,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a35847d6765f714bbe81f059245bc1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerBuoyancy
-  _minSubmergeDepth: 0.5
-  _floatDepth: 0.4
+  _minSubmergeDepth: 0.4
+  _floatDepth: 0.7
   _buoyancySpringStrength: 60
   _buoyancyDamping: 8
   _waterDrag: 6
@@ -1072,16 +1071,17 @@ MonoBehaviour:
     m_Bits: 128
   _shoreAssistRadius: 1
   _shoreAssistMaxDepthBelowSurface: 1.5
-  _shoreAssistUpForce: 100
+  _shoreAssistUpForce: 110
   _shoreAssistForwardForce: 40
   _shoreAssistSphereCastRadius: 0.25
   _shoreAssistSphereCastPullback: 0.4
   _maxWallNormalDot: 0.8
+  _maxBuoyancyForce: 100
   _scaleForceByLedgeHeight: 1
   _minLedgeHeight: -0.1
   _maxLedgeHeight: 0.8
   _minUpForceMultiplier: 0.8
-  _maxUpForceMultiplier: 2.8
+  _maxUpForceMultiplier: 2.2
   _ledgeProbeHeight: 2
   _waterGooRate: 0.2
   _IsSubmerged:

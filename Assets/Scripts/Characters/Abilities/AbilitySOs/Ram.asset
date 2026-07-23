@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Ram
   m_EditorClassIdentifier: Assembly-CSharp::RamAbilitySO
   _name: Ram
-  _baseCooldown: 2
+  _baseCooldown: 7
   _icon: {fileID: 0}
   _skillTrigger: SkillTrigger
   _releaseTrigger: SkillRelease

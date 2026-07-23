@@ -11,7 +11,6 @@ public class GooPuddle : MonoBehaviour
     {
         if (other.TryGetComponent(out PlayerComponentRegistry registry))
         {
-            //registry = other.transform.root.GetComponent<PlayerComponentRegistry>();
             if (registry.Controller.Object != null && registry.Controller.Object.HasStateAuthority)
             {
                 registry.Goo.ApplyExposure(_puddleGooRate);

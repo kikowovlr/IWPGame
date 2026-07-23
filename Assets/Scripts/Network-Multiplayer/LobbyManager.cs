@@ -28,7 +28,6 @@ public class LobbyManager : NetworkBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        Debug.Log($"[LobbyManager] Spawned on {(Object.HasStateAuthority ? "HOST" : "CLIENT")} — LocalPlayer={Runner.LocalPlayer}");
 
         if (Object.HasStateAuthority)
         {
@@ -37,7 +36,6 @@ public class LobbyManager : NetworkBehaviour
         }
         else
         {
-            Debug.Log($"[LobbyManager] CLIENT sending Rpc_SubmitName for {GetLocalDisplayName()}");
             Rpc_SubmitName(Runner.LocalPlayer, GetLocalDisplayName());
         }
     }
@@ -63,7 +61,6 @@ public class LobbyManager : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     private void Rpc_SubmitName(PlayerRef player, string playerName)
     {
-        Debug.Log($"[LobbyManager] HOST received Rpc_SubmitName from {player}: {playerName}");
         RegisterPlayer(player, playerName);
     }
 
@@ -79,7 +76,6 @@ public class LobbyManager : NetworkBehaviour
             if (_playerSlots[i] == player)
             {
                 _playerNames.Set(i, playerName);
-                Debug.Log($"[LobbyManager] Updated existing slot {i} for {player}: {playerName}");
                 return;
             }
 
@@ -87,11 +83,9 @@ public class LobbyManager : NetworkBehaviour
             {
                 _playerSlots.Set(i, player);
                 _playerNames.Set(i, playerName);
-                Debug.Log($"[LobbyManager] Registered NEW slot {i} for {player}: {playerName}");
                 return;
             }
         }
-        Debug.LogWarning("[LobbyManager] RegisterPlayer failed — no free slots found!");
     }
 
     public void UnregisterPlayer(PlayerRef player)

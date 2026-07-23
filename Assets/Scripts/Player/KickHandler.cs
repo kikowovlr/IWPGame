@@ -54,8 +54,6 @@ public class KickHandler : NetworkBehaviour
 
     public void TriggerAirKick(Vector3 inputDirection, bool isSprinting)
     {
-        Utils.DebugLog("Kick Triggered");
-
         // only obj w state authority can trigger
         if (!Object.HasStateAuthority || IsKicking) return;
 
@@ -75,11 +73,6 @@ public class KickHandler : NetworkBehaviour
         {
             kickDir.Normalize();
         }
-
-        //// 2. Instantly snap player's physical rotation to face the kick direction
-        //Quaternion targetRot = Quaternion.LookRotation(kickDirection, Vector3.up);
-        //_playerRb.MoveRotation(targetRot);
-        //_mainJoint.targetRotation = Quaternion.Inverse(targetRot) * _initialJointRotation;
 
         // scale velocity dynamically based on sprint status
         float finalForwardForce = _baseForwardKickForce;

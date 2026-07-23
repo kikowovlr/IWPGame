@@ -53,15 +53,10 @@ public class PodiumSceneController : MonoBehaviour
         }
 
         if (GameManager.Instance != null)
-        {
             GameManager.Instance.SetGlobalInputRestrictions(InputRestrictions.None);
-        }
 
         if (CameraManager.Instance != null)
-        {
             CameraManager.Instance.SetCameraState(CameraManager.CameraMode.Gameplay);
-            Debug.Log("[PODIUM] -> Forcing CameraManager to Gameplay mode.");
-        }
 
         if (LevelLoader.Instance != null)
             LevelLoader.Instance.TransitionIn();
@@ -159,6 +154,7 @@ public class PodiumSceneController : MonoBehaviour
         {
             if (registry.Health != null) registry.Health.ResetHealthToMax();
             if (registry.Elimination != null) registry.Elimination.ResetLivesToMax();
+            if (registry.Drowning != null) registry.Drowning.ResetDrownState();
             if (registry.Controller != null) registry.Controller.StopAllCoroutines();
         }
     }

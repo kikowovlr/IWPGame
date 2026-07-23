@@ -42,9 +42,12 @@ public class MainMenuUIController : MonoBehaviour
         ReturnToMainMenu();
 
         // load their previously typed name if they played b4, if not dont fill
-        if (_nameInputField != null && PlayerPrefs.HasKey(NAME_PREFS_KEY))
+        if (_nameInputField != null)
         {
-            _nameInputField.text = PlayerPrefs.GetString(NAME_PREFS_KEY);
+            _nameInputField.characterLimit = 9;
+
+            if (PlayerPrefs.HasKey(NAME_PREFS_KEY))
+                _nameInputField.text = PlayerPrefs.GetString(NAME_PREFS_KEY);
         }
 
         // assign button callbacks
@@ -193,7 +196,10 @@ public class MainMenuUIController : MonoBehaviour
     {
         if (_nameInputField == null) return;
 
-        string finalName = _nameInputField.text;
+        string finalName = _nameInputField.text.Trim();
+
+        if (finalName.Length > 9)
+            finalName = finalName.Substring(0, 9);
 
         // validation check - dont save it blank
         if (string.IsNullOrWhiteSpace(finalName))

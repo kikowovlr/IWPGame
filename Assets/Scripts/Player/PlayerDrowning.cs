@@ -49,6 +49,8 @@ public class PlayerDrowning : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         if (!IsSinking) return;
+        if (GameManager.Instance != null && GameManager.Instance.IsCurrentlyOnPodiumScene())
+            return;
 
         if (Object.HasStateAuthority)
         {
