@@ -119,7 +119,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     // characters
     [Header("Character Visuals")]
     [SerializeField] private GameObject[] _characterPackages;
-    [SerializeField] private int _defaultCharacterIndex = 0; // TEMP - default character
     [Networked, OnChangedRender(nameof(OnCharacterChanged))] public int CharacterIndex { get; set; }
 
     // abilities

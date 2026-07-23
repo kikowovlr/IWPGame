@@ -24,7 +24,6 @@ using UnityEngine.UI;
 public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] NetworkPlayerController _networkPlayerPrefab;
-    [SerializeField] private String _mainMenuScene = "MainMenuScene";
     public bool IsTransitioningToGameplay { get; set; } = false;
 
     // input is being collected by network player which is then sent to the host thru this fn
