@@ -3740,6 +3740,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2137118286891457406, guid: c5520fbd94e22004fabcab30da196817, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2148990114075510972, guid: c5520fbd94e22004fabcab30da196817, type: 3}
       propertyPath: m_Name
       value: LoadingPanel

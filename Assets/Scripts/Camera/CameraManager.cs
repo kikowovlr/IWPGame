@@ -453,14 +453,14 @@ public class CameraManager : MonoBehaviour
         }
     }
 
-    public void ResetCameraToPivot(Transform pivot)
-    {
-        if (_gameplayCam != null && _gameplayCam.Follow != pivot)
-        {
-            _gameplayCam.Follow = pivot;
-            _gameplayCam.LookAt = pivot;
-        }
-    }
+    //public void ResetCameraToPivot(Transform pivot)
+    //{
+    //    if (_gameplayCam != null && _gameplayCam.Follow != pivot)
+    //    {
+    //        _gameplayCam.Follow = pivot;
+    //        _gameplayCam.LookAt = pivot;
+    //    }
+    //}
 
     private void OnDestroy()
     {

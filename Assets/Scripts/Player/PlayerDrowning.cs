@@ -96,7 +96,7 @@ public class PlayerDrowning : NetworkBehaviour
         {
             // fires when ResetState() flips it back on respawn
             if (CameraManager.Instance != null)
-                CameraManager.Instance.ResetCameraToPivot(_controller.CameraTarget);
+                CameraManager.Instance.SwapCameraFollowTarget(_cameraFollowProxy, _controller.CameraTarget);
         }
     }
 }

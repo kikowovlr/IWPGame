@@ -45,10 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c46555378786c994caf7b4f764719664, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthHandler
-  _maxHealth: 100
+  _maxHealth: 300
   _knockedDownDamageMultiplier: 0.3
-  _baseKnockoutTime: 3
-  _maxKnockoutTime: 8
+  _baseKnockoutTime: 5
+  _maxKnockoutTime: 10
   _knockOutForceMultiplier: 1.8
   _CurrentHealth: 0
   _MaxHealth: 0
@@ -2121,6 +2121,10 @@ PrefabInstance:
       value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7721345039906996910, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}
+      propertyPath: _syncAnimation
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7721345039906996910, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}
       propertyPath: _isSetupInEditor
       value: 1
       objectReference: {fileID: 0}
@@ -2580,6 +2584,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 2609227640498066217, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
+      propertyPath: _syncAnimation
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2609227640498066217, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _isSetupInEditor
       value: 1
       objectReference: {fileID: 0}
@@ -2601,19 +2609,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2609227640498066217, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _worldRotationOffset.w
-      value: 1.0000001
+      value: 0.89561373
       objectReference: {fileID: 0}
     - target: {fileID: 2609227640498066217, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _worldRotationOffset.x
-      value: 0
+      value: -0.2964106
       objectReference: {fileID: 0}
     - target: {fileID: 2609227640498066217, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _worldRotationOffset.y
-      value: 0
+      value: 0.044504266
       objectReference: {fileID: 0}
     - target: {fileID: 2609227640498066217, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _worldRotationOffset.z
-      value: 0
+      value: -0.32868928
       objectReference: {fileID: 0}
     - target: {fileID: 2609227640498066217, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _startSlerpPositionSpring

@@ -1012,6 +1012,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                  
                 if (linker.characterAnimator != null)
                     _animator = linker.characterAnimator;
+                if (_animator != null)
+                    _animator.Update(0f);
 
                 Registry.vfxAnchors.SetUpAnchors(linker._head, linker._leftEye, linker._rightEye);
 
@@ -1322,13 +1324,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         if (Object.HasStateAuthority)
         {
             CharacterIndex = Random.Range(0, _characterPackages.Length);
-        }
-
-        GameObject startingPackage = _characterPackages[CharacterIndex];
-        Animator startingAnimator = startingPackage.GetComponentInChildren<Animator>();
-        if (startingAnimator != null)
-        {
-            startingAnimator.Update(0f);
         }
 
         ExecuteCharacterPackageSwap(CharacterIndex);
