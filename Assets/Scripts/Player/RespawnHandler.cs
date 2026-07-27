@@ -17,9 +17,6 @@ public class RespawnHandler : NetworkBehaviour
         if (_registry != null)
             _registry.VisualsOverrider.EnableVisuals();
 
-        transform.position = position;
-        transform.rotation = rotation;
-
         if (Object.HasStateAuthority)
         {
             NetworkRigidbody3D rb = _registry.Controller.NetworkedRb;

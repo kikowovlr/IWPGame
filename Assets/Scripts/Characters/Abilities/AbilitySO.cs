@@ -9,6 +9,7 @@ public abstract class AbilitySO : ScriptableObject
     public string _name;
     public float _baseCooldown;
     public Sprite _icon;
+    [TextArea(3, 6)] public string _description;
 
     [Header("Animation Settings")]
     [SerializeField] protected string _skillTrigger = "SkillTrigger";

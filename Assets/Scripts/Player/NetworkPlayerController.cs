@@ -154,6 +154,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
     [Header("Camera Target")]
     [SerializeField] private Transform _cameraTarget;
+
+    [Header("Nametag")]
+    [SerializeField] private Color[] _nametagColorOptions;
+    [Networked] public Color NametagColor { get; private set; }
+
     public bool IsCameraRotationLocked
     {
         get
@@ -173,6 +178,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public ref AbilityState AbilityStateRef => ref CurrentAbilityState;
     public AbilitySO EquippedAbility => _equippedAbility;
     public Transform CameraTarget => _cameraTarget != null ? _cameraTarget : transform;
+    public int CharacterPackageCount => _characterPackages.Length;
+
 
     private void Awake()
     {
@@ -246,20 +253,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         }
     }
     #endregion
-
-    private void Update()
-    {
-        // TODO - TEMP DEBUG SWITCH: Runs locally in standard frame updates to catch key strokes perfectly
-        //if (Object != null && Object.HasStateAuthority)
-        //{
-        //    if (Input.GetKeyDown(KeyCode.Alpha1))
-        //        ExecuteCharacterPackageSwap(0);
-        //    else if (Input.GetKeyDown(KeyCode.Alpha2))
-        //        ExecuteCharacterPackageSwap(1);
-        //    else if (Input.GetKeyDown(KeyCode.Alpha3))
-        //        ExecuteCharacterPackageSwap(2);
-        //}
-    }
 
     public override void FixedUpdateNetwork()
     {
@@ -1018,7 +1011,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 if (linker.characterAnimator != null)
                     _animator = linker.characterAnimator;
                 if (_animator != null)
+                {
+                    _animator.SetBool("IsGrounded", true);
                     _animator.Update(0f);
+                }
 
                 Registry.vfxAnchors.SetUpAnchors(linker._head, linker._leftEye, linker._rightEye);
 
@@ -1049,6 +1045,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
                     _allChildRigidbodies[i].linearVelocity = Vector3.zero;
                     _allChildRigidbodies[i].angularVelocity = Vector3.zero;
+                }
+
+                if (_rb != null)
+                {
+                    _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
                 }
             }
         }
@@ -1200,11 +1201,39 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         _grabbedByOtherCount = isGrabbed
             ? _grabbedByOtherCount + 1
             : Mathf.Max(0, _grabbedByOtherCount - 1);
-
-        Debug.Log($"[Drag] {name}: NotifyGrabbedByOther({isGrabbed}) → count={_grabbedByOtherCount}, IsBeingDraggedByOther={IsBeingDraggedByOther}");
     }
 
     public bool IsBeingDraggedByOther => _grabbedByOtherCount > 0;
+
+    public CharacterComponentLinker GetCharacterLinker(int index)
+    {
+        if (index < 0 || index >= _characterPackages.Length) return null;
+
+        GameObject package = _characterPackages[index];
+        if (package == null) return null;
+
+        return package.GetComponent<CharacterComponentLinker>();
+    }
+
+    public CharacterDataSO GetCharacterData(int index)
+    {
+        if (index < 0 || index >= _characterPackages.Length) return null;
+
+        GameObject package = _characterPackages[index];
+        if (package == null) return null;
+
+        CharacterComponentLinker linker = package.GetComponent<CharacterComponentLinker>();
+        return linker != null ? linker._characterData : null;
+    }
+
+    public void AssignNametagColorByIndex(int index)
+    {
+        if (!Object.HasStateAuthority) return;
+        if (_nametagColorOptions == null || index < 0 || index >= _nametagColorOptions.Length) return;
+
+        NametagColor = _nametagColorOptions[index];
+    }
+    public int NametagColorPoolSize => _nametagColorOptions != null ? _nametagColorOptions.Length : 0;
 
     // spawner calls this then transmit info to host
     public NetworkInputData GetNetworkInput()
@@ -1336,13 +1365,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         // make it easier to tell which player is which
         transform.name = $"P_{Object.Id}";
 
-        // TODO: character selection
         if (Object.HasStateAuthority)
         {
-            CharacterIndex = Random.Range(0, _characterPackages.Length);
+            CharacterIndex = 0; // set to default character
         }
 
         ExecuteCharacterPackageSwap(CharacterIndex);
+
+        CheckForGround();
     }
 
     // prevent null ref when player dc/leave

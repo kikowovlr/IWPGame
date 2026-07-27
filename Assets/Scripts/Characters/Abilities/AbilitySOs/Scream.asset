@@ -14,7 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScreamAbilitySO
   _name: Scream
   _baseCooldown: 5
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 4094143e71fc96c43be85dc86bf7fe61, type: 3}
+  _description: 'Unleashes a high-pitch scream that knocks back and deals massive
+    damage.
+
+    Press [SKILL] button to use.'
   _skillTrigger: SkillTrigger
   _releaseTrigger: SkillRelease
   _activeBool: IsSkillActive

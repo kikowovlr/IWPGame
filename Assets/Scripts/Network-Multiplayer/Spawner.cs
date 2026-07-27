@@ -1,10 +1,11 @@
+using Fusion;
+using Fusion.Sockets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Fusion;
-using Fusion.Sockets;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -24,7 +25,6 @@ using UnityEngine.UI;
 public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] NetworkPlayerController _networkPlayerPrefab;
-    public bool IsTransitioningToGameplay { get; set; } = false;
 
     // input is being collected by network player which is then sent to the host thru this fn
     public void OnInput(NetworkRunner runner, NetworkInput input)
@@ -38,10 +38,24 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadStart(NetworkRunner runner)
     {
-        if (!IsTransitioningToGameplay) return;
+        if (NetworkLauncher.Instance != null && !NetworkLauncher.Instance.HasSkippedInitialSceneLoad)
+        {
+            NetworkLauncher.Instance.HasSkippedInitialSceneLoad = true;
+            Debug.Log("[Spawner] OnSceneLoadStart — skipping (initial lobby connection)");
+            return;
+        }
+
+        bool isPodiumTransition = GameManager.Instance != null && GameManager.Instance.CurrentRoundState == RoundState.MatchOver;
+        if (isPodiumTransition)
+        {
+            Debug.Log("[Spawner] OnSceneLoadStart — skipping (podium transition, handled separately)");
+            return;
+        }
+
+        Debug.Log("[Spawner] OnSceneLoadStart — showing loading screen");
 
         if (TransitionUIManager.Instance != null)
-            TransitionUIManager.Instance.ShowMapLoadingScreen("Starting Match...");
+            TransitionUIManager.Instance.ShowMapLoadingScreenTimed("Starting Match...");
     }
 
     /// <summary>
@@ -49,8 +63,6 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
     /// </summary>
     public void OnSceneLoadDone(NetworkRunner runner)
     {
-        IsTransitioningToGameplay = false;
-
         if (!runner.IsServer) return;
 
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "GameScene")

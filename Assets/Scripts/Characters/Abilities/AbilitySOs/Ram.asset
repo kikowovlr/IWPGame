@@ -14,7 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RamAbilitySO
   _name: Ram
   _baseCooldown: 7
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 7d752e5bd8917cf4eb6a22c0fa0b6fd6, type: 3}
+  _description: 'Rams into critters and knocks them back.
+
+    Hold [SKILL] button
+    to charge. Use [MOUSE] to aim. '
   _skillTrigger: SkillTrigger
   _releaseTrigger: SkillRelease
   _activeBool: IsSkillActive

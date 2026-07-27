@@ -38,6 +38,8 @@ public class MatchSettings : ScriptableObject
     [SerializeField] private float _countdownDuration = 3.5f;
     [SerializeField] private float _roundOverBufferDuration = 4.0f;
     [SerializeField] private float _matchOverBufferDuration = 4.0f;
+    [SerializeField] private float _characterSelectDuration = 60.0f;
+    [SerializeField] private float _finalCharacterSelectCountdown = 5.0f;
 
     [Header("Rules")]
     [SerializeField] private int _crownsToWinMatch = 3;
@@ -49,6 +51,8 @@ public class MatchSettings : ScriptableObject
     public float CountdownDuration => _countdownDuration;
     public float RoundOverBufferDuration => _roundOverBufferDuration;
     public float MatchOverBufferDuration => _matchOverBufferDuration;
+    public float CharacterSelectDuration => _characterSelectDuration;
+    public float FinalCharacterSelectCountdown => _finalCharacterSelectCountdown;
     public int CrownsToWinMatch => _crownsToWinMatch;
     public SceneReference PodiumScene => _podiumSceneRef;
 

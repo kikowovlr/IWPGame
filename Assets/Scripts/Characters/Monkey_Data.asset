@@ -15,3 +15,6 @@ MonoBehaviour:
   CharacterName: Peanut
   CharacterIcon: {fileID: 21300000, guid: 4094143e71fc96c43be85dc86bf7fe61, type: 3}
   PrefabPackage: {fileID: 4003127477016757687, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
+  CharacterDescription: Peanut is an expressive critter who gets overwhelmed easily.
+    When threatened, his loud and dramatic screams become his greatest strength.
+  CharacterSplashArt: {fileID: 21300000, guid: 63445b7052686b546a502b3ca683ffa6, type: 3}

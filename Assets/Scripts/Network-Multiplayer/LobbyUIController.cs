@@ -105,10 +105,6 @@ public class LobbyUIController : MonoBehaviour
         int currentPlayerCount = LobbyManager.Instance != null ? LobbyManager.Instance.GetLobbyRoster().Count : 0;
         if (currentPlayerCount < _minPlayersToStart) return;
 
-        Spawner spawner = FindAnyObjectByType<Spawner>();
-        if (spawner != null)
-            spawner.IsTransitioningToGameplay = true;
-
         await _runner.LoadScene(SceneRef.FromIndex(_gameplaySceneBuildIndex));
     }
 

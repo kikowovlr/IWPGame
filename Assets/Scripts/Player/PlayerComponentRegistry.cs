@@ -16,6 +16,7 @@ public class PlayerComponentRegistry : MonoBehaviour
     [SerializeField] private PlayerBuoyancy _buoyancy;
     [SerializeField] private GooExposure _gooExposure;
     [SerializeField] private PlayerDrowning _drowning;
+    [SerializeField] private PlayerCharacterSelect _characterSelect;
 
     public NetworkPlayerController Controller => _playerController;
     public PlayerHealthHandler Health => _healthHandler;
@@ -32,6 +33,7 @@ public class PlayerComponentRegistry : MonoBehaviour
     public PlayerBuoyancy Buoyancy => _buoyancy;
     public GooExposure Goo => _gooExposure;
     public PlayerDrowning Drowning => _drowning;
+    public PlayerCharacterSelect CharacterSelect => _characterSelect;
 
     private void Awake()
     {

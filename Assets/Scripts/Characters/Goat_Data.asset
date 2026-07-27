@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b278586aff4b711479fdef29840ac233, type: 3}
   m_Name: Goat_Data
   m_EditorClassIdentifier: Assembly-CSharp::CharacterDataSO
-  CharacterName: Ramy
+  CharacterName: Ramy the Ram
   CharacterIcon: {fileID: 21300000, guid: 7d752e5bd8917cf4eb6a22c0fa0b6fd6, type: 3}
   PrefabPackage: {fileID: 266757487661110781, guid: 650fdfb11759916428fa98c4d34bdfb1, type: 3}
+  CharacterDescription: Remy is a gentle and caring critter who always looks out
+    for her friends. However, when her emotions get overwhelming, her patience runs
+    out and she flares into a fit of rage.
+  CharacterSplashArt: {fileID: 21300000, guid: 41cf3cb48727b144fb8cc913d42bb718, type: 3}

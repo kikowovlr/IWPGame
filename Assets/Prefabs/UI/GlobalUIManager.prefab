@@ -603,6 +603,9 @@ MonoBehaviour:
   _loadingBackgroundImage: {fileID: 1821332979932537487}
   _connectingBackground: {fileID: 21300000, guid: a908bb4b3ecaa974ebf3132467261c80, type: 3}
   _mapLoadingBackground: {fileID: 21300000, guid: a908bb4b3ecaa974ebf3132467261c80, type: 3}
+  _loadingBarGO: {fileID: 2398489750042130740}
+  _loadingBar: {fileID: 7525710545060438917}
+  _mapLoadingMinDuration: 5
 --- !u!114 &8730651535037549818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -760,6 +763,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7165876064896519023, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
   m_PrefabInstance: {fileID: 9124558170951091155}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2398489750042130740 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6911289263506111207, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
+  m_PrefabInstance: {fileID: 9124558170951091155}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &4756479316810343303 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4369223858064236628, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
@@ -782,3 +790,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &7525710545060438917 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1643884859117051990, guid: 3e0c3b588cca8b84ea90366c48c4c688, type: 3}
+  m_PrefabInstance: {fileID: 9124558170951091155}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image

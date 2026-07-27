@@ -13,8 +13,8 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private CinemachineCamera _gameplayCam; // follow player cam
     [SerializeField] private CinemachineCamera _staticSpectatorCam; // static cam looking down at the arena
     [SerializeField] private CinemachineCamera _spectatorCam; // reusable orbital cam for spectating specific players
+    [SerializeField] private CinemachineCamera _characterSelectCam; // static character select cam
     [SerializeField] private Camera _myLocalCamera;
-    [SerializeField] private CinemachineInputAxisController _axisController;
 
     [Header("Camera Settings")]
     [SerializeField] private CinemachineBlendDefinition _gameplayIntroBlend = new CinemachineBlendDefinition(CinemachineBlendDefinition.Styles.EaseInOut, 1.5f);
@@ -38,7 +38,8 @@ public class CameraManager : MonoBehaviour
     {
         Gameplay,
         StaticOverview,
-        SpectatingPlayer
+        SpectatingPlayer,
+        CharacterSelect
     }
 
     private enum SpectatorViewMode
@@ -128,12 +129,13 @@ public class CameraManager : MonoBehaviour
     public void SetCameraState(CameraMode mode)
     {
         _currentMode = mode;
-        if (_gameplayCam == null || _spectatorCam == null || _staticSpectatorCam == null) return;
+        if (_gameplayCam == null || _spectatorCam == null || _staticSpectatorCam == null || _characterSelectCam == null) return;
 
         // swap priority
         _gameplayCam.Priority = (mode == CameraMode.Gameplay) ? 10 : 0;
         _spectatorCam.Priority = (mode == CameraMode.SpectatingPlayer) ? 10 : 0;
         _staticSpectatorCam.Priority = (mode == CameraMode.StaticOverview) ? 10 : 0;
+        _characterSelectCam.Priority = (mode == CameraMode.CharacterSelect) ? 10 : 0;
 
         UpdateCursorState();
 
@@ -147,6 +149,8 @@ public class CameraManager : MonoBehaviour
                 activeCam = _spectatorCam; break;
             case CameraMode.Gameplay:
                 activeCam = _gameplayCam; break;
+            case CameraMode.CharacterSelect:
+                activeCam = _characterSelectCam; break;
         }
 
         // update player registry
@@ -161,11 +165,24 @@ public class CameraManager : MonoBehaviour
         _gameplayCam.Follow = target;
         _gameplayCam.LookAt = target;
 
-        // if in setup state, start in static overview
-        if (GameManager.Instance != null && GameManager.Instance.CurrentRoundState == RoundState.Setup)
-            SetCameraState(CameraMode.StaticOverview);
-        else
+        if (GameManager.Instance == null)
+        {
             SetCameraState(CameraMode.Gameplay);
+            return;
+        }
+
+        switch (GameManager.Instance.CurrentRoundState)
+        {
+            case RoundState.Setup:
+                SetCameraState(CameraMode.StaticOverview);
+                break;
+            case RoundState.CharacterSelect:
+                SetCameraState(CameraMode.CharacterSelect);
+                break;
+            default:
+                SetCameraState(CameraMode.Gameplay);
+                break;
+        }
     }
 
     private void HandlePlayerSpectatorReady(PlayerEliminationHandler handler)
@@ -356,7 +373,6 @@ public class CameraManager : MonoBehaviour
         // check if the player that js died is the one that our camera is following
         if (_spectatorCam.Follow == deadPlayerTransform)
         {
-            Debug.Log($"[CameraManager] The player we are currently spectating ({deadPlayerId}) was eliminated! Triggering auto-swap.");
             OnCameraSwapRequested?.Invoke();
 
             _pendingCameraCutAction = () =>
@@ -368,7 +384,7 @@ public class CameraManager : MonoBehaviour
 
     private void HandleGameplayCameraLock()
     {
-        if (_axisController == null) return;
+
 
         bool shouldLockCamera = false;
 
@@ -390,10 +406,7 @@ public class CameraManager : MonoBehaviour
 
     private void SetCinemachineInputLocked(bool isLocked)
     {
-        // ensure input is enabled if we arent in gameplay
-        _axisController.enabled = !isLocked;
-
-        if (isLocked)
+        if (isLocked && _currentMode == CameraMode.Gameplay)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -444,6 +457,32 @@ public class CameraManager : MonoBehaviour
         {
             _spectatorCam.Follow = newTarget;
             _spectatorCam.LookAt = newTarget;
+        }
+    }
+
+    /// <summary>
+    /// local only - points this client's character select cam at this client's own player
+    /// </summary>
+    public void FocusCharacterSelectCameraOnLocalPlayer()
+    {
+        if (_characterSelectCam == null)
+        {
+            Debug.LogWarning("[CameraManager] _characterSelectCam is NULL — not assigned in Inspector?");
+            return;
+        }
+
+        Transform localTarget = PlayerRegistry.LocalPlayerTransform;
+        if (localTarget == null)
+        {
+            Debug.LogWarning("[CameraManager] PlayerRegistry.LocalPlayerTransform is NULL — local player not registered yet?");
+            return;
+        }
+
+        if (_characterSelectCam.Follow != localTarget)
+        {
+            Debug.Log($"[CameraManager] Setting character select cam Follow/LookAt to {localTarget.name}");
+            _characterSelectCam.Follow = localTarget;
+            _characterSelectCam.LookAt = localTarget;
         }
     }
 

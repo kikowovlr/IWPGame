@@ -7,7 +7,6 @@ public class MainMenuUIController : MonoBehaviour
 {
     [Header("Network References")]
     [SerializeField] private NetworkLauncher _networkLauncher;
-    [SerializeField] private int _gameplaySceneBuildIndex = 1;
     [SerializeField] private LobbyManager _lobbyManagerPrefab;
     [SerializeField] private LobbyUIController _lobbyUIController;
 

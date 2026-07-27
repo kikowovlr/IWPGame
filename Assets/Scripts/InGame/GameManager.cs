@@ -25,7 +25,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     // rounds
     [Networked] public int CurrentRoundNumber { get; private set; } = 0;
     [Networked, OnChangedRender(nameof(OnRoundStateChanged))] public RoundState CurrentRoundState { get; private set; }
-    private RoundState _lastTrackedState = RoundState.Setup;
+    private RoundState _lastTrackedState = RoundState.None;
     [Networked] private TickTimer StateTimer { get; set; }
     [HideInInspector] [Networked, OnChangedRender(nameof(OnSetupUIStateChanged))] public NetworkBool IsSetupUIActive { get; private set; }
     private bool _firstRoundInitialised = false;
@@ -40,12 +40,17 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
 
     [SerializeField] private IslandBreakManager _islandBreakManager;
 
+    [Header("Character Select")]
+    [SerializeField] private Transform[] _characterSelectStagePoints; // positions for character select
+    [Networked] private NetworkBool _hasCompletedCharacterSelect { get; set; }
+    [HideInInspector] [Networked] public NetworkBool IsInFinalCharacterSelectCountdown { get; private set; }
+
     // getters
     public MatchSettings Settings => _matchSettings;
     public RoundState GetCurrentRoundState() => CurrentRoundState;
     public int GetLivingPlayerCount() => _localLivingPlayers.Count;
     public RoundEndDisplayController RoundEndDisplay => _roundEndDisplayController;
-
+    public bool IsSpawned { get; private set; }
 
     private void Awake()
     {
@@ -59,6 +64,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
 
     private void InitRoundStateMachine()
     {
+        _stateMachine.Add(RoundState.CharacterSelect, new CharacterSelectState());
         _stateMachine.Add(RoundState.Setup, new SetupState());
         _stateMachine.Add(RoundState.Countdown, new CountdownState());
         _stateMachine.Add(RoundState.RoundActive, new RoundActiveState());
@@ -81,6 +87,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     /// </summary>
     public override void Spawned()
     {
+        IsSpawned = true;
         DontDestroyOnLoad(gameObject);
 
         if (Object.HasStateAuthority)
@@ -92,9 +99,10 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
         }
 
         RebuildLocalLivingPlayers();
-
         _lastTrackedState = CurrentRoundState;
-        if (_stateMachine.TryGetValue(CurrentRoundState, out IRoundState initialRoundState))
+
+        // only force state enter if we are joining a game in progress
+        if (CurrentRoundState != RoundState.None && _stateMachine.TryGetValue(CurrentRoundState, out IRoundState initialRoundState))
         {
             Debug.Log($"[MATCH LOCAL] -> Initializing First Frame State: {CurrentRoundState}");
             initialRoundState.OnStateEnter(this);
@@ -119,13 +127,19 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
             int activeNetworkPlayers = Object.Runner.ActivePlayers.Count();
             int fullyTrackedCount = GetTotalTrackedPlayerCount();
 
-            if (activeNetworkPlayers > 0 && fullyTrackedCount >= activeNetworkPlayers)
+            if (activeNetworkPlayers > 0 && fullyTrackedCount >= activeNetworkPlayers && AreAllPlayerAvatarsSpawned())
             {
-                Debug.Log($"[MATCH ENGINE] -> Network arrays synced ({fullyTrackedCount}/{activeNetworkPlayers}). Commencing Setup state safely.");
                 _firstRoundInitialised = true;
 
-                ResetRoundEntities();
-                TransitionToState(RoundState.Setup, _matchSettings.SetUpDuration);
+                if (!_hasCompletedCharacterSelect)
+                {
+                    TransitionToState(RoundState.CharacterSelect, _matchSettings.CharacterSelectDuration);
+                }
+                else
+                {
+                    ResetRoundEntities();
+                    TransitionToState(RoundState.Setup, _matchSettings.SetUpDuration);
+                }
             }
             else
                 return;
@@ -578,6 +592,137 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
                 }
             }
         }
+    }
+
+    public void MarkCharacterSelectComplete()
+    {
+        if (Object.HasStateAuthority)
+            _hasCompletedCharacterSelect = true;
+    }
+
+    public void SetFinalCharacterSelectCountdown(bool value)
+    {
+        if (Object.HasStateAuthority)
+            IsInFinalCharacterSelectCountdown = value;
+    }
+
+    public void BeginFinalCharacterSelectCountdown()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        IsInFinalCharacterSelectCountdown = true;
+        ResetStateTimer(_matchSettings.FinalCharacterSelectCountdown);
+    }
+
+    public void AutoLockUnreadyPlayers()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        foreach (PlayerRef playerRef in Object.Runner.ActivePlayers)
+        {
+            if (Object.Runner.TryGetPlayerObject(playerRef, out NetworkObject playerObj))
+            {
+                if (playerObj.TryGetComponent(out PlayerComponentRegistry registry) && registry.CharacterSelect != null)
+                {
+                    if (!registry.CharacterSelect.IsReadyToStart)
+                        registry.CharacterSelect.ForceLock();
+                }
+            }
+        }
+    }
+
+    public void TeleportPlayersToCharacterSelectStage()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        var sortedPlayers = Object.Runner.ActivePlayers.OrderBy(p => p.PlayerId).ToList();
+
+        for (int i = 0; i < sortedPlayers.Count && i < _characterSelectStagePoints.Length; i++)
+        {
+            if (Object.Runner.TryGetPlayerObject(sortedPlayers[i], out NetworkObject playerObj))
+            {
+                if (playerObj.TryGetComponent(out PlayerComponentRegistry registry) && registry.RespawnHandler != null)
+                {
+                    registry.RespawnHandler.TeleportToSpawnPoint(_characterSelectStagePoints[i].position, _characterSelectStagePoints[i].rotation);
+                }
+            }
+        }
+    }
+
+    public bool AreAllPlayersReady()
+    {
+        foreach (PlayerRef playerRef in Object.Runner.ActivePlayers)
+        {
+            if (Object.Runner.TryGetPlayerObject(playerRef, out NetworkObject playerObj))
+            {
+                if (playerObj.TryGetComponent(out PlayerComponentRegistry registry) && registry.CharacterSelect != null)
+                {
+                    if (!registry.CharacterSelect.IsReadyToStart) return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public void ResetAllPlayersCharacterSelectState()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        // build a fresh shuffled pool of color indices, once, for this match so every player this round gets a guaranteed-unique color
+        var activePlayerRefs = Object.Runner.ActivePlayers.ToList();
+
+        int paletteSize = 0;
+        foreach (PlayerRef pRef in activePlayerRefs)
+        {
+            if (Object.Runner.TryGetPlayerObject(pRef, out NetworkObject firstObj)
+                && firstObj.TryGetComponent(out PlayerComponentRegistry firstRegistry)
+                && firstRegistry.Controller != null)
+            {
+                paletteSize = firstRegistry.Controller.NametagColorPoolSize;
+                break;
+            }
+        }
+
+        List<int> availableColorIndices = Enumerable.Range(0, paletteSize)
+            .OrderBy(_ => Random.value)
+            .ToList();
+
+        foreach (PlayerRef playerRef in activePlayerRefs)
+        {
+            if (Object.Runner.TryGetPlayerObject(playerRef, out NetworkObject playerObj))
+            {
+                if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
+                {
+                    if (registry.CharacterSelect != null)
+                        registry.CharacterSelect.ResetSelectState();
+
+                    if (registry.Controller != null)
+                    {
+                        if (availableColorIndices.Count > 0)
+                        {
+                            int colorIndex = availableColorIndices[0];
+                            availableColorIndices.RemoveAt(0);
+                            registry.Controller.AssignNametagColorByIndex(colorIndex);
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"[GameManager] Ran out of unique nametag colors for player {playerRef} — palette needs at least as many colors as max players.");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private bool AreAllPlayerAvatarsSpawned()
+    {
+        foreach (PlayerRef playerRef in Object.Runner.ActivePlayers)
+        {
+            if (!Object.Runner.TryGetPlayerObject(playerRef, out _))
+                return false;
+        }
+        return true;
     }
 
     public static void ResetInstance()

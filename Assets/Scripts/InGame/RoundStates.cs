@@ -9,6 +9,8 @@ using UnityEngine.SceneManagement;
 // state enums to track round state
 public enum RoundState
 {
+    None,
+    CharacterSelect,// one played through once, first state before setup
     Setup,          // brief buffer to spawn players, "ROUND _" UI, use a 2d background
     Countdown,      // transition to game scene, 3, 2, 1.. countdown (UI ticks, movement and camera locked)
     RoundActive,    // actual gameplay
@@ -26,6 +28,66 @@ public interface IRoundState
 
 // states
 #region STATES IMPLEMENTATION
+
+public class CharacterSelectState : IRoundState
+{
+    public RoundState StateType => RoundState.CharacterSelect;
+
+    public void OnStateEnter(GameManager manager)
+    {
+        Debug.Log("[MATCH ENGINE] -> Entered CharacterSelect State.");
+
+        if (CameraManager.Instance != null)
+        {
+            CameraManager.Instance.SetDefaultBlendStyle(CameraManager.Instance.CutCameraBlend);
+            CameraManager.Instance.SetCameraState(CameraManager.CameraMode.CharacterSelect);
+        }
+
+        if (manager.Object.HasStateAuthority)
+        {
+            manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
+            manager.TeleportPlayersToCharacterSelectStage();
+            manager.ResetAllPlayersCharacterSelectState();
+            manager.SetFinalCharacterSelectCountdown(false);
+            manager.ResetStateTimer(manager.Settings.CharacterSelectDuration);
+        }
+    }
+
+    public void OnStateUpdate(GameManager manager)
+    {
+        if (!manager.Object.HasStateAuthority) return;
+
+        if (!manager.IsInFinalCharacterSelectCountdown)
+        {
+            bool allReady = manager.AreAllPlayersReady();
+
+            if (allReady)
+            {
+                manager.BeginFinalCharacterSelectCountdown();
+            }
+            else if (manager.IsStateTimerExpired)
+            {
+                // auto-lock everyone still selecting using whatever character is currently hovered
+                manager.AutoLockUnreadyPlayers();
+                manager.BeginFinalCharacterSelectCountdown();
+            }
+        }
+        else
+        {
+            if (manager.IsStateTimerExpired)
+            {
+                manager.MarkCharacterSelectComplete();
+                manager.ResetRoundEntities();
+                manager.TransitionToState(RoundState.Setup, manager.Settings.SetUpDuration);
+            }
+        }
+    }
+
+    public void OnStateExit(GameManager manager)
+    {
+        Debug.Log("[MATCH ENGINE] -> Exited CharacterSelect State.");
+    }
+}
 
 // brief buffer to spawn players, "ROUND _" UI, use a 2d background
 public class SetupState : IRoundState

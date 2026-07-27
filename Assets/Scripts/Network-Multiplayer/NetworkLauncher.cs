@@ -11,6 +11,7 @@ public class NetworkLauncher : MonoBehaviour
     public static NetworkLauncher Instance { get; private set; }
     [SerializeField] private NetworkRunner _runnerPrefab;
     public NetworkRunner Runner { get; private set; }
+    public bool HasSkippedInitialSceneLoad { get; set; } = false;
 
     private void Awake()
     {
@@ -30,6 +31,8 @@ public class NetworkLauncher : MonoBehaviour
     /// </summary>
     public async Task<StartGameResult> LaunchSession(GameMode mode, int gameplaySceneIndex, string sessionName)
     {
+        HasSkippedInitialSceneLoad = false;
+
         if (Runner != null)
         {
             try

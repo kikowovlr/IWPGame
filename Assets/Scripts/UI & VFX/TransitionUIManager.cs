@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +21,10 @@ public class TransitionUIManager : MonoBehaviour
     [SerializeField] private Sprite _connectingBackground;
     [SerializeField] private Sprite _mapLoadingBackground;
 
+    [SerializeField] private GameObject _loadingBarGO;
+    [SerializeField] private Image _loadingBar;
+    [SerializeField] private float _mapLoadingMinDuration = 5.0f;
+
     private void Awake()
     {
         if (Instance == null)
@@ -34,6 +39,35 @@ public class TransitionUIManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        if (_loadingBarGO != null)
+            _loadingBarGO.SetActive(false);
+    }
+
+    public void ShowMapLoadingScreenTimed(string status)
+    {
+        StartCoroutine(MapLoadingRoutine(status));
+    }
+
+    private IEnumerator MapLoadingRoutine(string status)
+    {
+        ShowMapLoadingScreen(status);
+
+        float elapsed = 0f;
+        while (elapsed < _mapLoadingMinDuration)
+        {
+            elapsed += Time.deltaTime;
+            if (_loadingBar != null)
+                _loadingBar.fillAmount = Mathf.Clamp01(elapsed / _mapLoadingMinDuration);
+            yield return null;
+        }
+
+        if (_loadingBarGO != null)
+            _loadingBarGO.SetActive(false);
+        ClearAllOverlays();
+    }
+
     public void ShowMapLoadingScreen(string status)
     {
         if (_loadingPanel != null) _loadingPanel.SetActive(true);
@@ -44,6 +78,9 @@ public class TransitionUIManager : MonoBehaviour
             _loadingBackgroundImage.sprite = _mapLoadingBackground;
         if (_loadingTitle != null)
             _loadingTitle.text = "MAP LOADING SCREEN";
+
+        if (_loadingBarGO != null)
+            _loadingBarGO.SetActive(true);
     }
 
     public void ShowGenericTransitionScreen(string status)
