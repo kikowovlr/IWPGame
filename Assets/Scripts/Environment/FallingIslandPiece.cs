@@ -152,7 +152,5 @@ public class FallingIslandPiece : NetworkBehaviour
 
         _staticCollider.enabled = true;
         _fallingCollider.enabled = false;
-
-        Debug.Log($"[FallingPiece] {name}: RESET via Teleport to {_originalPosition}");
     }
 }
