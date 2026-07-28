@@ -8,6 +8,8 @@ using System.Collections.Generic;
 /// </summary>
 public class GooPuddleManager : NetworkBehaviour
 {
+    public static GooPuddleManager Instance { get; private set; }
+
     [System.Serializable]
     public class PuddleSpawnPoint
     {
@@ -29,18 +31,36 @@ public class GooPuddleManager : NetworkBehaviour
 
     [SerializeField] private float _telegraphDuration = 1f;
 
+    [Networked] private NetworkBool _sequenceStarted { get; set; }
     [Networked] private TickTimer _nextSpawnTimer { get; set; }
     private List<NetworkObject> _activePuddles = new List<NetworkObject>();
 
     public override void Spawned()
     {
-        if (!Object.HasStateAuthority) return;
-        _nextSpawnTimer = TickTimer.CreateFromSeconds(Runner, _initialDelay);
+        Instance = this;
     }
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        if (Instance == this) Instance = null;
+    }
+
 
     public override void FixedUpdateNetwork()
     {
         if (!Object.HasStateAuthority) return;
+        if (GameManager.Instance == null) return;
+
+        RoundState currentState = GameManager.Instance.CurrentRoundState;
+
+        // start sequence only when round starts
+        if (!_sequenceStarted && currentState == RoundState.RoundActive)
+        {
+            _sequenceStarted = true;
+            _nextSpawnTimer = TickTimer.CreateFromSeconds(Runner, _initialDelay);
+        }
+
+        if (!_sequenceStarted) return;
         if (!_nextSpawnTimer.Expired(Runner)) return;
 
         // clean up any despawned puddles
@@ -69,5 +89,19 @@ public class GooPuddleManager : NetworkBehaviour
             if (spawnPoint.parentTile != null)
                 puddle.AttachToTile(spawnPoint.parentTile);
         }
+    }
+
+    public void ResetForNewRound()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        foreach (var puddle in _activePuddles)
+        {
+            if (puddle != null)
+                Runner.Despawn(puddle);
+        }
+        _activePuddles.Clear();
+
+        _sequenceStarted = false;
     }
 }

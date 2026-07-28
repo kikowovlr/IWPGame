@@ -11,11 +11,21 @@ public class GooPuddle : NetworkBehaviour
 
     [Header("Telegraph")]
     [SerializeField] private GameObject _visualRoot; // actual puddle mesh
-    [SerializeField] private ParticleSystem _telegraphVFX; // vfx particle
+    [SerializeField] private GooRainVFXController _rainVFX; // vfx particle
+    [SerializeField] private Vector2 _rainAreaSize = new Vector2(2f, 2f);
 
     [Header("Growth Anim")]
     [SerializeField] private AnimationCurve _growCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     [SerializeField] private float _growDuration = 1.0f;
+
+    [Header("Lifetime")]
+    [SerializeField] private float _puddleMinLifeTime = 10f;
+    [SerializeField] private float _puddleMaxLifeTime = 15f;
+    [SerializeField] private float _shrinkDuration = 0.6f;
+    [SerializeField] private AnimationCurve _shrinkCurve = AnimationCurve.EaseInOut(0, 1, 1, 0);
+
+    [Networked] private TickTimer _lifetimeTimer { get; set; }
+    private bool _isShrinking = false;
 
     [Networked, OnChangedRender(nameof(OnActiveChanged))] private NetworkBool IsActive { get; set; }
     [Networked] private TickTimer _telegraphTimer { get; set; }
@@ -52,8 +62,11 @@ public class GooPuddle : NetworkBehaviour
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_PlayTelegrahVFX()
     {
-        if (_telegraphVFX != null)
-            _telegraphVFX.Play();
+        if (_rainVFX != null)
+        {
+            _rainVFX.SetAreaSize(_rainAreaSize);
+            _rainVFX.Play();
+        }
     }
 
     public override void FixedUpdateNetwork()
@@ -69,7 +82,44 @@ public class GooPuddle : NetworkBehaviour
         if (_parentTile != null && _parentTile.HasEngagedSinking)
         {
             Runner.Despawn(Object);
+            return;
         }
+
+        // natural lifetime expiry - start shrinking
+        if (IsActive && !_isShrinking && _lifetimeTimer.Expired(Runner))
+        {
+            _isShrinking = true;
+            RPC_BeginShrink();
+        }
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_BeginShrink()
+    {
+        StartCoroutine(ShrinkThenDespawnRoutine());
+    }
+
+    private IEnumerator ShrinkThenDespawnRoutine()
+    {
+        Vector3 startScale = _visualRoot.transform.localScale;
+        float elapsed = 0f;
+
+        while (elapsed < _shrinkDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = _shrinkCurve.Evaluate(elapsed / _shrinkDuration);
+
+            _visualRoot.transform.localScale = new Vector3(
+                startScale.x * t,
+                startScale.y,
+                startScale.z * t
+            );
+            yield return null;
+        }
+
+        // only the state authority actually despawns the networked object -> clients just finish playing the local shrink animation and stop there
+        if (Object.HasStateAuthority)
+            Runner.Despawn(Object);
     }
 
     /// <summary>
@@ -79,11 +129,17 @@ public class GooPuddle : NetworkBehaviour
     {
         if (!IsActive) return;
 
+        if (_rainVFX != null)
+            _rainVFX.Stop();
+
         if (_visualRoot != null)
         {
             _visualRoot.SetActive(true);
             StartCoroutine(GrowPuddleRoutine());
         }
+
+        if (Object.HasStateAuthority)
+            _lifetimeTimer = TickTimer.CreateFromSeconds(Runner, Random.Range(_puddleMinLifeTime, _puddleMaxLifeTime));
     }
 
     private IEnumerator GrowPuddleRoutine()

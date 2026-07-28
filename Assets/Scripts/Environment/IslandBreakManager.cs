@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class IslandBreakManager : NetworkBehaviour
 {
+    public static IslandBreakManager Instance { get; private set; }
+
     private const int MAX_PIECES = 8;
 
     [SerializeField] private FallingIslandPiece[] _pieces = new FallingIslandPiece[MAX_PIECES];
@@ -18,6 +20,16 @@ public class IslandBreakManager : NetworkBehaviour
 
     private List<int> _availableIndices = new List<int>(); // temporary store remaining pieces left
 
+    public override void Spawned()
+    {
+        Instance = this;
+    }
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        if (Instance == this) Instance = null;
+
+    }
     public override void FixedUpdateNetwork()
     {
         if (!Object.HasStateAuthority) return;
@@ -30,9 +42,6 @@ public class IslandBreakManager : NetworkBehaviour
         {
             _sequenceStarted = true;
             _nextBreakTimer = TickTimer.CreateFromSeconds(Runner, _initialDelay);
-
-            if (_debugLogging)
-                Debug.Log($"[IslandBreak] Round active — first piece breaks in {_initialDelay}s");
         }
 
         if (!_sequenceStarted) return;

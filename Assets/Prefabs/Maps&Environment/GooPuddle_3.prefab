@@ -32,6 +32,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 5943192239484127618}
+  - {fileID: 6809397357264649278}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8567382197491211507
@@ -48,7 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GooPuddle
   _puddleGooRate: 0.55
   _visualRoot: {fileID: 8312873189373527811}
-  _telegraphVFX: {fileID: 0}
+  _rainVFX: {fileID: 4943539838430088529}
+  _rainAreaSize: {x: 1.92, y: 2.03}
   _growCurve:
     serializedVersion: 2
     m_Curve:
@@ -73,7 +75,34 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _growDuration: 1
+  _growDuration: 3
+  _puddleMinLifeTime: 10
+  _puddleMaxLifeTime: 15
+  _shrinkDuration: 3
+  _shrinkCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &5875229476727610284
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -350,3 +379,76 @@ Transform:
   - {fileID: 8297331355410630235}
   m_Father: {fileID: 240170317884528124}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &9166298658272803240
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 240170317884528124}
+    m_Modifications:
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.16
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8447611442732365358, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+      propertyPath: m_Name
+      value: GooRainVFX
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+--- !u!114 &4943539838430088529 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4300875358621889785, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+  m_PrefabInstance: {fileID: 9166298658272803240}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 768b622b10a3aa141a7703616c8fe188, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GooRainVFXController
+--- !u!4 &6809397357264649278 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2398987866467419542, guid: 89b46f8cc976707418f50bce6033ceda, type: 3}
+  m_PrefabInstance: {fileID: 9166298658272803240}
+  m_PrefabAsset: {fileID: 0}

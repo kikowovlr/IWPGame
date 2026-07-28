@@ -38,8 +38,6 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     [SerializeField] private RoundEndDisplayController _roundEndDisplayController;
     [HideInInspector] [Networked] public PlayerRef LastRoundWinner { get; private set; } = PlayerRef.None;
 
-    [SerializeField] private IslandBreakManager _islandBreakManager;
-
     [Header("Character Select")]
     [SerializeField] private Transform[] _characterSelectStagePoints; // positions for character select
     [Networked] private NetworkBool _hasCompletedCharacterSelect { get; set; }
@@ -315,8 +313,11 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
             }
         }
 
-        if (_islandBreakManager != null)
-            _islandBreakManager.ResetAllPieces();
+        if (IslandBreakManager.Instance != null)
+            IslandBreakManager.Instance.ResetAllPieces();
+
+        if (GooPuddleManager.Instance != null)
+            GooPuddleManager.Instance.ResetForNewRound();
     }
 
     private void TeleportAndResetPlayer(NetworkObject playerObj, Transform targetTransform)
