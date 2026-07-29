@@ -17,6 +17,7 @@ public class PlayerDrowning : NetworkBehaviour
     private Rigidbody _rb;
     private PlayerBuoyancy _buoyancy;
     private NetworkPlayerController _controller;
+    private PlayerEliminationHandler _elimination;
 
     public Transform CameraFollowProxy => _cameraFollowProxy;
 
@@ -31,6 +32,7 @@ public class PlayerDrowning : NetworkBehaviour
             _rb = registry.Controller.NetworkedRb.Rigidbody;
             _buoyancy = registry.Buoyancy;
             _controller = registry.Controller;
+            _elimination = registry.Elimination;
         }
     }
 
@@ -48,9 +50,14 @@ public class PlayerDrowning : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        if (!IsSinking) return;
         if (GameManager.Instance != null && GameManager.Instance.IsCurrentlyOnPodiumScene())
             return;
+
+        // check if they are submerged every second - in case of edge cases like player dying THEN falling into the water
+        if (Object.HasStateAuthority && !IsSinking && _elimination != null && _elimination.IsEliminated && _buoyancy != null && _buoyancy.IsSubmerged)
+            BeginSink();
+
+        if (!IsSinking) return;
 
         if (Object.HasStateAuthority)
         {

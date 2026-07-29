@@ -91,7 +91,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     ActiveRagdollMember[] _activeRagdollMembers;
     private Quaternion _initialJointRotation;
 
-    // TODO: change to sending bytes instead of Quaternion and limite how much the joints can rotate
+    // TODO: change to sending bytes instead of Quaternion
     [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
 
     private const float InputThreshold = 0.01f;
@@ -151,6 +151,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private PlayerBuoyancy _buoyancy;
     private GooExposure _goo;
     private PlayerDrowning _drowning;
+    private PlayerBoost _boost;
 
     [Header("Camera Target")]
     [SerializeField] private Transform _cameraTarget;
@@ -179,6 +180,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public AbilitySO EquippedAbility => _equippedAbility;
     public Transform CameraTarget => _cameraTarget != null ? _cameraTarget : transform;
     public int CharacterPackageCount => _characterPackages.Length;
+    public ConfigurableJoint MainJoint => _mainJoint;
 
 
     private void Awake()
@@ -195,6 +197,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             _buoyancy = Registry.Buoyancy;
             _goo = Registry.Goo;
             _drowning = Registry.Drowning;
+            _boost = Registry.Boost;
         }
     }
 
@@ -270,22 +273,25 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             );
 
             TargetSpeedMultiplier = 1.0f; // reset each frame, status effects, etc, will continuously overwrite this during ticks
+            _boost.ApplyTargetSpeedMultiplier();
 
-
-            if (!IsKnockedOut)
+            if (_drowning.IsSinking)
             {
-                if (_buoyancy.IsSubmerged)
-                {
-                    _buoyancy.ApplyBuoyancy();
-                }
-                else
-                {
-                    ApplyGravity();
-                }
+                // PlayerDrowning.FixedUpdateNetwork fully owns force application during the drowning sequence, do nothing 
             }
-            else if (!_drowning.IsSinking)
+            else if (_buoyancy.IsSubmerged)
+            {
+                _buoyancy.ApplyBuoyancy(); // applies whether knocked out or not, floats a ragdoll body, prevents falling through
+            }
+            else if (!IsKnockedOut)
+            {
+                ApplyGravity(); // conscious, ride-spring/ground-hugging gravity
+            }
+            else
+            {
                 // apply downward gravity when unconscious so their dead weight falls naturally
-                _rb.AddForce(Vector3.down * _gravity, ForceMode.Force);
+                _rb.AddForce(Vector3.down * _gravity, ForceMode.Force); // ragdolled, not submerged — simple fall
+            }
         }
 
         // reset input restrictions
@@ -482,6 +488,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 float slopeFactor = slopeAngle / _maxSlopeAngle;
                 finalForce += _movementForce * CurrentSpeedMultiplier * slopeFactor * _slopeForceMultiplier;
             }
+
+            finalForce *= _boost.GetAirControlFactor(); // <-- reduced steering while boosting
 
             // move character in the dir they're facing
             _rb.AddForce(moveDir * finalForce, ForceMode.Force);

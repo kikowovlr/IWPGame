@@ -12,7 +12,6 @@ public class IslandBreakManager : NetworkBehaviour
     [SerializeField] private float _initialDelay = 60f; // time until pieces start to break
     [SerializeField] private float _minInterval = 15f;
     [SerializeField] private float _maxInterval = 30f;
-    [SerializeField] private bool _debugLogging = true;
 
     [Networked] private TickTimer _nextBreakTimer { get; set; }
     [Networked] private NetworkBool _sequenceStarted { get; set; }
@@ -52,9 +51,6 @@ public class IslandBreakManager : NetworkBehaviour
         // set next interval timing
         float nextInterval = Random.Range(_minInterval, _maxInterval);
         _nextBreakTimer = TickTimer.CreateFromSeconds(Runner, nextInterval);
-
-        if (_debugLogging)
-            Debug.Log($"[IslandBreak] next piece scheduled in {nextInterval:F1}s");
     }
 
     private void TryBreakRandomPiece()
@@ -64,17 +60,11 @@ public class IslandBreakManager : NetworkBehaviour
             if (!_hasBroken[i]) _availableIndices.Add(i);
 
         if (_availableIndices.Count == 0)
-        {
-            if (_debugLogging) Debug.Log("[IslandBreak] all pieces already broken — nothing left");
             return;
-        }
 
         int chosen = _availableIndices[Random.Range(0, _availableIndices.Count)];
         _hasBroken.Set(chosen, true);
         _pieces[chosen].BeginTilt();
-
-        if (_debugLogging)
-            Debug.Log($"[IslandBreak] BREAKING piece {chosen} ({_pieces[chosen].name}) — {_availableIndices.Count - 1} remain");
     }
 
     public void ResetAllPieces()

@@ -1,5 +1,6 @@
-using System.Collections;
 using Fusion;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GooPuddle : NetworkBehaviour
@@ -29,7 +30,7 @@ public class GooPuddle : NetworkBehaviour
 
     [Networked, OnChangedRender(nameof(OnActiveChanged))] private NetworkBool IsActive { get; set; }
     [Networked] private TickTimer _telegraphTimer { get; set; }
-
+    private Dictionary<PlayerComponentRegistry, int> _lastAppliedTick = new Dictionary<PlayerComponentRegistry, int>();
     private FallingIslandPiece _parentTile;
 
     private void Awake()
@@ -164,18 +165,24 @@ public class GooPuddle : NetworkBehaviour
         _visualRoot.transform.localScale = targetScale;
     }
 
-    private void OnTriggerStay(Collider other)
+    public void HandleTriggerStay(Collider other)
     {
         if (!IsActive) return; // dont trigger anything during telegraph window
+        if (!Object.HasStateAuthority) return;
 
         if (other.TryGetComponent(out PlayerComponentRegistry registry))
         {
-            if (registry.Controller.Object != null && registry.Controller.Object.HasStateAuthority)
-            {
-                registry.Goo.ApplyExposure(_puddleGooRate);
-                // constantly refresh slowness duration 
-                registry.Status.InflictStatus(StatusEffectType.Slowness, HeartbeatDuration);
-            }
+            int currentTick = Runner.Tick.Raw;
+
+            // ensure each puddle hits players only ONCE per tick even with multiple colliders
+            if (_lastAppliedTick.TryGetValue(registry, out int lastTick) && lastTick == currentTick)
+                return;
+
+            _lastAppliedTick[registry] = currentTick;
+
+            registry.Goo.ApplyExposure(_puddleGooRate);
+            // constantly refresh slowness duration 
+            registry.Status.InflictStatus(StatusEffectType.Slowness, HeartbeatDuration);
         }
     }
 }

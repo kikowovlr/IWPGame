@@ -8,8 +8,8 @@ using UnityEngine;
 /// </summary>
 public class NetworkPlayerStats : NetworkBehaviour
 {
-    [Networked, OnChangedRender(nameof(OnCrownsCountChanged))] public int CrownCount { get; private set; }
-    [Networked, OnChangedRender(nameof(OnNameReplicated))] public string PlayerName { get; private set; }
+    [HideInInspector] [Networked, OnChangedRender(nameof(OnCrownsCountChanged))] public int CrownCount { get; private set; }
+    [HideInInspector] [Networked, OnChangedRender(nameof(OnNameReplicated))] public string PlayerName { get; private set; }
 
     // events
     public static Action<PlayerRef, int> OnPlayerCrownsChanged;

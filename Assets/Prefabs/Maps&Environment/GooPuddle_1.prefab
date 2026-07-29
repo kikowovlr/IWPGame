@@ -44,9 +44,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2634453623094806013}
   - component: {fileID: 380910852205518054}
-  - component: {fileID: 4265390944080706944}
   - component: {fileID: 4412469703605890236}
   - component: {fileID: 553572217613481655}
+  - component: {fileID: 8976276187487963253}
   m_Layer: 0
   m_Name: pPlane3
   m_TagString: Untagged
@@ -76,28 +76,6 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3869069042699312404}
-  m_Mesh: {fileID: 3680687292192122401, guid: f9425dba16c31ad43b5b1aca8e01a619, type: 3}
---- !u!64 &4265390944080706944
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3869069042699312404}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
   m_Mesh: {fileID: 3680687292192122401, guid: f9425dba16c31ad43b5b1aca8e01a619, type: 3}
 --- !u!23 &4412469703605890236
 MeshRenderer:
@@ -169,6 +147,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.007270784, y: 0.002515426, z: 0.00885357}
   m_Center: {x: -0.0005825932, y: -0.00024984762, z: -0.00096562033}
+--- !u!114 &8976276187487963253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3869069042699312404}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b4128b5c6d82843a7f68293a253baa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GooPuddleRelay
 --- !u!1 &4501825864426253311
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,9 +169,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8451442208267000992}
   - component: {fileID: 6080753469193498992}
-  - component: {fileID: 1954375444888851331}
   - component: {fileID: 837157111769241287}
   - component: {fileID: 5583490383439649868}
+  - component: {fileID: 228246157550996207}
   m_Layer: 0
   m_Name: pPlane2
   m_TagString: Untagged
@@ -211,28 +201,6 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4501825864426253311}
-  m_Mesh: {fileID: 8342159127421523248, guid: f9425dba16c31ad43b5b1aca8e01a619, type: 3}
---- !u!64 &1954375444888851331
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4501825864426253311}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
   m_Mesh: {fileID: 8342159127421523248, guid: f9425dba16c31ad43b5b1aca8e01a619, type: 3}
 --- !u!23 &837157111769241287
 MeshRenderer:
@@ -304,6 +272,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.00941888, y: 0.0021953713, z: 0.00996224}
   m_Center: {x: 0.00006655208, y: -0.00005318044, z: -0.00045344117}
+--- !u!114 &228246157550996207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4501825864426253311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b4128b5c6d82843a7f68293a253baa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GooPuddleRelay
 --- !u!1 &6984527077205682482
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,7 +294,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8276110356710990759}
   - component: {fileID: 6772438230576763524}
-  - component: {fileID: 8288021990785269834}
   - component: {fileID: 207559889755610612}
   m_Layer: 0
   m_Name: pPlane12
@@ -345,28 +324,6 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6984527077205682482}
-  m_Mesh: {fileID: 2607726357411533434, guid: f9425dba16c31ad43b5b1aca8e01a619, type: 3}
---- !u!64 &8288021990785269834
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6984527077205682482}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
   m_Mesh: {fileID: 2607726357411533434, guid: f9425dba16c31ad43b5b1aca8e01a619, type: 3}
 --- !u!23 &207559889755610612
 MeshRenderer:
@@ -428,6 +385,7 @@ GameObject:
   - component: {fileID: 1657338496476751801}
   - component: {fileID: 2358632040800786338}
   - component: {fileID: 2610638506659843250}
+  - component: {fileID: 8947236595211127964}
   m_Layer: 0
   m_Name: GooPuddle_1
   m_TagString: Untagged
@@ -464,7 +422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66f33eaf6daaa8940a184145efd7f944, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GooPuddle
-  _puddleGooRate: 0.55
+  _puddleGooRate: 0.2
   _visualRoot: {fileID: 2771752181059570311}
   _rainVFX: {fileID: 3077809731487051357}
   _rainAreaSize: {x: 2.4, y: 2.2}
@@ -492,10 +450,10 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _growDuration: 3
+  _growDuration: 2
   _puddleMinLifeTime: 10
   _puddleMaxLifeTime: 15
-  _shrinkDuration: 3
+  _shrinkDuration: 2
   _shrinkCurve:
     serializedVersion: 2
     m_Curve:
@@ -538,7 +496,25 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 2358632040800786338}
+  - {fileID: 8947236595211127964}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &8947236595211127964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8049511262514141460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 1
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
 --- !u!1001 &1232109426557967012
 PrefabInstance:
   m_ObjectHideFlags: 0

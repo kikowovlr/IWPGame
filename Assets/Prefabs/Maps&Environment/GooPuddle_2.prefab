@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 5115800449903447417}
   - component: {fileID: 8189622457651195900}
   - component: {fileID: 2979298558945010838}
+  - component: {fileID: 7543138754917215231}
   m_Layer: 0
   m_Name: pPlane5
   m_TagString: Untagged
@@ -146,6 +147,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.0080431, y: 0.002574746, z: 0.008011598}
   m_Center: {x: 0.000059268437, y: -0.00009832176, z: -0.000036566285}
+--- !u!114 &7543138754917215231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003587604934405388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b4128b5c6d82843a7f68293a253baa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GooPuddleRelay
 --- !u!1 &2308699571679969184
 GameObject:
   m_ObjectHideFlags: 0
@@ -158,6 +171,7 @@ GameObject:
   - component: {fileID: 91514531994294732}
   - component: {fileID: 7959869978249208450}
   - component: {fileID: 5099291133714232169}
+  - component: {fileID: 6078189988329575856}
   m_Layer: 0
   m_Name: pPlane11
   m_TagString: Untagged
@@ -258,6 +272,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.007320308, y: 0.0014691117, z: 0.0072089764}
   m_Center: {x: 0.0011257505, y: -0.0005651499, z: 0.00042791362}
+--- !u!114 &6078189988329575856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2308699571679969184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b4128b5c6d82843a7f68293a253baa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GooPuddleRelay
 --- !u!1 &5952246408266115080
 GameObject:
   m_ObjectHideFlags: 0
@@ -269,6 +295,7 @@ GameObject:
   - component: {fileID: 144700873152359927}
   - component: {fileID: 7599488506260250630}
   - component: {fileID: 5258991184104058019}
+  - component: {fileID: 7600603192249408877}
   m_Layer: 0
   m_Name: GooPuddle_2
   m_TagString: Untagged
@@ -285,7 +312,7 @@ Transform:
   m_GameObject: {fileID: 5952246408266115080}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.659, y: 0.031983614, z: 7.1698785}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -379,7 +406,25 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 7599488506260250630}
+  - {fileID: 7600603192249408877}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &7600603192249408877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5952246408266115080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 1
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0
 --- !u!1 &6321949486870701332
 GameObject:
   m_ObjectHideFlags: 0
@@ -392,6 +437,7 @@ GameObject:
   - component: {fileID: 7709294804302933513}
   - component: {fileID: 4585791788255278146}
   - component: {fileID: 3890154932069414428}
+  - component: {fileID: 495054916193945449}
   m_Layer: 0
   m_Name: pPlane6
   m_TagString: Untagged
@@ -492,6 +538,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.010419979, y: 0.0024315282, z: 0.009606933}
   m_Center: {x: 0.00022847392, y: 0.0002525463, z: 0.00074787135}
+--- !u!114 &495054916193945449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6321949486870701332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b4128b5c6d82843a7f68293a253baa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GooPuddleRelay
 --- !u!1001 &3132105564789682880
 PrefabInstance:
   m_ObjectHideFlags: 0

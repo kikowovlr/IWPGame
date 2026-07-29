@@ -76,7 +76,9 @@ public class GooPuddleManager : NetworkBehaviour
     {
         if (_puddlePrefabs.Length == 0 || _candidateSpawnPoints.Length == 0) return;
 
-        PuddleSpawnPoint spawnPoint = _candidateSpawnPoints[Random.Range(0, _candidateSpawnPoints.Length)];
+        PuddleSpawnPoint spawnPoint = GetValidSpawnPoint();
+        if (spawnPoint == null) return; // no valid spawn points = skip 
+
         NetworkObject chosenPrefab = _puddlePrefabs[Random.Range(0, _puddlePrefabs.Length)];
 
         NetworkObject spawned = Runner.Spawn(chosenPrefab, spawnPoint.point.position, spawnPoint.point.rotation);
@@ -89,6 +91,25 @@ public class GooPuddleManager : NetworkBehaviour
             if (spawnPoint.parentTile != null)
                 puddle.AttachToTile(spawnPoint.parentTile);
         }
+    }
+
+    private PuddleSpawnPoint GetValidSpawnPoint()
+    {
+        // build list of valid spawn points (tile hasnt sunk or tilted)
+        List<PuddleSpawnPoint> validPoints = new List<PuddleSpawnPoint>();
+
+        foreach (var sp in _candidateSpawnPoints)
+        {
+            bool isValid = sp.parentTile == null // permanent ground — always valid
+                || (!sp.parentTile.IsTilting && !sp.parentTile.HasEngagedSinking);
+
+            if (isValid)
+                validPoints.Add(sp);
+        }
+
+        if (validPoints.Count == 0) return null;
+
+        return validPoints[Random.Range(0, validPoints.Count)];
     }
 
     public void ResetForNewRound()
