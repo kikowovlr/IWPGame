@@ -775,7 +775,7 @@ MonoBehaviour:
   _CurrentSpeedMultiplier: 1
   _TargetSpeedMultiplier: 1
   _speedLerpRate: 2
-  _jumpForce: 15
+  _jumpForce: 18
   _gravity: 13
   _jumpCooldown: 0.15
   _groundCheckRadius: 0.05
