@@ -41,21 +41,21 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
         if (NetworkLauncher.Instance != null && !NetworkLauncher.Instance.HasSkippedInitialSceneLoad)
         {
             NetworkLauncher.Instance.HasSkippedInitialSceneLoad = true;
-            Debug.Log("[Spawner] OnSceneLoadStart — skipping (initial lobby connection)");
             return;
         }
 
         bool isPodiumTransition = GameManager.Instance != null && GameManager.Instance.CurrentRoundState == RoundState.MatchOver;
         if (isPodiumTransition)
-        {
-            Debug.Log("[Spawner] OnSceneLoadStart — skipping (podium transition, handled separately)");
             return;
-        }
 
-        Debug.Log("[Spawner] OnSceneLoadStart — showing loading screen");
+        // check for which map/scene is loading
+        int loadingIndex = PendingMapCache.Instance != null
+            ? PendingMapCache.Instance.PendingSceneIndex
+            : -1;
+
 
         if (TransitionUIManager.Instance != null)
-            TransitionUIManager.Instance.ShowMapLoadingScreenTimed("Starting Match...");
+            TransitionUIManager.Instance.ShowMapLoadingScreenTimed("Starting Match...", loadingIndex);
     }
 
     /// <summary>
@@ -65,8 +65,7 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
     {
         if (!runner.IsServer) return;
 
-        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "GameScene")
-            return;
+        if (!UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Game")) return;
 
         foreach (var player in runner.ActivePlayers)
         {

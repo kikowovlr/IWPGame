@@ -9,8 +9,11 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenuScene.unity
     guid: fbd614a8741396547b7b84d8cd00d5bc
   - enabled: 1
-    path: Assets/Scenes/GameScene.unity
+    path: Assets/Scenes/CandylandGameScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/TutorialGameScene.unity
+    guid: 9f22a3f4f88eb3048a546675c3d538e1
   - enabled: 1
     path: Assets/Scenes/EndGamePodiumScene.unity
     guid: 9568989c9f1abe043ba9010dc469b308

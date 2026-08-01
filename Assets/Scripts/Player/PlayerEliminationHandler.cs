@@ -115,7 +115,6 @@ public class PlayerEliminationHandler : NetworkBehaviour
         {
             _playerController.Knockout();
         }
-        // TODO: show spectator UI
     }
 
     /// <summary>

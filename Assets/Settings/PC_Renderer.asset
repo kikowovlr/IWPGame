@@ -69,7 +69,8 @@ MonoBehaviour:
   - {fileID: 1456334908377184441}
   - {fileID: -8149733345365888831}
   - {fileID: -9088816983539098141}
-  m_RendererFeatureMap: ad6b866f10d7b46cb9b8d217e2f03514c1704f97b354e68ee35d9dab1b09de81
+  - {fileID: 7863971747084000109}
+  m_RendererFeatureMap: ad6b866f10d7b46cb9b8d217e2f03514c1704f97b354e68ee35d9dab1b09de816d5ba68ca370226d
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -145,3 +146,23 @@ MonoBehaviour:
     BlurQuality: 0
     Falloff: 100
     SampleCount: -1
+--- !u!114 &7863971747084000109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
+  m_Name: GradientFog
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
+  m_Active: 1
+  injectionPoint: 550
+  fetchColorBuffer: 1
+  requirements: 5
+  passMaterial: {fileID: 2100000, guid: 2139555bb7c95034895f870c93efc25e, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1

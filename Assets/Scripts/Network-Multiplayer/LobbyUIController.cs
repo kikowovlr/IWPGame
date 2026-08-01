@@ -27,7 +27,7 @@ public class LobbyUIController : MonoBehaviour
     {
         gameObject.SetActive(true);
         if (_lobbyPanel != null) _lobbyPanel.SetActive(true);
-        if (_lobbyCodeText != null) _lobbyCodeText.text = $"CODE: {lobbyCode}";
+        if (_lobbyCodeText != null) _lobbyCodeText.text = lobbyCode;
         if (_lobbyNameText != null) _lobbyNameText.text = "LOBBY";
 
         if (_startGameButton != null)
@@ -105,7 +105,22 @@ public class LobbyUIController : MonoBehaviour
         int currentPlayerCount = LobbyManager.Instance != null ? LobbyManager.Instance.GetLobbyRoster().Count : 0;
         if (currentPlayerCount < _minPlayersToStart) return;
 
-        await _runner.LoadScene(SceneRef.FromIndex(_gameplaySceneBuildIndex));
+        int sceneIndex = _gameplaySceneBuildIndex; // fallback
+
+        if (LobbyMapSelection.Instance != null)
+        {
+            LobbyMapSelection.Instance.CommitResolvedScene(); // roll
+            int resolved = LobbyMapSelection.Instance.ResolvedSceneIndex;
+            if (resolved != -1)
+                sceneIndex = resolved;
+
+            if (PendingMapCache.Instance != null)
+                PendingMapCache.Instance.Set(sceneIndex);
+
+            await System.Threading.Tasks.Task.Delay(250);
+        }
+
+        await _runner.LoadScene(SceneRef.FromIndex(sceneIndex));
     }
 
     private async void LeaveLobby()

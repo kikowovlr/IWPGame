@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 405097402805084366}
   - component: {fileID: 60440949262152921}
   - component: {fileID: 7081028901545276882}
+  - component: {fileID: 616977703552542482}
   m_Layer: 0
   m_Name: LobbyManager
   m_TagString: Untagged
@@ -63,4 +64,19 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 60440949262152921}
+  - {fileID: 616977703552542482}
   ForceRemoteRenderTimeframe: 0
+--- !u!114 &616977703552542482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2401849504338943556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1925f191045d0047a7e4d988606f173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LobbyMapSelection
+  _catalog: {fileID: 11400000, guid: 0c5a3bcede2593344a172cc3e6054c6a, type: 2}
+  _SelectedMode: 0

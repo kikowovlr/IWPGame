@@ -154,7 +154,6 @@ public class CountdownState : IRoundState
     {
         Debug.Log("[MATCH ENGINE] -> Enter Countdown State.");
 
-        // TODO: Add transition
         if (manager.Object.HasStateAuthority)
         {
             manager.SetSetupUIActive(false);

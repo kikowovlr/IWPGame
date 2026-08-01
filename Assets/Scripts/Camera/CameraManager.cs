@@ -22,10 +22,9 @@ public class CameraManager : MonoBehaviour
     public CinemachineBlendDefinition GameplayIntroBlend => _gameplayIntroBlend;
     public CinemachineBlendDefinition CutCameraBlend => _cutCameraBlend;
 
-    private int _currentSpectatorIndex = -1;
+    private int _spectatorSlot = 0;
     private CameraMode _currentMode = CameraMode.StaticOverview;
     private SpectatorViewMode _currentViewMode = SpectatorViewMode.Overview;
-
     private HashSet<string> _cursorRequests = new HashSet<string>(); // store requests for cursor -> cursor only disappears if all stop requesting
     public bool IsCursorVisible => _cursorRequests.Count > 0;
 
@@ -33,6 +32,7 @@ public class CameraManager : MonoBehaviour
     public static event Action OnCameraSwapRequested; // flag to signal spectator input for camera swap
     public static event Action OnCameraCutExecuted; // flag to signal the actual camera swap
     private Action _pendingCameraCutAction; // holds onto context until screen goes black from blink
+    public static event Action<string> OnSpectatorTargetChanged; // update 
 
     public enum CameraMode
     {
@@ -114,10 +114,10 @@ public class CameraManager : MonoBehaviour
     private void Update()
     {
         // handle spectator input
-        if (_currentMode == CameraMode.StaticOverview || _currentMode == CameraMode.SpectatingPlayer)
-        {
-            HandleSpectatorInput();
-        }
+        //if (_currentMode == CameraMode.StaticOverview || _currentMode == CameraMode.SpectatingPlayer)
+        //{
+        //    HandleSpectatorInput();
+        //}
 
         HandleGameplayCameraLock();
     }
@@ -221,7 +221,6 @@ public class CameraManager : MonoBehaviour
                 {
                     // switch to player tracking mode
                     _currentViewMode = SpectatorViewMode.Player;
-                    _currentSpectatorIndex = 0; // reset loop tracking
                     SpectateFirstAvailablePlayer();
                 }
                 else
@@ -318,7 +317,6 @@ public class CameraManager : MonoBehaviour
         Transform targetTransform = PlayerRegistry.GetAvatarTransform(nextTargetID);
         if (targetTransform != null)
         {
-            _currentSpectatorIndex = nextIndex; 
             SpectateTarget(targetTransform);
         }
         else
@@ -338,7 +336,6 @@ public class CameraManager : MonoBehaviour
             return;
         }
 
-        _currentSpectatorIndex = -1;
         CycleThroughLivingPlayers();
     }
 
@@ -377,15 +374,14 @@ public class CameraManager : MonoBehaviour
 
             _pendingCameraCutAction = () =>
             {
-                CycleThroughLivingPlayers();
+                ApplySpectatorSlot(_spectatorSlot);
+                //CycleThroughLivingPlayers();
             };
         }
     }
 
     private void HandleGameplayCameraLock()
     {
-
-
         bool shouldLockCamera = false;
 
             Transform localTransform = PlayerRegistry.LocalPlayerTransform;
@@ -466,24 +462,118 @@ public class CameraManager : MonoBehaviour
     public void FocusCharacterSelectCameraOnLocalPlayer()
     {
         if (_characterSelectCam == null)
-        {
-            Debug.LogWarning("[CameraManager] _characterSelectCam is NULL — not assigned in Inspector?");
             return;
-        }
 
         Transform localTarget = PlayerRegistry.LocalPlayerTransform;
         if (localTarget == null)
-        {
-            Debug.LogWarning("[CameraManager] PlayerRegistry.LocalPlayerTransform is NULL — local player not registered yet?");
             return;
-        }
 
         if (_characterSelectCam.Follow != localTarget)
         {
-            Debug.Log($"[CameraManager] Setting character select cam Follow/LookAt to {localTarget.name}");
             _characterSelectCam.Follow = localTarget;
             _characterSelectCam.LookAt = localTarget;
         }
+    }
+
+    /// <summary>
+    /// total slots = overview cams + total alive players
+    /// </summary>
+    private int GetSpectatorSlotCount()
+    {
+        var living = GameManager.Instance != null ? GameManager.Instance.GetLivingPlayerIDs() : null;
+        int livingCount = living != null ? living.Count : 0;
+        return 1 + livingCount; // +1 for overview
+    }
+
+    public void SpectateNext()
+    {
+        if (ScreenFXManager.Instance != null && ScreenFXManager.Instance.IsBlinking) return;
+
+        int count = GetSpectatorSlotCount();
+        if (count <= 1) 
+        { 
+            GoToSlotViaBlink(0); 
+            return; 
+        } // only overview available
+
+        int next = (_spectatorSlot + 1) % count;
+        GoToSlotViaBlink(next);
+    }
+
+    public void SpectatePrevious()
+    {
+        if (ScreenFXManager.Instance != null && ScreenFXManager.Instance.IsBlinking) return;
+
+        int count = GetSpectatorSlotCount();
+        if (count <= 1) 
+        { 
+            GoToSlotViaBlink(0); 
+            return; 
+        }
+
+        int prev = (_spectatorSlot - 1 + count) % count;
+        GoToSlotViaBlink(prev);
+    }
+
+    private void GoToSlotViaBlink(int targetSlot)
+    {
+        OnCameraSwapRequested?.Invoke(); // start the blink (close eye)
+
+        _pendingCameraCutAction = () =>
+        {
+            ApplySpectatorSlot(targetSlot);
+        };
+    }
+
+    private void ApplySpectatorSlot(int slot)
+    {
+        var living = GameManager.Instance != null ? GameManager.Instance.GetLivingPlayerIDs() : null;
+        int livingCount = living != null ? living.Count : 0;
+
+        // clamp in case players died since the arrow press
+        int maxSlot = livingCount;
+        if (slot > maxSlot) slot = 0;
+
+        _spectatorSlot = slot;
+
+        if (slot == 0 || livingCount == 0)
+        {
+            // overview
+            _spectatorSlot = 0;
+            SetCameraState(CameraMode.StaticOverview);
+            OnSpectatorTargetChanged?.Invoke("OVERVIEW");
+            return;
+        }
+
+        // player slot (1..N -> living index 0..N-1)
+        int livingIndex = slot - 1;
+        Fusion.PlayerRef targetId = living[livingIndex];
+        Transform targetTransform = PlayerRegistry.GetAvatarTransform(targetId);
+
+        if (targetTransform != null)
+        {
+            SpectateTarget(targetTransform);
+            OnSpectatorTargetChanged?.Invoke(ResolveSpectatorName(targetId));
+        }
+        else
+        {
+            // target vanished -> fall back to overview
+            _spectatorSlot = 0;
+            SetCameraState(CameraMode.StaticOverview);
+            OnSpectatorTargetChanged?.Invoke("OVERVIEW");
+        }
+    }
+
+    private string ResolveSpectatorName(Fusion.PlayerRef playerId)
+    {
+        if (GameManager.Instance != null && GameManager.Instance.Runner != null
+            && GameManager.Instance.Runner.TryGetPlayerObject(playerId, out NetworkObject obj))
+        {
+            PlayerComponentRegistry reg = obj.GetComponent<PlayerComponentRegistry>();
+            if (reg != null && reg.Stats != null && !string.IsNullOrEmpty(reg.Stats.PlayerName))
+                return reg.Stats.PlayerName;
+        }
+        return $"Player {playerId.PlayerId}";
     }
 
     private void OnDestroy()

@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b278586aff4b711479fdef29840ac233, type: 3}
   m_Name: RedPanda_Data
   m_EditorClassIdentifier: Assembly-CSharp::CharacterDataSO
-  CharacterName: Wah
-  CharacterIcon: {fileID: 21300000, guid: 02b4be555fd228f42868278b7e55e385, type: 3}
+  CharacterName: Wah the Red Panda
+  CharacterIcon: {fileID: 21300000, guid: 24ac0c68d32889347923517a5e6ef8ae, type: 3}
   PrefabPackage: {fileID: 7760978505757086777, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}
   CharacterDescription: Wah is a mischievous critter who loves teasing his friends
     through pranks. Behind his playful demeanour, he hides his insecurities by trying
     to appear bigger and scarier than he really is.
   CharacterSplashArt: {fileID: 21300000, guid: f1faa70d88d247e478b6c90090222f1b, type: 3}
+  CharacterInfoCard: {fileID: 21300000, guid: 18fad39c2f8177a4581db6bf755cea7e, type: 3}

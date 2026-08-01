@@ -192,6 +192,7 @@ public class PlayerHealthHandler : NetworkBehaviour
     private void Knockout()
     {
         bool isPodiumScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Podium");
+        bool eliminationBlocked = TutorialManager.Instance != null && TutorialManager.Instance.EliminationDisabled;
 
         if (_eliminationHandler != null && !isPodiumScene)
             _eliminationHandler.DeductLife();   

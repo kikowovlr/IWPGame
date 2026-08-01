@@ -157,8 +157,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [SerializeField] private Transform _cameraTarget;
 
     [Header("Nametag")]
-    [SerializeField] private Color[] _nametagColorOptions;
-    [Networked] public Color NametagColor { get; private set; }
+    [SerializeField] private Sprite[] _nametagSpriteOptions;
+    [Networked] public int NametagSpriteIndex { get; private set; } = -1;
 
     public bool IsCameraRotationLocked
     {
@@ -1237,11 +1237,17 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public void AssignNametagColorByIndex(int index)
     {
         if (!Object.HasStateAuthority) return;
-        if (_nametagColorOptions == null || index < 0 || index >= _nametagColorOptions.Length) return;
-
-        NametagColor = _nametagColorOptions[index];
+        if (_nametagSpriteOptions == null || index < 0 || index >= _nametagSpriteOptions.Length) return;
+        NametagSpriteIndex = index;
     }
-    public int NametagColorPoolSize => _nametagColorOptions != null ? _nametagColorOptions.Length : 0;
+    public int NametagSpritePoolSize => _nametagSpriteOptions != null ? _nametagSpriteOptions.Length : 0;
+
+    public Sprite GetNametagSprite()
+    {
+        if (_nametagSpriteOptions == null || NametagSpriteIndex < 0 || NametagSpriteIndex >= _nametagSpriteOptions.Length)
+            return null;
+        return _nametagSpriteOptions[NametagSpriteIndex];
+    }
 
     // spawner calls this then transmit info to host
     public NetworkInputData GetNetworkInput()

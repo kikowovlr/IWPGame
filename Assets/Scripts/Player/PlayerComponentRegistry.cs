@@ -18,6 +18,7 @@ public class PlayerComponentRegistry : MonoBehaviour
     [SerializeField] private PlayerDrowning _drowning;
     [SerializeField] private PlayerCharacterSelect _characterSelect;
     [SerializeField] private PlayerBoost _boost;
+    [SerializeField] private PlayerTutorialProgress _progress;
 
     public NetworkPlayerController Controller => _playerController;
     public PlayerHealthHandler Health => _healthHandler;
@@ -36,6 +37,7 @@ public class PlayerComponentRegistry : MonoBehaviour
     public PlayerDrowning Drowning => _drowning;
     public PlayerCharacterSelect CharacterSelect => _characterSelect;
     public PlayerBoost Boost => _boost;
+    public PlayerTutorialProgress Progress => _progress;
 
     private void Awake()
     {

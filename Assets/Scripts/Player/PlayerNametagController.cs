@@ -70,7 +70,7 @@ public class PlayerNametagController : MonoBehaviour
             if (_gameplayNameText != null) _gameplayNameText.text = displayName;
 
             if (_registry != null && _registry.Controller != null && _gameplayBackgroundImage != null)
-                _gameplayBackgroundImage.color = _registry.Controller.NametagColor;
+                _gameplayBackgroundImage.sprite = _registry.Controller.GetNametagSprite();
         }
     }
 

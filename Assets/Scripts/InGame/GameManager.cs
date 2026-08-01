@@ -680,7 +680,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
                 && firstObj.TryGetComponent(out PlayerComponentRegistry firstRegistry)
                 && firstRegistry.Controller != null)
             {
-                paletteSize = firstRegistry.Controller.NametagColorPoolSize;
+                paletteSize = firstRegistry.Controller.NametagSpritePoolSize;
                 break;
             }
         }
@@ -705,10 +705,6 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
                             int colorIndex = availableColorIndices[0];
                             availableColorIndices.RemoveAt(0);
                             registry.Controller.AssignNametagColorByIndex(colorIndex);
-                        }
-                        else
-                        {
-                            Debug.LogWarning($"[GameManager] Ran out of unique nametag colors for player {playerRef} — palette needs at least as many colors as max players.");
                         }
                     }
                 }

@@ -5,6 +5,7 @@ public class LeaderboardItemConfig : ScriptableObject
 {
     [SerializeField] private Sprite _emptyCrownSprite;
     [SerializeField] private Sprite _filledCrownSprite;
+    [SerializeField] private Sprite[] _rankSprites;
 
     [SerializeField] private Color _defaultPlayerColor = Color.white;
     [SerializeField] private Color _localPlayerHighightColor = new Color(1f, 0.89f, 1f);
@@ -13,4 +14,5 @@ public class LeaderboardItemConfig : ScriptableObject
     public Sprite FilledCrownSprite => _filledCrownSprite;
     public Color DefaultPlayerColor => _defaultPlayerColor;
     public Color LocalPlayerHighlightColor => _localPlayerHighightColor;
+    public Sprite[] RankSprites => _rankSprites;
 }

@@ -10,4 +10,5 @@ public class CharacterDataSO : ScriptableObject
     [Header("Info Popup")]
     [TextArea(3, 6)] public string CharacterDescription;
     public Sprite CharacterSplashArt;
+    public Sprite CharacterInfoCard;
 }

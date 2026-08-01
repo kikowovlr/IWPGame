@@ -12,8 +12,6 @@ public class CharacterSelectUIController : MonoBehaviour
     [SerializeField] private Button _cancelButton;
     [SerializeField] private GameObject _startingButton;
     [SerializeField] private Image _timerPanel;
-    [SerializeField] private Color _defaultTimerColor;
-    [SerializeField] private Color _startingTimerColor;
     [SerializeField] private int _characterCount = 3;
     [SerializeField] private Image _prevCharacterIcon; // small icon, left side
     [SerializeField] private Image _currCharacterIcon; // large icon, center, highlighted
@@ -33,7 +31,6 @@ public class CharacterSelectUIController : MonoBehaviour
 
         _startingButton.SetActive(false);
         _cancelButton.gameObject.SetActive(false);
-        _timerPanel.color = _defaultTimerColor;
 
         if (_characterInfoButton != null)
             _characterInfoButton.onClick.AddListener(OpenCharacterInfoPopup);
@@ -64,9 +61,6 @@ public class CharacterSelectUIController : MonoBehaviour
         if (_readyButton != null) _readyButton.gameObject.SetActive(!isFinalCountdown && !isReady);
         if (_cancelButton != null) _cancelButton.gameObject.SetActive(!isFinalCountdown && isReady);
         if (_startingButton != null) _startingButton.SetActive(isFinalCountdown);
-
-        if (isFinalCountdown)
-            _timerPanel.color = _startingTimerColor;
 
         bool canScroll = !isReady && !isFinalCountdown;
         _leftArrowButton.interactable = canScroll;

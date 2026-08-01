@@ -73,7 +73,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: ef12c16d922e326448bb9548b10260f9, type: 2}
-  - {fileID: 2100000, guid: 130dd65715eee7b4da21d9aef3a32256, type: 2}
+  - {fileID: 2100000, guid: 3edbfb625ba49944b80c682e5f90c938, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -187,7 +187,6 @@ MonoBehaviour:
   _tiltTorque: 2
   _maxTiltAngle: 15
   _randomTiltVariance: 30
-  _impactVelocityThreshold: 3
   _sinkEngageDistance: 0.4
   _sinkRestDepth: 10
   _sinkSpeed: 0.3

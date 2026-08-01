@@ -12,7 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af872006e87003b409689543d84e4f75, type: 3}
   m_Name: LeaderboardItemConfig
   m_EditorClassIdentifier: Assembly-CSharp::LeaderboardItemConfig
-  _emptyCrownSprite: {fileID: 21300000, guid: 780be7817a14b134fa0cba1f14e4e738, type: 3}
-  _filledCrownSprite: {fileID: 21300000, guid: 90b19b4c0fe970d4dae50c200f2d9548, type: 3}
+  _emptyCrownSprite: {fileID: 21300000, guid: b8b04fdc0392d194f9f889394b8cd0d5, type: 3}
+  _filledCrownSprite: {fileID: 21300000, guid: 4cca771113baf4e448810bdabcab40c8, type: 3}
+  _rankSprites:
+  - {fileID: 21300000, guid: 119d3b60c11d0c54eb37ffc551c1a70e, type: 3}
+  - {fileID: 21300000, guid: a84a7d53628fdf04ca6d35c72f2f797e, type: 3}
+  - {fileID: 21300000, guid: 655f64cee4e59e3418253c4ae962ad1a, type: 3}
+  - {fileID: 21300000, guid: d9e511c82d9375240aa3ad7fddb3b08b, type: 3}
   _defaultPlayerColor: {r: 1, g: 1, b: 1, a: 1}
   _localPlayerHighightColor: {r: 1, g: 0.8980392, b: 0.5137255, a: 1}

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RamAbilitySO
   _name: Ram
   _baseCooldown: 7
-  _icon: {fileID: 21300000, guid: 7d752e5bd8917cf4eb6a22c0fa0b6fd6, type: 3}
+  _icon: {fileID: 21300000, guid: e87e173a2f290494cba5d4a2243bd1e0, type: 3}
   _description: 'Rams into critters and knocks them back.
 
     Hold [SKILL] button
