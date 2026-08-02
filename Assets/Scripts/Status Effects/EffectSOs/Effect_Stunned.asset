@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StunEffectSO
   _type: 1
   _effectName: Stunned
+  _effectIcon: {fileID: 21300000, guid: 9add0d6214e462644b86906ab9134a61, type: 3}
   _defaultDuration: 5
+  _isSustained: 0
   _visualContainers:
   - _prefab: {fileID: 1449486581183628366, guid: 6e4ffd44759072a4a893c5aef23156c2, type: 3}
     _anchorType: 1

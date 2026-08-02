@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.Assemblies;
-
 public class HUDCoordinator : MonoBehaviour
 {
     [SerializeField] private GameObject _playerHUDRoot;          
@@ -31,7 +29,7 @@ public class HUDCoordinator : MonoBehaviour
     {
         // poll round state (GameManager is networked; no C# event for state change
         // that this local UI can rely on cross-scene, so a light poll is simplest)
-        if (GameManager.Instance == null) return;
+        if (GameManager.Instance == null || !GameManager.Instance.IsSpawned) return;
 
         RoundState current = GameManager.Instance.CurrentRoundState;
         if (current != _lastKnownState)
@@ -63,8 +61,11 @@ public class HUDCoordinator : MonoBehaviour
 
     private void Reevaluate()
     {
-        bool isGameplay = GameManager.Instance != null
-                          && GameManager.Instance.CurrentRoundState != RoundState.CharacterSelect && GameManager.Instance.CurrentRoundState != RoundState.None;
+        RoundState state = GameManager.Instance != null
+                ? GameManager.Instance.CurrentRoundState
+                : RoundState.None;
+
+        bool isGameplay = state == RoundState.Countdown || state == RoundState.RoundActive;
 
         if (!isGameplay)
         {
@@ -92,6 +93,7 @@ public class HUDCoordinator : MonoBehaviour
 
     private void HideAllHUDs()
     {
+        _isSpectating = false;
         if (_spectatorRoot != null) _spectatorRoot.SetActive(false);
         SetGameplayHUDActive(false);
     }

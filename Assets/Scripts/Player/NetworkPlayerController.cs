@@ -35,6 +35,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [SerializeField] private float _rotationSpeed = 300f;
     [Range(0.1f, 1.0f)]
     [SerializeField] private float _walkInputScale = 0.5f;
+    [SerializeField] private float _sprintSpeedMultiplier = 1.5f;
     [Networked] public float CurrentSpeedMultiplier { get; set; } = 1.0f;
     [Networked] public float TargetSpeedMultiplier { get; set; } = 1.0f;
     [SerializeField] private float _speedLerpRate = 10f;    
@@ -92,7 +93,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private Quaternion _initialJointRotation;
 
     // TODO: change to sending bytes instead of Quaternion
-    [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
+    [HideInInspector] [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
 
     private const float InputThreshold = 0.01f;
 
@@ -120,7 +121,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     // characters
     [Header("Character Visuals")]
     [SerializeField] private GameObject[] _characterPackages;
-    [Networked, OnChangedRender(nameof(OnCharacterChanged))] public int CharacterIndex { get; set; }
+    [HideInInspector] [Networked, OnChangedRender(nameof(OnCharacterChanged))] public int CharacterIndex { get; set; }
 
     // abilities
     [Header("Ability Configuration")]
@@ -143,22 +144,23 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [Header("Physics Recovery")]
     [Networked] private TickTimer _physicsControlLockTimer { get; set; }
     [SerializeField] private float _maxKnockbackControlLockDuration = 0.5f;
-    public bool IsInPhysicsRecovery => !_physicsControlLockTimer.ExpiredOrNotRunning(Runner);
+    [HideInInspector] public bool IsInPhysicsRecovery => !_physicsControlLockTimer.ExpiredOrNotRunning(Runner);
 
     // input blocking
     // this clears and rebuilds at the top of every network tick
-    public InputRestrictions ActiveRestrictions { get; private set; } = InputRestrictions.None;
+    [HideInInspector] public InputRestrictions ActiveRestrictions { get; private set; } = InputRestrictions.None;
     private PlayerBuoyancy _buoyancy;
     private GooExposure _goo;
     private PlayerDrowning _drowning;
     private PlayerBoost _boost;
-
+    private PlayerStamina _stamina;
+    
     [Header("Camera Target")]
     [SerializeField] private Transform _cameraTarget;
 
     [Header("Nametag")]
     [SerializeField] private Sprite[] _nametagSpriteOptions;
-    [Networked] public int NametagSpriteIndex { get; private set; } = -1;
+    [HideInInspector] [Networked] public int NametagSpriteIndex { get; private set; } = -1;
 
     public bool IsCameraRotationLocked
     {
@@ -181,7 +183,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public Transform CameraTarget => _cameraTarget != null ? _cameraTarget : transform;
     public int CharacterPackageCount => _characterPackages.Length;
     public ConfigurableJoint MainJoint => _mainJoint;
-
+    public float AbilityCooldownRemaining => CurrentAbilityState._cooldownTimer;
 
     private void Awake()
     {
@@ -198,6 +200,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             _goo = Registry.Goo;
             _drowning = Registry.Drowning;
             _boost = Registry.Boost;
+            _stamina = Registry.Stamina;
         }
     }
 
@@ -373,9 +376,19 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 }
                 else if (inputMagnitude > InputThreshold)
                 {
+                    bool wantsSprint = networkInputData._isSprintPressed;
+
+                    // stamina gate -> force walk while exhausted
+                    if (_stamina != null && _stamina.ExhaustedForcedWalk)
+                        wantsSprint = false;
+
+                    // report sprint-move to stamina (drains only when sprinting AND moving)
+                    if (_stamina != null && Object.HasStateAuthority)
+                        _stamina.NotifySprintingThisTick(wantsSprint);
+
                     // calculate the animation speed should be based entirely on input
-                    targetAnimSpeed = networkInputData._isSprintPressed ? 1.0f : _walkInputScale;
-                    ProcessInputMovement(networkInputData, inputMagnitude);
+                    targetAnimSpeed = wantsSprint ? 1.0f : _walkInputScale;
+                    ProcessInputMovement(networkInputData, wantsSprint, inputMagnitude);
                 }
                 else
                 {
@@ -458,7 +471,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         }
     }
 
-    private void ProcessInputMovement(NetworkInputData networkInputData, float inputMagnitude)
+    private void ProcessInputMovement(NetworkInputData networkInputData, bool isSprinting, float inputMagnitude)
     {
         _hasIdleAnchor = false; // clear anchor while actively moving
 
@@ -466,7 +479,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         HandleRotation(moveDir);
 
         // calculate max speed based on speed multiplier
-        float dynamicMaxSpeed = _maxSpeed * CurrentSpeedMultiplier;
+        float speedScale = isSprinting ? _sprintSpeedMultiplier : 1f;
+        float dynamicMaxSpeed = _maxSpeed * CurrentSpeedMultiplier * speedScale;
 
         // counter velocity that isnt aligned with where player is going
         // prevents diagonal carry-overs when input dir flips
@@ -479,14 +493,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         {
             // calculate how steep the current slope is
             float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
-            float finalForce = _movementForce * CurrentSpeedMultiplier;
+            float finalForce = _movementForce * CurrentSpeedMultiplier * speedScale;
 
             // scale forces when climbing up hills
             if (_isGrounded && slopeAngle > 5f && slopeAngle <= _maxSlopeAngle)
             {
                 // as slope gets steeper, scale forces
                 float slopeFactor = slopeAngle / _maxSlopeAngle;
-                finalForce += _movementForce * CurrentSpeedMultiplier * slopeFactor * _slopeForceMultiplier;
+                finalForce += _movementForce * CurrentSpeedMultiplier * speedScale * slopeFactor * _slopeForceMultiplier;
             }
 
             finalForce *= _boost.GetAirControlFactor(); // <-- reduced steering while boosting
@@ -909,7 +923,13 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                            && !CurrentAbilityState._isDashing;
 
         if (inputData._abilityPressed && canStartAbility)
+        {
             _equippedAbility.OnTickPressed(this, ref CurrentAbilityState, inputData._abilityAimDirection);
+
+            // if it's an instant ability (doesn't charge), start cooldown immediately on press
+            if (!CurrentAbilityState._isCharging)
+                CurrentAbilityState._cooldownTimer = _equippedAbility._baseCooldown;
+        }
         else if (CurrentAbilityState._isCharging)
         {
             if (inputData._abilityReleased)

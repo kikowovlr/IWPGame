@@ -19,6 +19,8 @@ public class PlayerComponentRegistry : MonoBehaviour
     [SerializeField] private PlayerCharacterSelect _characterSelect;
     [SerializeField] private PlayerBoost _boost;
     [SerializeField] private PlayerTutorialProgress _progress;
+    [SerializeField] private PlayerStamina _stamina;
+    [SerializeField] private StatusEffectManager _statusEffectManager;
 
     public NetworkPlayerController Controller => _playerController;
     public PlayerHealthHandler Health => _healthHandler;
@@ -38,6 +40,8 @@ public class PlayerComponentRegistry : MonoBehaviour
     public PlayerCharacterSelect CharacterSelect => _characterSelect;
     public PlayerBoost Boost => _boost;
     public PlayerTutorialProgress Progress => _progress;
+    public PlayerStamina Stamina => _stamina;
+    public StatusEffectManager StatusManager => _statusEffectManager;
 
     private void Awake()
     {

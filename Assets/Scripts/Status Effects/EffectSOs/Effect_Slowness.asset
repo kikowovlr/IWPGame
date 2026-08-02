@@ -14,5 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SlownessEffectSO
   _type: 2
   _effectName: Slowness
+  _effectIcon: {fileID: 21300000, guid: 411056ebef17d244da4b5ee808c1e5b3, type: 3}
   _defaultDuration: 3
+  _isSustained: 1
   _visualContainers: []

@@ -17,7 +17,9 @@ public class BoostPad : NetworkBehaviour
     {
         if (!Object.HasStateAuthority) return;
 
-        PlayerComponentRegistry registry = other.transform.root.GetComponent<PlayerComponentRegistry>();
+        if (!other.transform.root.TryGetComponent<PlayerComponentRegistry>(out var registry))
+            return;
+
         PlayerBoost boost = registry.Boost;
         if (boost == null) return;
 

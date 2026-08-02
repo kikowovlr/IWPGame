@@ -1,7 +1,14 @@
 using Fusion;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+
+public struct ActiveEffectInfo
+{
+    public StatusEffectType Type;
+    public Sprite Icon;
+    public float RemainingSeconds; // <= 0 if not resolvable
+    public bool IsSustained;       // sustained (slowness) vs timed (stun)
+}
 
 /// <summary>
 /// manages status effects for one player
@@ -141,5 +148,31 @@ public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
         // pass to vfx handler and update active types
         if (_vfxHandler != null)
             _vfxHandler.SyncStatusVisualEffects(activeTypes, _effectsDictionary);
+    }
+
+    public List<ActiveEffectInfo> GetActiveEffectsForUI()
+    {
+        var list = new List<ActiveEffectInfo>();
+
+        for (int i = 0; i < _activeEffects.Length; i++)
+        {
+            StatusEffectType type = _activeEffects[i]._type;
+            if (type == StatusEffectType.None) continue;
+            if (!_activeEffects[i].IsActive(Runner)) continue;
+            if (!_effectsDictionary.ContainsKey(type)) continue;
+
+            StatusEffectSO so = _effectsDictionary[type];
+            float remaining = _activeEffects[i]._remainingTime.RemainingTime(Runner) ?? 0f;
+
+            list.Add(new ActiveEffectInfo
+            {
+                Type = type,
+                Icon = so.Icon,
+                RemainingSeconds = remaining,
+                IsSustained = so.IsSustained
+            });
+        }
+
+        return list;
     }
 }

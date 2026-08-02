@@ -8,10 +8,10 @@ public class PlayerEliminationHandler : NetworkBehaviour
     [SerializeField] private int _maxLives = 3;
     [SerializeField] private float _spectatorTransitionDuration = 6f;
 
-    [Networked] public int CurrentLives { get; private set; }
-    [Networked, OnChangedRender(nameof(OnEliminationStatusChanged))] public bool IsEliminated { get; private set; }
+    [HideInInspector] [Networked] public int CurrentLives { get; private set; }
+    [HideInInspector] [Networked, OnChangedRender(nameof(OnEliminationStatusChanged))] public bool IsEliminated { get; private set; }
     [Networked] private TickTimer SpectatorTransitionTimer { get; set; }
-    [Networked, OnChangedRender(nameof(OnSpectatorTransitionCompleteChanged))] public bool IsSpectatorTransitionComplete { get; private set; }
+    [HideInInspector] [Networked, OnChangedRender(nameof(OnSpectatorTransitionCompleteChanged))] public bool IsSpectatorTransitionComplete { get; private set; }
 
     private PlayerHealthHandler _healthHandler;
     private NetworkPlayerController _playerController;

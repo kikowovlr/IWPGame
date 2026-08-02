@@ -15,7 +15,9 @@ public abstract class StatusEffectSO : ScriptableObject
 {
     [SerializeField] protected StatusEffectType _type;
     [SerializeField] protected string _effectName;
+    [SerializeField] protected Sprite _effectIcon;
     [SerializeField] protected float _defaultDuration = 3f;
+    [SerializeField] protected bool _isSustained = false; 
 
     [Header("Modifiers")]
     [Range(0f, 1f)] protected float _movementSpeedModifier = 1f;
@@ -25,8 +27,10 @@ public abstract class StatusEffectSO : ScriptableObject
 
     // getters
     public StatusEffectType Type => _type;
+    public Sprite Icon => _effectIcon;
     public float DefaultDuration => _defaultDuration;
     public List<VFXContainer> VisualContainers => _visualContainers;
+    public bool IsSustained => _isSustained;
 
     public abstract void OnEffectAdded(NetworkPlayerController player, ref StatusEffectState state);
     public abstract void ApplyTickModifiers(NetworkPlayerController player, ref StatusEffectState state); // override in subclasses to apply specific modifiers EVERY TICK
