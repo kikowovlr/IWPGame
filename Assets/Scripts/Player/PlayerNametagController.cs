@@ -43,9 +43,9 @@ public class PlayerNametagController : MonoBehaviour
 
         bool isLocalPlayer = _playerObj.HasInputAuthority;
 
-        bool isCharacterSelect = GameManager.Instance != null
-            && GameManager.Instance.IsSpawned
-            && GameManager.Instance.CurrentRoundState == RoundState.CharacterSelect;
+        bool isCharacterSelect = MatchContext.Current != null
+            && MatchContext.Current.IsSpawned
+            && MatchContext.Current.IsInCharacterSelect;
 
         if (_canvasGroup != null)
         {

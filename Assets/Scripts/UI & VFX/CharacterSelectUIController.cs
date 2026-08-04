@@ -38,9 +38,8 @@ public class CharacterSelectUIController : MonoBehaviour
 
     private void Update()
     {
-        if (GameManager.Instance == null || !GameManager.Instance.IsSpawned) return;
-
-        bool shouldShow = GameManager.Instance != null && GameManager.Instance.CurrentRoundState == RoundState.CharacterSelect;
+        if (MatchContext.Current == null || !MatchContext.Current.IsSpawned) return;
+        bool shouldShow = MatchContext.Current.IsInCharacterSelect;
 
         // dont show ui and stage if not character select
         if (_panel != null) _panel.SetActive(shouldShow);
@@ -52,10 +51,10 @@ public class CharacterSelectUIController : MonoBehaviour
             CameraManager.Instance.FocusCharacterSelectCameraOnLocalPlayer();
 
         if (_timerText != null)
-            _timerText.text = Mathf.CeilToInt(GameManager.Instance.GetRemainingStateTime()).ToString();
+            _timerText.text = Mathf.CeilToInt(MatchContext.Current.GetRemainingStateTime()).ToString();
 
         PlayerCharacterSelect localSelect = GetLocalCharacterSelect();
-        bool isFinalCountdown = GameManager.Instance.IsInFinalCharacterSelectCountdown;
+        bool isFinalCountdown = MatchContext.Current.IsInFinalCharacterSelectCountdown;
         bool isReady = localSelect != null && localSelect.IsReadyToStart;
 
         if (_readyButton != null) _readyButton.gameObject.SetActive(!isFinalCountdown && !isReady);

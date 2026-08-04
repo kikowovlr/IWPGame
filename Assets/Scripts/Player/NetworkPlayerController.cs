@@ -301,8 +301,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         ActiveRestrictions = InputRestrictions.None;
 
         // check game manager for global restrictions
-        if (GameManager.Instance != null)
-            ActiveRestrictions |= GameManager.Instance.GlobalRestrictions;
+        ActiveRestrictions |= MatchRestrictionsProvider.Current;
 
         // holds the target anim float
         float targetAnimSpeed = 0f;

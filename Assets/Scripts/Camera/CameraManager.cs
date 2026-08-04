@@ -24,7 +24,6 @@ public class CameraManager : MonoBehaviour
 
     private int _spectatorSlot = 0;
     private CameraMode _currentMode = CameraMode.StaticOverview;
-    private SpectatorViewMode _currentViewMode = SpectatorViewMode.Overview;
     private HashSet<string> _cursorRequests = new HashSet<string>(); // store requests for cursor -> cursor only disappears if all stop requesting
     public bool IsCursorVisible => _cursorRequests.Count > 0;
 
@@ -113,12 +112,6 @@ public class CameraManager : MonoBehaviour
 
     private void Update()
     {
-        // handle spectator input
-        //if (_currentMode == CameraMode.StaticOverview || _currentMode == CameraMode.SpectatingPlayer)
-        //{
-        //    HandleSpectatorInput();
-        //}
-
         HandleGameplayCameraLock();
     }
 
@@ -194,75 +187,10 @@ public class CameraManager : MonoBehaviour
 
         _pendingCameraCutAction = () =>
         {
-            _currentViewMode = SpectatorViewMode.Overview;
+            _spectatorSlot = 0;
             SetCameraState(CameraMode.StaticOverview);
+            OnSpectatorTargetChanged?.Invoke("OVERVIEW");
         };
-    }
-
-    private void HandleSpectatorInput()
-    {
-        if (GameManager.Instance == null || ScreenFXManager.Instance.IsBlinking) return; // dont allow toggle if blinking is active
-
-        var livingPlayerIDs = GameManager.Instance.GetLivingPlayerIDs();
-        int livingCount = livingPlayerIDs != null ? livingPlayerIDs.Count : 0;
-
-        // right click -> toggle spectator mode
-        if (Input.GetMouseButtonDown(1))
-        {
-            // if trying to switch but no players alive, dont switch
-            if (_currentViewMode == SpectatorViewMode.Overview && livingCount == 0) return;
-
-            OnCameraSwapRequested?.Invoke(); // signal to close eye/blink
-
-            // holds context until this event is called
-            _pendingCameraCutAction = () =>
-            {
-                if (_currentViewMode == SpectatorViewMode.Overview)
-                {
-                    // switch to player tracking mode
-                    _currentViewMode = SpectatorViewMode.Player;
-                    SpectateFirstAvailablePlayer();
-                }
-                else
-                {
-                    // switch back to standard bird's eye view
-                    _currentViewMode = SpectatorViewMode.Overview;
-                    SetCameraState(CameraMode.StaticOverview);
-                }
-            };
-
-            return; // prevent execution cross-over on this frame
-        }
-
-        // left click -> cycling through cams
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (_currentViewMode == SpectatorViewMode.Player)
-            {
-                if (livingCount <= 1) return;
-
-                OnCameraSwapRequested?.Invoke(); // start closing
-
-                // holds context until this event is called
-                _pendingCameraCutAction = () =>
-                {
-                    CycleThroughLivingPlayers();
-                };
-            }
-            else if (_currentViewMode == SpectatorViewMode.Overview)
-            {
-                if (_currentMode == CameraMode.StaticOverview) return; // if alrdy looking at overview cam, dont change
-
-                OnCameraSwapRequested?.Invoke(); // start closing
-
-                // holds context until this event is called
-                _pendingCameraCutAction = () =>
-                {
-                    // if more static cams added, cycle them here
-                    SetCameraState(CameraMode.StaticOverview);
-                };
-            }
-        }
     }
 
     /// <summary>
@@ -287,7 +215,6 @@ public class CameraManager : MonoBehaviour
         if (livingPlayerIDs == null || livingPlayerIDs.Count == 0)
         {
             // if everyone is dead, use static view
-            _currentViewMode = SpectatorViewMode.Overview;
             SetCameraState(CameraMode.StaticOverview);
             return;
         }
@@ -321,22 +248,8 @@ public class CameraManager : MonoBehaviour
         }
         else
         {
-            _currentViewMode = SpectatorViewMode.Overview;
             SetCameraState(CameraMode.StaticOverview);
         }
-    }
-
-    private void SpectateFirstAvailablePlayer()
-    {
-        var livingPlayerIDs = GameManager.Instance.GetLivingPlayerIDs();
-        if (livingPlayerIDs == null || livingPlayerIDs.Count == 0)
-        {
-            _currentViewMode = SpectatorViewMode.Overview;
-            SetCameraState(CameraMode.StaticOverview);
-            return;
-        }
-
-        CycleThroughLivingPlayers();
     }
 
     private void SpectateTarget(Transform target)

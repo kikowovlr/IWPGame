@@ -5,10 +5,14 @@ public enum TutorialActionType
     None,
     Move,
     Jump,
-    UseSkill,
     Punch,
+    StrongPunch,
     Grab,
-    Boost, // hit a boost pad?
+    Throw,
+    Headbutt,
+    AirKick,
+    UseSkill,
+    Environment, // hit a boost pad?
 }
 
 [CreateAssetMenu(fileName = "TutorialStep", menuName = "Tutorial/Tutorial Step")]

@@ -11,7 +11,8 @@ public enum TutorialState
     None,
     CharacterSelect,
     TutorialActive,     // step-by-step objectives, infinite lives
-    SuddenDeath,        // teleported to fixed spots, READY SET GO, last player standing
+    Countdown,          // teleported to fixed spots, READY SET GO
+    SuddenDeath,        // last player standing
     TutorialStageOver   // victory overlay -> back to lobby/main menu
 }
 
@@ -41,14 +42,27 @@ public class TutorialCharacterSelectState : ITutorialState
         {
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
             manager.ResetStateTimer(manager.CharacterSelectDuration);
-            // NOTE: your existing CharacterSelectUIController should activate itself
-            // the same way it does in the real game. If it keys off GameManager state,
-            // give it a tutorial entry point or have it also listen to TutorialManager.
         }
     }
 
     public void OnStateUpdate(TutorialManager manager)
     {
+        if (!manager.Object.HasStateAuthority) return;
+
+        // advance when everyone's ready, or the timer runs out (auto-lock stragglers)
+        if (manager.AreAllPlayersReady() || manager.IsStateTimerExpired)
+        {
+            if (manager.IsStateTimerExpired)
+                manager.AutoLockUnreadyPlayers();
+
+            manager.TransitionToState(TutorialState.TutorialActive);
+        }
+
+        if (!manager.IsInFinalCharacterSelectCountdown
+            && manager.GetRemainingStateTime() <= manager.Settings.FinalCharacterSelectCountdown)
+        {
+            manager.SetFinalCountdown(true);
+        }
     }
 
     public void OnStateExit(TutorialManager manager)

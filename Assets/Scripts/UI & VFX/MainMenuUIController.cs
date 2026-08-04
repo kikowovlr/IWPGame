@@ -81,6 +81,15 @@ public class MainMenuUIController : MonoBehaviour
 
         if (_quitButton != null)
             _quitButton.onClick.AddListener(ShowQuitPanel);
+
+        if (IsReturningFromMatch())
+        {
+            ShowLobbyOnReturn();
+        }
+        else
+        {
+            ShowMainMenuPanel();
+        }
     }
 
     /// <summary>
@@ -274,5 +283,25 @@ public class MainMenuUIController : MonoBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
+    }
+
+    private void ShowLobbyOnReturn()
+    {
+         if (_menuSelectionPanel != null) _menuSelectionPanel.SetActive(false);
+
+        string lobbyCode = "";
+        var runner = NetworkLauncher.Instance.Runner;
+        if (runner.SessionInfo != null && runner.SessionInfo.IsValid)
+            lobbyCode = runner.SessionInfo.Name;
+
+        if (_lobbyUIController != null)
+            _lobbyUIController.ShowLobby(lobbyCode);
+    }
+
+    private bool IsReturningFromMatch()
+    {
+        return NetworkLauncher.Instance != null
+            && NetworkLauncher.Instance.Runner != null
+            && NetworkLauncher.Instance.Runner.IsRunning;
     }
 }

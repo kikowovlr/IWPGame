@@ -2,9 +2,8 @@ using Fusion;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-public class TutorialManager : NetworkBehaviour
+public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
 {
     public static TutorialManager Instance { get; private set; }
 
@@ -41,6 +40,13 @@ public class TutorialManager : NetworkBehaviour
         (_steps != null && CurrentStepIndex >= 0 && CurrentStepIndex < _steps.Length)
         ? _steps[CurrentStepIndex] : null;
 
+    public const int MAX_PLAYERS = 4;
+
+    [Networked, Capacity(MAX_PLAYERS)]
+    private NetworkArray<PlayerRef> _livingPlayers => default;
+    private readonly HashSet<PlayerRef> _localLiving = new HashSet<PlayerRef>();
+    [Networked] private NetworkBool _isInFinalCountdown { get; set; }
+
     // getters
     public float CharacterSelectDuration => _settings.CharacterSelectDuration;
     public float CountdownDuration => _settings.CountdownDuration;
@@ -48,6 +54,20 @@ public class TutorialManager : NetworkBehaviour
     public bool IsStateTimerExpired => _stateTimer.ExpiredOrNotRunning(Runner);
     public RoundEndDisplayController RoundEndDisplay => _roundEndDisplay;
     public TutorialUIController TutorialUI => _tutorialUI;
+    public MatchSettings Settings => _settings;
+    public bool IsInGameplayPhase =>
+        CurrentState == TutorialState.TutorialActive || CurrentState == TutorialState.SuddenDeath;
+    public bool IsInCharacterSelect => CurrentState == TutorialState.CharacterSelect;
+    public bool IsInFinalCharacterSelectCountdown => _isInFinalCountdown;
+    public float GetRemainingStateTime() => _stateTimer.RemainingTime(Runner) ?? 0f;
+    public List<PlayerRef> GetLivingPlayerIDs() => new List<PlayerRef>(_localLiving);
+    public int GetLivingPlayerCount() => _localLiving.Count;
+    public bool IsSpawned { get; private set; }
+
+    public bool IsCountdownActive => CurrentState == TutorialState.Countdown;
+    public bool ShouldShowGo => CurrentState == TutorialState.SuddenDeath;
+    public float CountdownRemaining => GetRemainingStateTime();
+    public float CountdownTotal => Settings.CountdownDuration;
 
     private void Awake()
     {
@@ -66,13 +86,29 @@ public class TutorialManager : NetworkBehaviour
         if (Object.HasStateAuthority)
             CurrentState = TutorialState.CharacterSelect;
 
+        // register
+        IsSpawned = true;
+        MatchContext.Register(this);
+        CountdownSourceLocator.Register(this);
+
         // force first local enter (OnChangedRender doesn't fire for the initial value)
         EnterStateLocal(CurrentState);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasStateAuthority)
     {
+        MatchContext.Unregister(this);
+        CountdownSourceLocator.Unregister(this);
         if (Instance == this) Instance = null;
+    }
+
+    private void OnEnable()
+    {
+        PlayerEliminationHandler.OnPlayerEliminated += HandlePlayerEliminated;
+    }
+    private void OnDisable()
+    {
+        PlayerEliminationHandler.OnPlayerEliminated -= HandlePlayerEliminated;
     }
 
     public override void FixedUpdateNetwork()
@@ -257,24 +293,64 @@ public class TutorialManager : NetworkBehaviour
         }
     }
 
-    public float GetRemainingStateTime()
+
+    public int GetActiveSpectatorCount()
     {
-        return _stateTimer.RemainingTime(Runner) ?? 0f;
+        int count = 0;
+        foreach (PlayerRef p in Runner.ActivePlayers)
+        {
+            if (Runner.TryGetPlayerObject(p, out NetworkObject obj))
+            {
+                PlayerComponentRegistry reg = obj.GetComponentInParent<PlayerComponentRegistry>();
+                if (reg != null && reg.Elimination != null && reg.Elimination.IsSpectatorTransitionComplete)
+                    count++;
+            }
+        }
+        return count;
     }
 
-    //public int GetLivingPlayerCount()
-    //{
-    //    // <<< VERIFY: copy GameManager.GetLivingPlayerCount() logic.
-    //    // Likely: count players whose Stats say they're alive / not eliminated.
-    //    int living = 0;
-    //    foreach (PlayerRef p in Runner.ActivePlayers)
-    //    {
-    //        if (Runner.TryGetPlayerObject(p, out NetworkObject obj))
-    //        {
-    //            PlayerComponentRegistry reg = obj.GetComponent<PlayerComponentRegistry>();
-    //            // if (reg != null && reg.Stats != null && reg.Stats.IsAlive) living++;
-    //        }
-    //    }
-    //    return living;
-    //}
+    private void HandlePlayerEliminated(PlayerEliminationHandler handler)
+    {
+        if (!Object.HasStateAuthority) return;
+        if (CurrentState != TutorialState.SuddenDeath) return;
+
+        PlayerRef dead = handler.Object.InputAuthority;
+        for (int i = 0; i < _livingPlayers.Length; i++)
+        {
+            if (_livingPlayers[i] == dead) { _livingPlayers.Set(i, PlayerRef.None); break; }
+        }
+        RebuildLocalLiving();
+    }
+
+    private void RebuildLocalLiving()
+    {
+        _localLiving.Clear();
+        for (int i = 0; i < _livingPlayers.Length; i++)
+            if (_livingPlayers[i] != PlayerRef.None)
+                _localLiving.Add(_livingPlayers[i]);
+    }
+
+    public void SeedLivingPlayersForSuddenDeath()
+    {
+        if (!Object.HasStateAuthority) return;
+        for (int i = 0; i < _livingPlayers.Length; i++) _livingPlayers.Set(i, PlayerRef.None);
+
+        int idx = 0;
+        foreach (PlayerRef p in Runner.ActivePlayers)
+            if (idx < _livingPlayers.Length) { _livingPlayers.Set(idx, p); idx++; }
+
+        RebuildLocalLiving();
+    }
+
+    public void SetMatchWinner(PlayerRef winner)
+    {
+        if (!Object.HasStateAuthority) return;
+        MatchWinner = winner;
+    }
+
+    public void SetFinalCountdown(bool active)
+    {
+        if (!Object.HasStateAuthority) return;
+        _isInFinalCountdown = active;
+    }
 }

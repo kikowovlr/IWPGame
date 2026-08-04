@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// centralised game manager script to handle rounds and games
 /// </summary>
-public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
+public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchContext, ICountdownSource
 {
     public static GameManager Instance { get; private set; }
 
@@ -17,7 +17,6 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     [Networked, Capacity(MAX_PLAYERS), OnChangedRender(nameof(OnActivePlayersChanged))]
     private NetworkArray<PlayerRef> _activePlayersInRound => default;
     private HashSet<PlayerRef> _localLivingPlayers = new HashSet<PlayerRef>(); // local tracking
-    [HideInInspector] [Networked] public InputRestrictions GlobalRestrictions { get; private set; } = InputRestrictions.None;
 
     // match
     [SerializeField] private MatchSettings _matchSettings;
@@ -41,7 +40,6 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     [Header("Character Select")]
     [SerializeField] private Transform[] _characterSelectStagePoints; // positions for character select
     [Networked] private NetworkBool _hasCompletedCharacterSelect { get; set; }
-    [HideInInspector] [Networked] public NetworkBool IsInFinalCharacterSelectCountdown { get; private set; }
 
     // getters
     public MatchSettings Settings => _matchSettings;
@@ -49,6 +47,15 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     public int GetLivingPlayerCount() => _localLivingPlayers.Count;
     public RoundEndDisplayController RoundEndDisplay => _roundEndDisplayController;
     public bool IsSpawned { get; private set; }
+    public bool IsInGameplayPhase =>
+    CurrentRoundState == RoundState.RoundActive || CurrentRoundState == RoundState.Countdown;
+    public bool IsInCharacterSelect => CurrentRoundState == RoundState.CharacterSelect;
+    [Networked] public bool IsInFinalCharacterSelectCountdown { get; private set; }
+
+    public bool IsCountdownActive => CurrentRoundState == RoundState.Countdown;
+    public bool ShouldShowGo => CurrentRoundState == RoundState.RoundActive;
+    public float CountdownRemaining => GetRemainingStateTime();
+    public float CountdownTotal => Settings.CountdownDuration;
 
     private void Awake()
     {
@@ -88,6 +95,9 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
         IsSpawned = true;
         DontDestroyOnLoad(gameObject);
 
+        // register
+        MatchContext.Register(this);
+
         if (Object.HasStateAuthority)
         {
             foreach (var player in Object.Runner.ActivePlayers)
@@ -111,6 +121,12 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
         {
             OnSetupUIStateChanged();
         }
+    }
+
+    public override void Despawned(NetworkRunner runner, bool hasStateAuthority)
+    {
+        MatchContext.Unregister(this);
+        if (Instance == this) Instance = null;
     }
 
     public override void FixedUpdateNetwork()
@@ -367,8 +383,9 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
 
     public void SetGlobalInputRestrictions(InputRestrictions restrictions)
     {
-        if (Object.HasStateAuthority)
-            GlobalRestrictions = restrictions;
+        if (!Object.HasStateAuthority) return;
+        if (MatchRestrictionsProvider.Instance != null)
+            MatchRestrictionsProvider.Instance.SetRestrictions(restrictions);
     }
 
     public void ResetStateTimer(float duration)
@@ -380,10 +397,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup
     private void OnSetupUIStateChanged()
     {
         if (TransitionUIManager.Instance == null)
-        {
-            Debug.LogWarning("[GameManager] OnSetupUIStateChanged fired but TransitionUIManager.Instance is NULL");
             return;
-        }
 
         if (IsSetupUIActive)
         {

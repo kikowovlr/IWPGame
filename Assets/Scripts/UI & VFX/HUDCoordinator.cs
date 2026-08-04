@@ -6,7 +6,7 @@ public class HUDCoordinator : MonoBehaviour
     [SerializeField] private GameObject _miniLeaderboardRoot;
 
     private bool _isSpectating = false;
-    private RoundState _lastKnownState = RoundState.None;
+    private bool _lastGameplay = false;
 
     private void OnEnable()
     {
@@ -27,14 +27,12 @@ public class HUDCoordinator : MonoBehaviour
 
     private void Update()
     {
-        // poll round state (GameManager is networked; no C# event for state change
-        // that this local UI can rely on cross-scene, so a light poll is simplest)
-        if (GameManager.Instance == null || !GameManager.Instance.IsSpawned) return;
+        if (MatchContext.Current == null || !MatchContext.Current.IsSpawned) return;
 
-        RoundState current = GameManager.Instance.CurrentRoundState;
-        if (current != _lastKnownState)
+        bool current = MatchContext.Current.IsInGameplayPhase;
+        if (current != _lastGameplay)
         {
-            _lastKnownState = current;
+            _lastGameplay = current;
             Reevaluate();
         }
     }
@@ -61,11 +59,11 @@ public class HUDCoordinator : MonoBehaviour
 
     private void Reevaluate()
     {
-        RoundState state = GameManager.Instance != null
-                ? GameManager.Instance.CurrentRoundState
-                : RoundState.None;
+        //RoundState state = GameManager.Instance != null
+        //        ? GameManager.Instance.CurrentRoundState
+        //        : RoundState.None;
 
-        bool isGameplay = state == RoundState.Countdown || state == RoundState.RoundActive;
+        bool isGameplay = MatchContext.Current != null && MatchContext.Current.IsInGameplayPhase;
 
         if (!isGameplay)
         {
