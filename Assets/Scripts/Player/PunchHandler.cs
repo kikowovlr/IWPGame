@@ -101,6 +101,7 @@ public class PunchHandler : NetworkBehaviour
             _strongPunchCooldownTimer = TickTimer.CreateFromSeconds(Runner, _strongPunchCooldown);
 
             AddStrongPunchImpulse();
+            TutorialManager.Instance?.NotifyPlayerAction(_playerController.Object.InputAuthority, TutorialActionType.StrongPunch);
         }
         else
         {
@@ -118,6 +119,7 @@ public class PunchHandler : NetworkBehaviour
             _animator.SetTrigger("WeakPunchTrigger");
 
             _nextHandIndex = (_nextHandIndex == 0) ? 1 : 0; // sets next hand as opposite of curr hand
+            TutorialManager.Instance?.NotifyPlayerAction(_playerController.Object.InputAuthority, TutorialActionType.Punch);
         }
 
         // set the collider to be enabled

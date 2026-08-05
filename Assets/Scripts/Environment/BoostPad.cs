@@ -31,5 +31,9 @@ public class BoostPad : NetworkBehaviour
         _lastBoostTime[boost] = now;
 
         boost.ApplyBoost(transform.forward, _forwardSpeed, _upwardSpeed, _boostDuration);
+
+        // tell the tutorial this player hit a boost pad
+        if (registry.Controller != null)
+            TutorialManager.Instance?.NotifyPlayerAction(registry.Controller.Object.InputAuthority, TutorialActionType.Environment);
     }
 }

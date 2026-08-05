@@ -40,6 +40,23 @@ public class LevelLoader : MonoBehaviour, ICleanup
         _transition.SetTrigger("End");
     }
 
+    /// <summary>
+    /// plays wipe to COVER screen (no screen load)
+    /// <summary>
+    public IEnumerator PlayWipeCover()
+    {
+        _transition.SetTrigger("Start");
+        yield return new WaitForSeconds(_transitionTime);
+    }
+
+    /// <summary>
+    /// Plays the wipe to REVEAL the screen (open from black).
+    /// </summary>
+    public void PlayWipeReveal()
+    {
+        _transition.SetTrigger("End");
+    }
+
     public static void ResetInstance()
     {
         Instance = null;

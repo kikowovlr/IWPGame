@@ -40,7 +40,9 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     [Header("Character Select")]
     [SerializeField] private Transform[] _characterSelectStagePoints; // positions for character select
     [Networked] private NetworkBool _hasCompletedCharacterSelect { get; set; }
+    [HideInInspector][Networked] public bool IsInFinalCharacterSelectCountdown { get; private set; }
 
+    // getters
     // getters
     public MatchSettings Settings => _matchSettings;
     public RoundState GetCurrentRoundState() => CurrentRoundState;
@@ -50,7 +52,6 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     public bool IsInGameplayPhase =>
     CurrentRoundState == RoundState.RoundActive || CurrentRoundState == RoundState.Countdown;
     public bool IsInCharacterSelect => CurrentRoundState == RoundState.CharacterSelect;
-    [Networked] public bool IsInFinalCharacterSelectCountdown { get; private set; }
 
     public bool IsCountdownActive => CurrentRoundState == RoundState.Countdown;
     public bool ShouldShowGo => CurrentRoundState == RoundState.RoundActive;
@@ -97,6 +98,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
 
         // register
         MatchContext.Register(this);
+        CountdownSourceLocator.Register(this);
 
         if (Object.HasStateAuthority)
         {
@@ -126,6 +128,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     public override void Despawned(NetworkRunner runner, bool hasStateAuthority)
     {
         MatchContext.Unregister(this);
+        CountdownSourceLocator.Unregister(this);
         if (Instance == this) Instance = null;
     }
 

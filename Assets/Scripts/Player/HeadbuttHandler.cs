@@ -61,6 +61,7 @@ public class HeadbuttHandler : NetworkBehaviour
         _animator.SetTrigger("HeadbuttTrigger");
         _cooldownTimer = TickTimer.CreateFromSeconds(Runner, _cooldown);
         ApplyHeadbuttForces();
+        TutorialManager.Instance?.NotifyPlayerAction(_playerController.Object.InputAuthority, TutorialActionType.Headbutt);
     }
 
     private void ApplyHeadbuttForces()

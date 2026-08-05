@@ -100,7 +100,7 @@ public class CharacterSelectUIController : MonoBehaviour
     {
         PlayerCharacterSelect localSelect = GetLocalCharacterSelect();
         if (localSelect == null || localSelect.IsReadyToStart) return;
-        if (GameManager.Instance == null && GameManager.Instance.IsInFinalCharacterSelectCountdown) return;
+        if (MatchContext.Current == null || MatchContext.Current.IsInFinalCharacterSelectCountdown) return;
         if (NetworkPlayerController.Local == null) return;
 
         int currentIndex = NetworkPlayerController.Local.CharacterIndex;
@@ -113,7 +113,7 @@ public class CharacterSelectUIController : MonoBehaviour
     {
         PlayerCharacterSelect localSelect = GetLocalCharacterSelect();
         if (localSelect == null) return;
-        if (GameManager.Instance != null && GameManager.Instance.IsInFinalCharacterSelectCountdown) return;
+        if (MatchContext.Current != null && MatchContext.Current.IsInFinalCharacterSelectCountdown) return;
 
         localSelect.Rpc_SetReady(!localSelect.IsReadyToStart);
     }

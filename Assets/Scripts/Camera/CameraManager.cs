@@ -121,6 +121,8 @@ public class CameraManager : MonoBehaviour
     /// <param name="mode"></param>
     public void SetCameraState(CameraMode mode)
     {
+        Debug.Log($"[CAM] SetCameraState -> {mode}\n{System.Environment.StackTrace}");
+
         _currentMode = mode;
         if (_gameplayCam == null || _spectatorCam == null || _staticSpectatorCam == null || _characterSelectCam == null) return;
 
@@ -158,24 +160,37 @@ public class CameraManager : MonoBehaviour
         _gameplayCam.Follow = target;
         _gameplayCam.LookAt = target;
 
-        if (GameManager.Instance == null)
+        if (MatchContext.Current == null || !MatchContext.Current.IsSpawned)
         {
             SetCameraState(CameraMode.Gameplay);
             return;
         }
 
-        switch (GameManager.Instance.CurrentRoundState)
-        {
-            case RoundState.Setup:
-                SetCameraState(CameraMode.StaticOverview);
-                break;
-            case RoundState.CharacterSelect:
-                SetCameraState(CameraMode.CharacterSelect);
-                break;
-            default:
-                SetCameraState(CameraMode.Gameplay);
-                break;
-        }
+        if (MatchContext.Current.IsInCharacterSelect)
+            SetCameraState(CameraMode.CharacterSelect);
+        else if (MatchContext.Current.IsInGameplayPhase)
+            SetCameraState(CameraMode.Gameplay);
+        else
+            SetCameraState(CameraMode.StaticOverview);
+
+        //if (GameManager.Instance == null)
+        //{
+        //    SetCameraState(CameraMode.Gameplay);
+        //    return;
+        //}
+
+        //switch (GameManager.Instance.CurrentRoundState)
+        //{
+        //    case RoundState.Setup:
+        //        SetCameraState(CameraMode.StaticOverview);
+        //        break;
+        //    case RoundState.CharacterSelect:
+        //        SetCameraState(CameraMode.CharacterSelect);
+        //        break;
+        //    default:
+        //        SetCameraState(CameraMode.Gameplay);
+        //        break;
+        //}
     }
 
     private void HandlePlayerSpectatorReady(PlayerEliminationHandler handler)

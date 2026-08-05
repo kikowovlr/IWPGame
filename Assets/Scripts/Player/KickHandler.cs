@@ -97,6 +97,7 @@ public class KickHandler : NetworkBehaviour
 
         // fire visual trigger
         _animator.SetTrigger("KickTrigger");
+        TutorialManager.Instance?.NotifyPlayerAction(_playerController.Object.InputAuthority, TutorialActionType.AirKick);
     }
 
     public override void FixedUpdateNetwork()

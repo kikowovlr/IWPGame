@@ -162,6 +162,12 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [SerializeField] private Sprite[] _nametagSpriteOptions;
     [HideInInspector] [Networked] public int NametagSpriteIndex { get; private set; } = -1;
 
+    // for detecting tutorial action
+    private float _tutorialMoveAccum;
+    private float _tutorialSprintAccum;
+    private const float TUTORIAL_MOVE_TIME = 1.0f;   // ~1s of moving = "done"
+    private const float TUTORIAL_SPRINT_TIME = 1.0f;
+
     public bool IsCameraRotationLocked
     {
         get
@@ -388,6 +394,27 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     // calculate the animation speed should be based entirely on input
                     targetAnimSpeed = wantsSprint ? 1.0f : _walkInputScale;
                     ProcessInputMovement(networkInputData, wantsSprint, inputMagnitude);
+
+                    // tutorial detection
+                    if (Object.HasStateAuthority)
+                    {
+                        _tutorialMoveAccum += Runner.DeltaTime;
+                        if (_tutorialMoveAccum >= TUTORIAL_MOVE_TIME)
+                        {
+                            TutorialManager.Instance?.NotifyPlayerAction(Object.InputAuthority, TutorialActionType.Move);
+                            _tutorialMoveAccum = 0f; // reset so it doesn't spam; step will complete at RequiredCount=1
+                        }
+
+                        if (wantsSprint)
+                        {
+                            _tutorialSprintAccum += Runner.DeltaTime;
+                            if (_tutorialSprintAccum >= TUTORIAL_SPRINT_TIME)
+                            {
+                                TutorialManager.Instance?.NotifyPlayerAction(Object.InputAuthority, TutorialActionType.Sprint);
+                                _tutorialSprintAccum = 0f;
+                            }
+                        }
+                    }
                 }
                 else
                 {
@@ -613,9 +640,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     _hasIdleAnchor = true;
                 }
 
-                if (IsBeingDraggedByOther)
-                    Debug.Log($"[Drag] {name}: anchor refreshed to {_idleAnchorPosition} (being dragged)");
-
                 // spring back toward anchor if there is residual drift
                 Vector3 offset = _idleAnchorPosition - _rb.position;
                 offset.y = 0f;
@@ -787,6 +811,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
             _isJumpButtonPressed = false; //reset immediately
             _isGrounded = false;
+            TutorialManager.Instance?.NotifyPlayerAction(Object.InputAuthority, TutorialActionType.Jump);
         }
     }
 
@@ -928,6 +953,9 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             // if it's an instant ability (doesn't charge), start cooldown immediately on press
             if (!CurrentAbilityState._isCharging)
                 CurrentAbilityState._cooldownTimer = _equippedAbility._baseCooldown;
+
+            if (Object.HasStateAuthority)
+                TutorialManager.Instance?.NotifyPlayerAction(Object.InputAuthority, TutorialActionType.UseSkill);
         }
         else if (CurrentAbilityState._isCharging)
         {

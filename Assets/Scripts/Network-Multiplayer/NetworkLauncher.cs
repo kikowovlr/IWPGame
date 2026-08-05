@@ -31,6 +31,12 @@ public class NetworkLauncher : MonoBehaviour
     /// </summary>
     public async Task<StartGameResult> LaunchSession(GameMode mode, int gameplaySceneIndex, string sessionName)
     {
+        // DIAGNOSTIC
+        if (Runner == null)
+            Debug.Log("[NetworkLauncher] LaunchSession start — Runner is NULL (clean)");
+        else
+            Debug.Log($"[NetworkLauncher] LaunchSession start — Runner not null, IsRunning={Runner.IsRunning}, GO={(Runner.gameObject != null ? "alive" : "destroyed")}");
+
         HasSkippedInitialSceneLoad = false;
 
         if (Runner != null)
@@ -73,5 +79,32 @@ public class NetworkLauncher : MonoBehaviour
         });
 
         return result;
+    }
+
+    /// <summary>
+    /// tear down the current runner. Call this whenever a session ends
+    /// (forced disconnect, leave, return to menu) so the next LaunchSession starts clean.
+    /// </summary>
+    public async Task CleanupRunner()
+    {
+        if (Runner != null)
+        {
+            try
+            {
+                if (Runner.IsRunning)
+                    await Runner.Shutdown();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[NetworkLauncher] Cleanup shutdown threw (ignoring): {e.Message}");
+            }
+            finally
+            {
+                if (Runner != null && Runner.gameObject != null)
+                    Destroy(Runner.gameObject);
+                Runner = null;
+            }
+        }
+        HasSkippedInitialSceneLoad = false;
     }
 }

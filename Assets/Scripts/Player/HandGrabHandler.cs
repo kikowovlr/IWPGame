@@ -252,6 +252,7 @@ public class HandGrabHandler : NetworkBehaviour
 
         // set animator to carrying
         _animator.SetBool("IsCarrying", true);
+        TutorialManager.Instance?.NotifyPlayerAction(_networkPlayer.Object.InputAuthority, TutorialActionType.Grab);
         return true;
     }
 
@@ -418,7 +419,7 @@ public class HandGrabHandler : NetworkBehaviour
 
             Utils.DebugLog("Two-Handed Throw Executed!");
             _throwCooldownTimer = TickTimer.CreateFromSeconds(Runner, _throwCooldown);
-
+            TutorialManager.Instance?.NotifyPlayerAction(_networkPlayer.Object.InputAuthority, TutorialActionType.Throw);
             ReleaseGrab(true);
         }
     }

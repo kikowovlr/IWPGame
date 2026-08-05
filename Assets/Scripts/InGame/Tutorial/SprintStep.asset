@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56f00faf7c326414496a847e547ef280, type: 3}
+  m_Name: SprintStep
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialStepSO
+  ObjectiveText: Pick Up the Pace
+  ObjectiveDescription: Hold [SHIFT] while moving to sprint
+  NarrationText: Marvellous walking! Truly, a natural. But sometimes, my friend,
+    walking simply will not do. Hold down Shift and RUN like the wind! Off you go!
+  RequiredAction: 2
+  RequiredCount: 1

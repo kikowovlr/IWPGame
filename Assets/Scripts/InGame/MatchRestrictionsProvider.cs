@@ -7,7 +7,7 @@ using UnityEngine;
 public class MatchRestrictionsProvider : NetworkBehaviour
 {
     public static MatchRestrictionsProvider Instance { get; private set; }
-    [Networked] public InputRestrictions GlobalRestrictions { get; private set; }
+    [HideInInspector] [Networked] public InputRestrictions GlobalRestrictions { get; private set; }
 
     private void Awake()
     {

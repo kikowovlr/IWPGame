@@ -23,3 +23,7 @@ MonoBehaviour:
     _sceneAsset: {fileID: 102900000, guid: 9568989c9f1abe043ba9010dc469b308, type: 3}
     _scenePath: Assets/Scenes/EndGamePodiumScene.unity
     _sceneName: EndGamePodiumScene
+  _tutorialIntroDuration: 3
+  _stepCompleteDisplayDuration: 2
+  _narrationCharsPerSecond: 2
+  _narrationHoldAfterType: 4

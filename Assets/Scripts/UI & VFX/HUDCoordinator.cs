@@ -4,6 +4,7 @@ public class HUDCoordinator : MonoBehaviour
     [SerializeField] private GameObject _playerHUDRoot;          
     [SerializeField] private GameObject _spectatorRoot;
     [SerializeField] private GameObject _miniLeaderboardRoot;
+    [SerializeField] private GameObject _tutorialHUDRoot;
 
     private bool _isSpectating = false;
     private bool _lastGameplay = false;
@@ -29,11 +30,19 @@ public class HUDCoordinator : MonoBehaviour
     {
         if (MatchContext.Current == null || !MatchContext.Current.IsSpawned) return;
 
-        bool current = MatchContext.Current.IsInGameplayPhase;
-        if (current != _lastGameplay)
+        // reevaluate whenever tutorial state changes -> every frame when tutorial manager is active
+        if (TutorialManager.Instance != null)
         {
-            _lastGameplay = current;
             Reevaluate();
+        }
+        else
+        {
+            bool current = MatchContext.Current.IsInGameplayPhase;
+            if (current != _lastGameplay)
+            {
+                _lastGameplay = current;
+                Reevaluate();
+            }
         }
     }
 
@@ -42,7 +51,7 @@ public class HUDCoordinator : MonoBehaviour
         // only react to the LOCAL player's transition
         if (!handler.Object.HasInputAuthority) return;
         _isSpectating = true;
-        ShowSpectatorUI();
+        Reevaluate();
     }
 
     private void HandleEliminationChanged(PlayerEliminationHandler handler)
@@ -59,9 +68,12 @@ public class HUDCoordinator : MonoBehaviour
 
     private void Reevaluate()
     {
-        //RoundState state = GameManager.Instance != null
-        //        ? GameManager.Instance.CurrentRoundState
-        //        : RoundState.None;
+        // change based on specific tutorial state if tutorial manager is active
+        if (TutorialManager.Instance != null)
+        {
+            ReevaluateTutorial(TutorialManager.Instance.CurrentState);
+            return;
+        }
 
         bool isGameplay = MatchContext.Current != null && MatchContext.Current.IsInGameplayPhase;
 
@@ -83,10 +95,45 @@ public class HUDCoordinator : MonoBehaviour
         }
     }
 
-    private void ShowSpectatorUI()
+    /// <summary>
+    /// tutorial specific HUD
+    /// </summary>
+    private void ReevaluateTutorial(TutorialState state)
     {
-        if (_playerHUDRoot != null) _playerHUDRoot.SetActive(false);
-        if (_spectatorRoot != null) _spectatorRoot.SetActive(true);
+        switch (state)
+        {
+            case TutorialState.TutorialActive:
+                // only the tutorial HUD; no player HUD, spectator, or leaderboard
+                SetPlayerHUDActive(false);
+                if (_spectatorRoot != null) _spectatorRoot.SetActive(false);
+                if (_miniLeaderboardRoot != null) _miniLeaderboardRoot.SetActive(false);
+                break;
+
+            case TutorialState.Countdown:
+            case TutorialState.SuddenDeath:
+                // player HUD (+ spectator when spectating); no tutorial HUD, no leaderboard
+                if (_miniLeaderboardRoot != null) _miniLeaderboardRoot.SetActive(false);
+
+                if (_isSpectating)
+                {
+                    SetPlayerHUDActive(false);
+                    if (_spectatorRoot != null) _spectatorRoot.SetActive(true);
+                }
+                else
+                {
+                    SetPlayerHUDActive(true);
+                    if (_spectatorRoot != null) _spectatorRoot.SetActive(false);
+                }
+                break;
+
+            case TutorialState.CharacterSelect:
+            case TutorialState.TutorialStageOver:
+            case TutorialState.None:
+            default:
+                // hide everything here
+                HideAllHUDs();
+                break;
+        }
     }
 
     private void HideAllHUDs()
@@ -100,5 +147,16 @@ public class HUDCoordinator : MonoBehaviour
     {
         if (_playerHUDRoot != null) _playerHUDRoot.SetActive(active);
         if (_miniLeaderboardRoot != null) _miniLeaderboardRoot.SetActive(active);
+    }
+
+    // player HUD alone (tutorial sudden death uses this WITHOUT the leaderboard)
+    private void SetPlayerHUDActive(bool active)
+    {
+        if (_playerHUDRoot != null) _playerHUDRoot.SetActive(active);
+    }
+
+    private void SetTutorialHUDActive(bool active)
+    {
+        if (_tutorialHUDRoot != null) _tutorialHUDRoot.SetActive(active);
     }
 }

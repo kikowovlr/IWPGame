@@ -64,44 +64,6 @@ public class CountdownUIController : MonoBehaviour
                 _lastDisplayedWord = " ";
             }
         }
-
-        //if (GameManager.Instance == null) return;
-        //if (!GameManager.Instance.Object || !GameManager.Instance.Object.IsValid) return; // ensure game manager has spawned first
-
-        //RoundState currState = GameManager.Instance.GetCurrentRoundState();
-
-        //// ensure countdown only shows up during Countdown state
-        //if (currState == RoundState.Countdown)
-        //{
-        //    // show countdown
-        //    _hasTriggeredGo = false; // reset GO flag
-        //    SetCountdownPanelActive(true);
-        //    UpdateCountdownWords();
-        //}
-        //// round js went active but GO has not been triggered
-        //else if (currState == RoundState.RoundActive && !_hasTriggeredGo)
-        //{
-        //    SetCountdownPanelActive(true);
-        //    UpdateWordDisplay("GO!");
-
-        //    // run local timer to handle lingering of GO text
-        //    _goDisplayTimer += Time.deltaTime;
-        //    if (_goDisplayTimer >= _goDisappearTime)
-        //    {
-        //        _hasTriggeredGo = true;
-        //        _goDisplayTimer = 0f;
-        //        SetCountdownPanelActive(false);
-        //    }
-        //}
-        //// everywhere else 
-        //else
-        //{
-        //    if (!_hasTriggeredGo)
-        //    {
-        //        SetCountdownPanelActive(false);
-        //        _lastDisplayedWord = " ";
-        //    }
-        //}
     }
 
     private void SetCountdownPanelActive(bool active)

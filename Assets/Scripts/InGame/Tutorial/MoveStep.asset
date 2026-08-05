@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56f00faf7c326414496a847e547ef280, type: 3}
+  m_Name: MoveStep
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialStepSO
+  ObjectiveText: Take a Stroll
+  ObjectiveDescription: 'Move around using [WASD]'
+  NarrationText: "Ahh, welcome, welcome! Splendid to see you. Now \u2014 let's start
+    with the basics, shall we? Give those WASD keys a press and take yourself for
+    a little wander!"
+  RequiredAction: 1
+  RequiredCount: 1

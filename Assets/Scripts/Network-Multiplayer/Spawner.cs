@@ -112,7 +112,6 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
-        Debug.Log($"[Spawner] Disconnected from server ({reason}) — returning to menu");
         HandleForcedReturnToMenu();
     }
 
@@ -121,7 +120,6 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
         // Ok = we intentionally shut down (clean leave / our own return-to-menu) — handled elsewhere
         if (shutdownReason == ShutdownReason.Ok) return;
 
-        Debug.Log($"[Spawner] Runner shutdown ({shutdownReason}) — returning to menu");
         HandleForcedReturnToMenu();
     }
 
@@ -130,14 +128,14 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
         // if the lobby UI exists in this scene, let it clean up; otherwise load the menu directly
         LobbyUIController lobby = FindAnyObjectByType<LobbyUIController>();
         if (lobby != null)
-        {
             lobby.HandleForcedDisconnect(); // your existing cleanup path
-        }
         else
-        {
             // mid-match / podium — no lobby UI here, so just load the menu scene locally
             SceneManager.LoadScene("MainMenuScene");
-        }
+
+        // clean up the runner so the next create-lobby starts fresh
+        if (NetworkLauncher.Instance != null)
+            _ = NetworkLauncher.Instance.CleanupRunner();
     }
 
     public void OnConnectedToServer(NetworkRunner runner)

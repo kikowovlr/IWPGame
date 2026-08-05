@@ -25,6 +25,10 @@ public class RoundEndDisplayController : MonoBehaviour
     [SerializeField] private GameObject _victoryTextObj;
     [SerializeField] private GameObject _defeatTextObj;
 
+    [Header("Tutorial Result")]
+    [SerializeField] private GameObject _tutorialWinnerContainer;
+    [SerializeField] private TMP_Text _tutorialWinnerNameText;
+
     private List<LeaderboardRowUI> _spawnedRows = new List<LeaderboardRowUI>();
 
     /// <summary>
@@ -147,5 +151,20 @@ public class RoundEndDisplayController : MonoBehaviour
     {
         if (_victoryTextObj != null) _victoryTextObj.SetActive(false);
         if (_defeatTextObj != null) _defeatTextObj.SetActive(true);
+    }
+
+    public void ShowTutorialResult(bool localPlayerWon, string winnerName)
+    {
+        if (_leaderboardContainer != null) _leaderboardContainer.SetActive(false);
+        if (_roundOverText != null) _roundOverText.gameObject.SetActive(false);
+
+        if (_tutorialWinnerNameText != null)
+        {
+            _tutorialWinnerContainer.SetActive(true);
+            _tutorialWinnerNameText.text = winnerName;
+        }
+
+        if (localPlayerWon) ShowMatchVictoryOverlay();
+        else ShowMatchDefeatOverlay();
     }
 }

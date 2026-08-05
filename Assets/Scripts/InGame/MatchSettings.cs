@@ -47,6 +47,13 @@ public class MatchSettings : ScriptableObject
     [Header("Podium Scene")]
     [SerializeField] private SceneReference _podiumSceneRef;
 
+    [Header("Tutorial Settings")]
+    [SerializeField] private float _tutorialIntroDuration = 3.0f;       // TUTORIAL STAGE popup
+    [SerializeField] private float _stepCompleteDisplayDuration = 2f;   // step done, moving on.. popup
+    [SerializeField] private float _narrationCharsPerSecond = 2f;       // typewriter speed for narration text
+    [SerializeField] private float _narrationHoldAfterType = 1f;        // extra hold after typing finishes before tracking starts
+    [SerializeField] private float _suddenDeathBannerDuration = 3f;
+
     public float SetUpDuration => _setupDuration;
     public float CountdownDuration => _countdownDuration;
     public float RoundOverBufferDuration => _roundOverBufferDuration;
@@ -55,6 +62,12 @@ public class MatchSettings : ScriptableObject
     public float FinalCharacterSelectCountdown => _finalCharacterSelectCountdown;
     public int CrownsToWinMatch => _crownsToWinMatch;
     public SceneReference PodiumScene => _podiumSceneRef;
+
+    public float TutorialIntroDuration => _tutorialIntroDuration;
+    public float StepCompleteDisplayDuration => _stepCompleteDisplayDuration;
+    public float NarrationCharsPerSecond => _narrationCharsPerSecond;
+    public float NarrationHoldAfterType => _narrationHoldAfterType;
+    public float SuddenDeathBannerDuration => _suddenDeathBannerDuration;
 
 #if UNITY_EDITOR
     private void OnValidate()
