@@ -29,6 +29,9 @@ public class RoundEndDisplayController : MonoBehaviour
     [SerializeField] private GameObject _tutorialWinnerContainer;
     [SerializeField] private TMP_Text _tutorialWinnerNameText;
 
+    [Header("Tutorial Solo Complete")]
+    [SerializeField] private GameObject _tutorialSoloPanel;
+
     private List<LeaderboardRowUI> _spawnedRows = new List<LeaderboardRowUI>();
 
     /// <summary>
@@ -166,5 +169,16 @@ public class RoundEndDisplayController : MonoBehaviour
 
         if (localPlayerWon) ShowMatchVictoryOverlay();
         else ShowMatchDefeatOverlay();
+    }
+
+    public void ShowTutorialSoloComplete()
+    {
+        gameObject.SetActive(true);
+
+        if (_leaderboardContainer != null) _leaderboardContainer.SetActive(false);
+        if (_roundOverText != null) _roundOverText.gameObject.SetActive(false);
+        if (_victoryTextObj != null) _victoryTextObj.SetActive(false);
+        if (_defeatTextObj != null) _defeatTextObj.SetActive(false);
+        if (_tutorialSoloPanel != null) _tutorialSoloPanel.SetActive(true);
     }
 }

@@ -73,7 +73,7 @@ public class PlayerDrowning : NetworkBehaviour
             }
         }
 
-        // runs on every client, keeps pruxy tracking XZ but not Y
+        // runs on every client, keeps proxy tracking XZ but not Y
         if (_cameraFollowProxy != null)
             _cameraFollowProxy.position = new Vector3(_rb.position.x, _frozenY, _rb.position.z);
     }

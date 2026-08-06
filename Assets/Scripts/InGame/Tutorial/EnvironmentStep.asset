@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TutorialStepSO
   ObjectiveText: Bounce Around
   ObjectiveDescription: Launch yourself off a boost pad
-  NarrationText: "Oho! See that glowing pad over there? Give it a hop and let it
-    FLING you onward! Up, up and away \u2014 try not to scream too loudly!"
+  NarrationText: "Oho! Different maps have different interactions! See that glowing
+    pad over there? Give it a hop and let it FLING you onward! Up, up and away \u2014
+    try not to scream too loudly!"
   RequiredAction: 11
   RequiredCount: 1

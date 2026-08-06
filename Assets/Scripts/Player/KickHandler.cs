@@ -130,7 +130,7 @@ public class KickHandler : NetworkBehaviour
         if (timeSinceKick >= (_ragdollDelayDuration + _ragdollDuration))
         {
             IsKicking = false;
-            _playerController.Recover();
+            _playerController.BeginRecover();
         }
     }
 

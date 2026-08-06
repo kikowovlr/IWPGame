@@ -296,6 +296,9 @@ public class MainMenuUIController : MonoBehaviour
 
         if (_lobbyUIController != null)
             _lobbyUIController.ShowLobby(lobbyCode);
+
+        if (TransitionUIManager.Instance != null)
+            TransitionUIManager.Instance.ClearAllOverlays();
     }
 
     private bool IsReturningFromMatch()

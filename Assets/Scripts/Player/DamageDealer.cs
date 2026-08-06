@@ -51,11 +51,11 @@ public class DamageDealer : NetworkBehaviour
 
             // Filter out hitting yourself
             if (other.transform.root == transform.root) continue;
-            if (((1 << other.gameObject.layer) & _hitLayer) == 0) return;
+            if (((1 << other.gameObject.layer) & _hitLayer) == 0) continue;
 
             // find victim's health pool
-            PlayerComponentRegistry victimRegistry = other.transform.root.GetComponent<PlayerComponentRegistry>();
-            if (victimRegistry != null)
+            IDamageable victim = other.transform.root.GetComponentInChildren<IDamageable>();
+            if (victim != null)
             {
                 string hitBoneName = "";
                 // get exact rigidbody we struck 
@@ -69,7 +69,7 @@ public class DamageDealer : NetworkBehaviour
 
                 // send data to health script 
                 Vector3 contactPoint = other.ClosestPoint(_hitCheckPoint.position);
-                victimRegistry.Health.Rpc_TakeDamage(_currentDamage, intendedForce, contactPoint, hitBoneName);
+                victim.Rpc_TakeDamage(_currentDamage, intendedForce, contactPoint, hitBoneName);
 
                 // deactivate attack after hitting
                 _isAttackActive = false;

@@ -3,7 +3,7 @@ using Fusion.Addons.Physics;
 using System.Collections;
 using UnityEngine;
 
-public class PlayerHealthHandler : NetworkBehaviour
+public class PlayerHealthHandler : NetworkBehaviour, IDamageable
 {
     [SerializeField] private float _maxHealth = 100f;
 
@@ -218,7 +218,10 @@ public class PlayerHealthHandler : NetworkBehaviour
             yield break;
         }
 
-        _playerController.Recover();
+        // start the get-up -> play animation + restore physics, but block input during the 2s
+        _playerController.BeginRecover();
+        yield return new WaitForSeconds(_playerController.RecoverAnimDuration);   // 2s get-up
+        _playerController.EndRecover(); // hand control back
         CurrentHealth = _maxHealth;
     }
 
@@ -260,5 +263,15 @@ public class PlayerHealthHandler : NetworkBehaviour
     public void ResetHealthToMax()
     {
         CurrentHealth = MaxHealth;
+    }
+
+    public void ResetKnockoutState()
+    {
+        StopAllCoroutines();
+        if (Object.HasStateAuthority)
+        {
+            CurrentHealth = MaxHealth;
+            _playerController.Recover();
+        }
     }
 }

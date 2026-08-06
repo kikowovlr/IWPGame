@@ -26,7 +26,7 @@ MonoBehaviour:
     _anchorType: 2
     _localPositionOffset: {x: -0.331, y: 0.02, z: -0.099}
     _localRotationOffset: {x: 0, y: -21.41, z: 0}
-  - _prefab: {fileID: 8060708364951480545, guid: f57dc27ce256291409efeeb9bed9c71c, type: 3}
+  - _prefab: {fileID: 8216548428951909697, guid: b57a2e446f788e5449b99ebdde9eaa42, type: 3}
     _anchorType: 0
-    _localPositionOffset: {x: -0.37, y: 0, z: 0}
+    _localPositionOffset: {x: 1.606, y: 0.003, z: 2.963}
     _localRotationOffset: {x: 0, y: 0, z: 90}

@@ -60,15 +60,20 @@ public class LobbyUIController : MonoBehaviour
         int currentPlayerCount = LobbyManager.Instance != null ? LobbyManager.Instance.GetLobbyRoster().Count : 0;
         bool hasEnoughPlayers = currentPlayerCount >= _minPlayersToStart;
 
+        // tutorial can be started solo
+        bool isTutorialSelected = LobbyMapSelection.Instance != null && LobbyMapSelection.Instance.SelectedMode == LobbyMode.Tutorial;
+        bool canStart = hasEnoughPlayers || isTutorialSelected;
+
         if (_startGameButton != null)
         {
             _startGameButton.gameObject.SetActive(isHost); //  host-only visibility
-            _startGameButton.interactable = hasEnoughPlayers; // greyed out until enough players
+            _startGameButton.interactable = canStart; // greyed out until enough players
         }
 
         if (_startGameHintText != null)
         {
-            _startGameHintText.gameObject.SetActive(isHost && !hasEnoughPlayers);
+            bool showHint = isHost && !canStart;
+            _startGameHintText.gameObject.SetActive(showHint);
             _startGameHintText.text = $"Need at least {_minPlayersToStart} players ({currentPlayerCount}/{_minPlayersToStart})";
         }
     }
@@ -103,10 +108,12 @@ public class LobbyUIController : MonoBehaviour
         if (_runner == null || !_runner.IsServer) return;
 
         int currentPlayerCount = LobbyManager.Instance != null ? LobbyManager.Instance.GetLobbyRoster().Count : 0;
-        if (currentPlayerCount < _minPlayersToStart) return;
+
+        bool isTutorialSelected = LobbyMapSelection.Instance != null && LobbyMapSelection.Instance.SelectedMode == LobbyMode.Tutorial;
+
+        if (!isTutorialSelected && currentPlayerCount < _minPlayersToStart) return;
 
         int sceneIndex = _gameplaySceneBuildIndex; // fallback
-
         if (LobbyMapSelection.Instance != null)
         {
             LobbyMapSelection.Instance.CommitResolvedScene(); // roll

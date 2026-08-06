@@ -3562,6 +3562,7 @@ GameObject:
   - component: {fileID: 8220648202472382838}
   - component: {fileID: 7686437623724003739}
   - component: {fileID: 136116282869557504}
+  - component: {fileID: 4869476892959736068}
   m_Layer: 8
   m_Name: Monkey_Animated_Package
   m_TagString: Untagged
@@ -3637,6 +3638,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bf22ea3795f53a4c989710a36929b70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AnimationEventForwarder
+--- !u!114 &4869476892959736068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4156875695571624353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1947e8687a73690418bb22a4636737c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IdleVariantController
+  _minInterval: 10
+  _maxInterval: 30
+  _idleSpeedThreshold: 0.05
 --- !u!1 &4187384388307595520
 GameObject:
   m_ObjectHideFlags: 0

@@ -344,34 +344,25 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
         if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
         {
             if (registry.RespawnHandler != null)
-            {
                 registry.RespawnHandler.TeleportToSpawnPoint(targetTransform.position, targetTransform.rotation);
-            }
 
             if (registry.Health != null)
             {
+                registry.Health.ResetKnockoutState();
                 registry.Health.ResetHealthToMax();
             }
 
             if (registry.Elimination != null)
-            {
                 registry.Elimination.ResetLivesToMax();
-            }
 
             if (registry.Drowning != null)
-            {
                 registry.Drowning.ResetDrownState();
-            }
+
+            if (registry.Fall != null)
+                registry.Fall.ResetFallState();
 
             if (playerObj.HasInputAuthority && ScreenFXManager.Instance != null)
-            {
                 ScreenFXManager.Instance.ResetLocalPlayerVisuals();
-            }
-
-            if (registry.Controller != null)
-            {
-                registry.Controller.Recover();
-            }
         }
     }
 

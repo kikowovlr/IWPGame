@@ -168,6 +168,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private const float TUTORIAL_MOVE_TIME = 1.0f;   // ~1s of moving = "done"
     private const float TUTORIAL_SPRINT_TIME = 1.0f;
 
+    [Header("Recovery")]
+    [SerializeField] private float _recoverAnimDuration = 2f;
+    [Networked] private NetworkBool _isRecovering { get; set; }
+
     public bool IsCameraRotationLocked
     {
         get
@@ -190,6 +194,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public int CharacterPackageCount => _characterPackages.Length;
     public ConfigurableJoint MainJoint => _mainJoint;
     public float AbilityCooldownRemaining => CurrentAbilityState._cooldownTimer;
+    public float RecoverAnimDuration => _recoverAnimDuration;
 
     private void Awake()
     {
@@ -853,20 +858,17 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         }
     }
 
-    public void Recover(bool playAnim = true)
+    public void BeginRecover(bool playAnim = true)
     {
         if (!Object.HasStateAuthority)
             return;
 
-        // TODO play recovery anim
-        if (playAnim)
-        {
-
-        }
+        if (playAnim && _animator != null)
+            _animator.SetTrigger("Recover");
 
         _isKnockedOut = false;
         _isGrabbingActive = false;
-
+        _isRecovering = true;
         SetCharacterMass(false);
 
         // update main joint
@@ -876,9 +878,34 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
         // update joints rotation and send them to clients
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
-        {
             _activeRagdollMembers[i].MakeActiveRagdoll();
-        }
+
+    }
+
+    public void Recover(bool playAnim = true)
+    {
+        if (!Object.HasStateAuthority)
+            return;
+
+        _isKnockedOut = false;
+        _isGrabbingActive = false;
+        _isRecovering = false;
+        SetCharacterMass(false);
+
+        // update main joint
+        JointDrive jointDrive = _mainJoint.slerpDrive;
+        jointDrive.positionSpring = _startSlerpPositionSpring;
+        _mainJoint.slerpDrive = jointDrive;
+
+        // update joints rotation and send them to clients
+        for (int i = 0; i < _activeRagdollMembers.Length; i++)
+            _activeRagdollMembers[i].MakeActiveRagdoll();
+    }
+
+    public void EndRecover()
+    {
+        if (!Object.HasStateAuthority) return;
+        _isRecovering = false;
     }
 
     void SetCharacterMass(bool isKnockedOut)
@@ -1115,7 +1142,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     /// </summary>
     public bool IsInputBlocked(InputRestrictions restriction)
     {
-        if (_isKnockedOut) return true; // if knocked out, restrict all
+        if (_isKnockedOut || _isRecovering) return true; // if knocked out, restrict all
 
         // & compared 2 sets of binary numbers
         // if the result is equal to the restriction, then that means the restriction is active
@@ -1129,7 +1156,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
     private void ApplyInputMask(ref NetworkInputData inputData)
     {
-        bool blockAll = _isKnockedOut || IsInputBlocked(InputRestrictions.BlockEverything);
+        bool blockAll = _isKnockedOut || _isRecovering || IsInputBlocked(InputRestrictions.BlockEverything);
 
         if (blockAll || IsInputBlocked(InputRestrictions.BlockCombat) || IsInputBlocked(InputRestrictions.BlockAbilities))
         {
@@ -1429,6 +1456,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         if (Object.HasStateAuthority)
         {
             CharacterIndex = 0; // set to default character
+            _isRecovering = false;
         }
 
         ExecuteCharacterPackageSwap(CharacterIndex);

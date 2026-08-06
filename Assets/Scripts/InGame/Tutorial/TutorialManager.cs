@@ -67,6 +67,18 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     public bool IsSuddenDeathCountdownPhase => CurrentSuddenDeathPhase == SuddenDeathPhase.Countdown;
     public bool IsSuddenDeathGoMoment => CurrentSuddenDeathPhase == SuddenDeathPhase.Fighting;
 
+    [Header("Tutorial Spawning - Boost Pads")]
+    [SerializeField] private BoostPad _boostPadPrefab;
+    [SerializeField] private Transform[] _boostPadSpawnPoints;
+    private readonly List<NetworkObject> _spawnedBoostPads = new List<NetworkObject>();
+
+    [Header("Tutorial Spawning - Bots")]
+    [SerializeField] private NetworkObject _botPrefab;
+    [SerializeField] private Transform[] _botSpawnPoints;
+    private readonly List<NetworkObject> _spawnedBots = new List<NetworkObject>();
+    private bool _botsSpawned;
+
+    [HideInInspector] [Networked] public NetworkBool WasSoloTutorial { get; private set; }
 
     // getters
     public float CharacterSelectDuration => _settings.CharacterSelectDuration;
@@ -224,7 +236,17 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     private void OnStepChanged()
     {
         if (_tutorialUI != null)
-            _tutorialUI.ShowStep(CurrentStep, CurrentStepIndex, TotalSteps, GetCompletionCountForCurrentStep(), GetActivePlayerCount());
+            _tutorialUI.ShowStep(CurrentStep, CurrentStepIndex, TotalSteps, GetCompletionCountForCurrentStep(), GetRealPlayerCount());
+
+        // spawn practice content based on the step's required action
+        if (Object.HasStateAuthority && CurrentStep != null)
+        {
+            if (CurrentStep.RequiredAction == TutorialActionType.Punch)
+                SpawnBotsToFill();       // bots from punch step onward (spawn once, persist)
+
+            if (CurrentStep.RequiredAction == TutorialActionType.Environment)
+                SpawnBoostPads();        // boost pads at the environment step
+        }
     }
 
     public void ResetStateTimer(float duration)
@@ -272,9 +294,9 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
         }
     }
 
-    public int GetActivePlayerCount() => Runner.ActivePlayers.Count();
+    public int GetRealPlayerCount() => Runner.ActivePlayers.Count();
 
-    public bool HaveAllPlayersCompletedCurrentStep() => GetCompletionCountForCurrentStep() >= GetActivePlayerCount();
+    public bool HaveAllPlayersCompletedCurrentStep() => GetCompletionCountForCurrentStep() >= GetRealPlayerCount();
 
     /// <summary>
     /// disable elimination during tutorial active stage!
@@ -420,34 +442,25 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
         if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
         {
             if (registry.RespawnHandler != null)
-            {
                 registry.RespawnHandler.TeleportToSpawnPoint(targetTransform.position, targetTransform.rotation);
-            }
 
             if (registry.Health != null)
             {
+                registry.Health.ResetKnockoutState();
                 registry.Health.ResetHealthToMax();
             }
 
             if (registry.Elimination != null)
-            {
                 registry.Elimination.ResetLivesToMax();
-            }
-
+            
             if (registry.Drowning != null)
-            {
                 registry.Drowning.ResetDrownState();
-            }
+
+            if (registry.Fall != null)
+                registry.Fall.ResetFallState();
 
             if (playerObj.HasInputAuthority && ScreenFXManager.Instance != null)
-            {
                 ScreenFXManager.Instance.ResetLocalPlayerVisuals();
-            }
-
-            if (registry.Controller != null)
-            {
-                registry.Controller.Recover();
-            }
         }
     }
 
@@ -609,7 +622,7 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
 
         // update UI with new phase info
         if (_tutorialUI != null)
-            _tutorialUI.OnStepPhaseChanged(CurrentStepPhase, CurrentStep, CurrentStepIndex, TotalSteps, GetCompletionCountForCurrentStep(), GetActivePlayerCount());
+            _tutorialUI.OnStepPhaseChanged(CurrentStepPhase, CurrentStep, CurrentStepIndex, TotalSteps, GetCompletionCountForCurrentStep(), GetRealPlayerCount());
     }
 
     public void ResetStepIndexToStart()
@@ -649,7 +662,7 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
 
                 // refresh the N/total tracker when someone newly completes
                 if (progress.HighestCompletedStep != before && _tutorialUI != null)
-                    _tutorialUI.UpdateTracker(GetCompletionCountForCurrentStep(), GetActivePlayerCount());
+                    _tutorialUI.UpdateTracker(GetCompletionCountForCurrentStep(), GetRealPlayerCount());
             }
         }
     }
@@ -830,6 +843,8 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     {
         if (!Object.HasStateAuthority) return;
 
+        DespawnBots();
+        DespawnBoostPads();
         DespawnAllPlayers();
 
         Runner.LoadScene(SceneRef.FromIndex(_mainMenuSceneBuildIndex), LoadSceneMode.Single);
@@ -844,4 +859,69 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
                 Runner.Despawn(playerObj);
         }
     }
+
+    public bool IsSoloTutorial() => GetRealPlayerCount() <= 1;
+
+    public void MarkSoloTutorial()
+    {
+        if (Object.HasStateAuthority) WasSoloTutorial = true;
+    }
+
+    #region BOOST PADS
+    public void SpawnBoostPads()
+    {
+        if (!Object.HasStateAuthority) return;
+        if (_boostPadPrefab == null || _boostPadSpawnPoints == null) return;
+        if (_spawnedBoostPads.Count > 0) return;   // already spawned
+
+        foreach (Transform pt in _boostPadSpawnPoints)
+        {
+            if (pt == null) continue;
+            // pad takes the spawn point's own rotation directly
+            NetworkObject pad = Runner.Spawn(_boostPadPrefab.gameObject, pt.position, pt.rotation);
+            if (pad != null) _spawnedBoostPads.Add(pad);
+        }
+    }
+
+    public void DespawnBoostPads()
+    {
+        if (!Object.HasStateAuthority) return;
+        foreach (var pad in _spawnedBoostPads)
+            if (pad != null) Runner.Despawn(pad);
+        _spawnedBoostPads.Clear();
+    }
+    #endregion
+
+    #region BOTS
+
+    public void SpawnBotsToFill()
+    {
+        if (!Object.HasStateAuthority) return;
+        if (_botsSpawned) return;                  // spawn once
+        if (_botPrefab == null || _botSpawnPoints == null) return;
+
+        int realPlayers = GetRealPlayerCount();
+        int botsToSpawn = Mathf.Min(MAX_PLAYERS - realPlayers, _botSpawnPoints.Length);
+
+        for (int i = 0; i < botsToSpawn; i++)
+        {
+            Transform pt = _botSpawnPoints[i];
+            if (pt == null) continue;
+            // no input authority -> stays out of ActivePlayers
+            NetworkObject bot = Runner.Spawn(_botPrefab, pt.position, pt.rotation, inputAuthority: PlayerRef.None);
+            if (bot != null) _spawnedBots.Add(bot);
+        }
+        _botsSpawned = true;
+    }
+
+    public void DespawnBots()
+    {
+        if (!Object.HasStateAuthority) return;
+        foreach (var bot in _spawnedBots)
+            if (bot != null) Runner.Despawn(bot);
+        _spawnedBots.Clear();
+        _botsSpawned = false;
+    }
+
+    #endregion
 }

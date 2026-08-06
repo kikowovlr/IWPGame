@@ -62,7 +62,7 @@ public class TutorialUIController : MonoBehaviour
         if (tm.IsTrackingPhase)
         {
             SetPersonalStatus(tm.HasLocalPlayerCompletedCurrentStep());
-            UpdateTracker(tm.GetCompletionCountForCurrentStep(), tm.GetActivePlayerCount());
+            UpdateTracker(tm.GetCompletionCountForCurrentStep(), tm.GetRealPlayerCount());
         }
     }
 

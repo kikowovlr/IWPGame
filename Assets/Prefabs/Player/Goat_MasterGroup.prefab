@@ -4261,7 +4261,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5961485847640013304
 Transform:
   m_ObjectHideFlags: 0
@@ -5745,6 +5745,7 @@ GameObject:
   - component: {fileID: 5878885780012406302}
   - component: {fileID: 8578946239686174394}
   - component: {fileID: 1596780231155311166}
+  - component: {fileID: 1800684231268861306}
   m_Layer: 8
   m_Name: Goat_Animated_Package
   m_TagString: Untagged
@@ -5820,6 +5821,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bf22ea3795f53a4c989710a36929b70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AnimationEventForwarder
+--- !u!114 &1800684231268861306
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7126096626073897399}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1947e8687a73690418bb22a4636737c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IdleVariantController
+  _minInterval: 10
+  _maxInterval: 30
+  _idleSpeedThreshold: 0.05
 --- !u!1 &7225409090208095876
 GameObject:
   m_ObjectHideFlags: 0
@@ -6552,7 +6568,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2851862903483832273
 Transform:
   m_ObjectHideFlags: 0

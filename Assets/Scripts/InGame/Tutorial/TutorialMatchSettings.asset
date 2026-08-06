@@ -15,7 +15,7 @@ MonoBehaviour:
   _setupDuration: 4
   _countdownDuration: 5
   _roundOverBufferDuration: 8
-  _matchOverBufferDuration: 3
+  _matchOverBufferDuration: 6
   _characterSelectDuration: 60
   _finalCharacterSelectCountdown: 5
   _crownsToWinMatch: 1
@@ -27,3 +27,4 @@ MonoBehaviour:
   _stepCompleteDisplayDuration: 3
   _narrationCharsPerSecond: 30
   _narrationHoldAfterType: 2
+  _suddenDeathBannerDuration: 3

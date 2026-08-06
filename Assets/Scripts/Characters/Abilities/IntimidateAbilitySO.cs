@@ -62,31 +62,35 @@ public class IntimidateAbilitySO : AbilitySO
             // check for cone
             if (Vector3.Angle(forwardDir, dirToTarget) < _coneAngle * 0.5f)
             {
-                if (hit.transform.root.TryGetComponent(out NetworkPlayerController enemy))
+                Transform root = hit.transform.root;
+
+                // need a NetworkObject for hit-dedup regardless of whether it's a player or dummy
+                if (!root.TryGetComponent(out NetworkObject netObj)) continue;
+
+                NetworkId enemyId = netObj.Id;
+                bool alreadyHit = false;
+
+                for (int j = 0; j < state._hitCount; j++)
                 {
-                    NetworkId enemyId = enemy.Object.Id;
-                    bool alreadyHit = false;
-
-                    for (int j = 0; j < state._hitCount; j++)
+                    if (state._abilityHitHistory[j] == enemyId)
                     {
-                        if (state._abilityHitHistory[j] == enemyId)
-                        {
-                            alreadyHit = true;
-                            break;
-                        }
+                        alreadyHit = true;
+                        break;
                     }
-
-                    if (alreadyHit) continue;
-
-                    if (state._hitCount < 8)
-                    {
-                        state._abilityHitHistory.Set(state._hitCount, enemyId);
-                        state._hitCount++;
-                    }
-
-                    if (enemy.Registry.Status != null)
-                        enemy.Registry.Status.InflictStatus(StatusEffectType.Stunned, _stunDuration);
                 }
+
+                if (alreadyHit) continue;
+
+                if (state._hitCount < 8)
+                {
+                    state._abilityHitHistory.Set(state._hitCount, enemyId);
+                    state._hitCount++;
+                }
+
+                // target anything that can be status-affected — players AND dummies
+                IAffectedByStatusEffects status = root.GetComponentInChildren<IAffectedByStatusEffects>();
+                if (status != null)
+                    status.InflictStatus(StatusEffectType.Stunned, _stunDuration);
             }
         }
     }

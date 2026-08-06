@@ -152,7 +152,18 @@ public class TutorialActiveState : ITutorialState
                 if (!manager.IsPhaseTimerExpired) return;
                 // "moving on" hold done -> next step or finish
                 if (manager.IsOnLastStep)
-                    manager.TransitionToState(TutorialState.SuddenDeath);
+                {
+                    if (manager.IsSoloTutorial())
+                    {
+                        // skip sudden death
+                        manager.MarkSoloTutorial();
+                        manager.TransitionToState(TutorialState.TutorialStageOver);
+                    }
+                    else
+                    {
+                        manager.TransitionToState(TutorialState.SuddenDeath);
+                    }
+                }
                 else
                 {
                     manager.AdvanceStep();
@@ -167,6 +178,9 @@ public class TutorialActiveState : ITutorialState
         Debug.Log("[TUTORIAL] -> Exit TutorialActive");
         if (manager.TutorialUI != null)
             manager.TutorialUI.HideAll();
+
+        // clean up
+        manager.DespawnBots(); 
     }
 }
 
@@ -241,13 +255,22 @@ public class TutorialStageOverState : ITutorialState
         if (manager.Object.HasStateAuthority)
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
 
-        // local win/lose result (every client evaluates for itself)
-        PlayerRef winner = manager.MatchWinner;
-        bool localWon = manager.LocalPlayerIsWinner(winner);
-        string winnerName = manager.GetPlayerName(winner);
+        if (manager.WasSoloTutorial)
+        {
+            // solo run - no winner, just TUTORIAL DONE
+            if (manager.RoundEndDisplay != null)
+                manager.RoundEndDisplay.ShowTutorialSoloComplete();
+        }
+        else
+        {
+            // local win/lose result (every client evaluates for itself)
+            PlayerRef winner = manager.MatchWinner;
+            bool localWon = manager.LocalPlayerIsWinner(winner);
+            string winnerName = manager.GetPlayerName(winner);
 
-        if (manager.RoundEndDisplay != null)
-            manager.RoundEndDisplay.ShowTutorialResult(localWon, winnerName);
+            if (manager.RoundEndDisplay != null)
+                manager.RoundEndDisplay.ShowTutorialResult(localWon, winnerName);
+        }
 
         if (manager.Object.HasStateAuthority)
             manager.ResetStateTimer(manager.Settings.MatchOverBufferDuration);

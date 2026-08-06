@@ -3106,6 +3106,7 @@ GameObject:
   - component: {fileID: 8225757121530677067}
   - component: {fileID: 3901113463476693924}
   - component: {fileID: 5971861501637083237}
+  - component: {fileID: 5360155970424842131}
   m_Layer: 0
   m_Name: RedPanda_Animated_Package
   m_TagString: Untagged
@@ -3181,6 +3182,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bf22ea3795f53a4c989710a36929b70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AnimationEventForwarder
+--- !u!114 &5360155970424842131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3426182673854646155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1947e8687a73690418bb22a4636737c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IdleVariantController
+  _minInterval: 10
+  _maxInterval: 30
+  _idleSpeedThreshold: 0.05
 --- !u!1 &3455432173920441809
 GameObject:
   m_ObjectHideFlags: 0
