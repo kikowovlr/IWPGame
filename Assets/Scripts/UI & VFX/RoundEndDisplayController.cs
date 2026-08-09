@@ -148,12 +148,16 @@ public class RoundEndDisplayController : MonoBehaviour
     {
         if (_victoryTextObj != null) _victoryTextObj.SetActive(true);
         if (_defeatTextObj != null) _defeatTextObj.SetActive(false);
+
+        SoundManager.Instance?.PlaySFX(SoundID.Victory);
     }
 
     public void ShowMatchDefeatOverlay()
     {
         if (_victoryTextObj != null) _victoryTextObj.SetActive(false);
         if (_defeatTextObj != null) _defeatTextObj.SetActive(true);
+
+        SoundManager.Instance?.PlaySFX(SoundID.Defeat);
     }
 
     public void ShowTutorialResult(bool localPlayerWon, string winnerName)

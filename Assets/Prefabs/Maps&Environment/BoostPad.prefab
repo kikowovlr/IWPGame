@@ -141,7 +141,7 @@ MonoBehaviour:
   _forwardSpeed: 17
   _upwardSpeed: 12
   _boostDuration: 2
-  _cooldownPerPlayer: 1
+  _cooldownPerPlayer: 2
 --- !u!114 &7376115956821572775
 MonoBehaviour:
   m_ObjectHideFlags: 0

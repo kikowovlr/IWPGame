@@ -13,6 +13,9 @@ public class BoostPad : NetworkBehaviour
 
     private readonly Dictionary<PlayerBoost, float> _lastBoostTime = new Dictionary<PlayerBoost, float>();
 
+    // fires on all clients when the pad launches someone
+    [Networked, OnChangedRender(nameof(OnLaunchChanged))] private byte _launchTick { get; set; }
+
     private void OnTriggerEnter(Collider other)
     {
         if (!Object.HasStateAuthority) return;
@@ -32,8 +35,15 @@ public class BoostPad : NetworkBehaviour
 
         boost.ApplyBoost(transform.forward, _forwardSpeed, _upwardSpeed, _boostDuration);
 
+        _launchTick++;
+
         // tell the tutorial this player hit a boost pad
         if (registry.Controller != null)
             TutorialManager.Instance?.NotifyPlayerAction(registry.Controller.Object.InputAuthority, TutorialActionType.Environment);
+    }
+
+    private void OnLaunchChanged()
+    {
+        SoundManager.Instance?.PlaySFXAtPosition(SoundID.BoostLaunch, transform.position);
     }
 }

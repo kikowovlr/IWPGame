@@ -91,6 +91,7 @@ public class TutorialCharacterSelectState : ITutorialState
         {
             if (manager.IsStateTimerExpired)
             {
+                manager.SetFinalCharacterSelectCountdown(false);
                 manager.MarkCharacterSelectComplete();
                 manager.BeginTransitionToTutorialActive();
             }

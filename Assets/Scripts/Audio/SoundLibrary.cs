@@ -52,13 +52,16 @@ public enum SoundID
 
     // Environment
     BoostLaunch,
+    IslandCrumble,
     IslandBreak,
+    IslandCrashWater,
 
     // Flow
     CountdownBeep,
     CountdownGo,
+    CharacterSelectCountdown,
     Victory,
-    Defeat
+    Defeat  
 }
 
 [System.Serializable]

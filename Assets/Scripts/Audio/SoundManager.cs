@@ -16,6 +16,9 @@ public class SoundManager : MonoBehaviour
     private const string MIXER_SFX = "SFXVolume";
     private const string MIXER_MUFFLE = "MuffleCutoff";
     private const string MIXER_DUCK = "DuckVolume";
+    private const string PREFS_MASTER = "vol_master";
+    private const string PREFS_BGM = "vol_bgm";
+    private const string PREFS_SFX = "vol_sfx";
 
     [SerializeField] private float _muffleMinCutoff = 900f;    // fully muffled (eliminated)
     [SerializeField] private float _muffleMaxCutoff = 22000f;  // fully clear (normal)
@@ -60,6 +63,7 @@ public class SoundManager : MonoBehaviour
         SetupBgmSource(_bgmSourceB);
 
         InitSfxPool();
+        LoadSavedVolumes();
     }
 
     private void SetupBgmSource(AudioSource src)
@@ -208,13 +212,45 @@ public class SoundManager : MonoBehaviour
         Destroy(go, clip.length + 0.1f); // + buffer
     }
 
+    /// <summary>
+    /// Plays a SoundID on a caller-owned AudioSource so the caller can Stop()/loop it
+    /// Use for positional, interruptible sounds (island crumble, ability loops on world objects, etc)
+    /// </summary>
+    public void PlayOnSource(SoundID id, AudioSource src, bool loop = false)
+    {
+        if (src == null || _soundLibrary == null) return;
+        if (!_soundLibrary.TryGet(id, out SoundEntry entry)) return;
+        if (entry.clips == null || entry.clips.Length == 0) return;
+
+        src.clip = entry.clips[Random.Range(0, entry.clips.Length)];
+        src.volume = entry.volume <= 0f ? 1f : entry.volume;
+        src.pitch = entry.pitchRange == Vector2.zero
+            ? 1f : Random.Range(entry.pitchRange.x, entry.pitchRange.y);
+        src.loop = loop;
+        src.Play();
+    }
+
     #endregion
 
     #region Volume
 
-    public void SetMasterVolume(float v) => SetMixerVolume(MIXER_MASTER, v);
-    public void SetBGMVolume(float v) => SetMixerVolume(MIXER_BGM, v);
-    public void SetSFXVolume(float v) => SetMixerVolume(MIXER_SFX, v);
+    public void SetMasterVolume(float v) 
+    { 
+        SetMixerVolume(MIXER_MASTER, v); 
+        PlayerPrefs.SetFloat(PREFS_MASTER, v); 
+    
+    }
+    public void SetBGMVolume(float v) 
+    { 
+        SetMixerVolume(MIXER_BGM, v); 
+        PlayerPrefs.SetFloat(PREFS_BGM, v); 
+    }
+
+    public void SetSFXVolume(float v) 
+    { 
+        SetMixerVolume(MIXER_SFX, v); 
+        PlayerPrefs.SetFloat(PREFS_SFX, v); 
+    }
 
     private void SetMixerVolume(string param, float v01)
     {
@@ -222,6 +258,18 @@ public class SoundManager : MonoBehaviour
         float dB = v01 <= 0.0001f ? -80f : Mathf.Log10(Mathf.Clamp01(v01)) * 20f;
         _mixer.SetFloat(param, dB);
     }
+
+    private void LoadSavedVolumes()
+    {
+        SetMasterVolume(PlayerPrefs.GetFloat(PREFS_MASTER, 1f));
+        SetBGMVolume(PlayerPrefs.GetFloat(PREFS_BGM, 1f));
+        SetSFXVolume(PlayerPrefs.GetFloat(PREFS_SFX, 1f));
+    }
+
+    // saved-value getters so the sliders can initialise to the right position
+    public float GetSavedMaster() => PlayerPrefs.GetFloat(PREFS_MASTER, 1f);
+    public float GetSavedBGM() => PlayerPrefs.GetFloat(PREFS_BGM, 1f);
+    public float GetSavedSFX() => PlayerPrefs.GetFloat(PREFS_SFX, 1f);
 
     #endregion
 

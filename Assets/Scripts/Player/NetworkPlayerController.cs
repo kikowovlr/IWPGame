@@ -93,7 +93,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private Quaternion _initialJointRotation;
 
     // TODO: change to sending bytes instead of Quaternion
-    [HideInInspector] [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
+    //[HideInInspector] [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
+    [HideInInspector][Networked, Capacity(30)] public NetworkArray<uint> NetworkPhysicsSyncedRotation { get; }
 
     private const float InputThreshold = 0.01f;
 
@@ -849,7 +850,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
         {
             _activeRagdollMembers[i].UpdateJointFromAnimation();
-            NetworkPhysicsSyncedRotation.Set(i, _activeRagdollMembers[i].transform.localRotation);
+            NetworkPhysicsSyncedRotation.Set(i, QuatCompression.Compress(_activeRagdollMembers[i].transform.localRotation));
+            //NetworkPhysicsSyncedRotation.Set(i, _activeRagdollMembers[i].transform.localRotation);
         }
     }
 

@@ -79,6 +79,7 @@ public class CharacterSelectState : IRoundState
         {
             if (manager.IsStateTimerExpired)
             {
+                manager.SetFinalCharacterSelectCountdown(false);
                 manager.MarkCharacterSelectComplete();
                 manager.ResetRoundEntities();
                 manager.TransitionToState(RoundState.Setup, manager.Settings.SetUpDuration);

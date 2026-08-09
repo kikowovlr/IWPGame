@@ -994,7 +994,7 @@ MonoBehaviour:
   - {fileID: 9056673993688702597}
   - {fileID: 9056673993688702596}
   - {fileID: 9056673993688702595}
-  _initialDelay: 25
+  _initialDelay: 20
   _minInterval: 15
   _maxInterval: 25
   _warningDuration: 2.5

@@ -30,6 +30,9 @@ public class FallingIslandPiece : NetworkBehaviour
     [SerializeField] private float _sinkSpeed = 0.3f;
     [SerializeField] private GameObject _breakWarningIndicator;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource _crumbleSource;
+
     [HideInInspector] [Networked, OnChangedRender(nameof(OnTiltingStateChanged))] public NetworkBool IsTilting { get; private set; }
     [HideInInspector][Networked, OnChangedRender(nameof(OnSinkEngagedChanged))] public NetworkBool HasEngagedSinking { get; private set; }
 
@@ -126,6 +129,12 @@ public class FallingIslandPiece : NetworkBehaviour
         _staticCollider.enabled = false;
         _fallingCollider.enabled = true;
         _rb.isKinematic = false;
+
+        // safety check
+        if (_crumbleSource != null && _crumbleSource.isPlaying)
+            _crumbleSource.Stop();
+
+        SoundManager.Instance?.PlaySFXAtPosition(SoundID.IslandBreak, transform.position);
     }
 
     /// </summary>
@@ -133,13 +142,16 @@ public class FallingIslandPiece : NetworkBehaviour
     {
         if (!HasEngagedSinking) return;
 
-        // TODO: splash VFX + sound + camera shake
+        // TODO: splash VFX + camera shake
+        SoundManager.Instance?.PlaySFXAtPosition(SoundID.IslandCrashWater, transform.position);
     }
 
     public void ShowBreakWarning()
     {
         if (_breakWarningIndicator != null)
             _breakWarningIndicator.SetActive(true);
+
+        SoundManager.Instance?.PlayOnSource(SoundID.IslandCrumble, _crumbleSource, true);
     }
 
     public void HideBreakWarning()

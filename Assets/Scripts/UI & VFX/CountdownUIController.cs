@@ -45,6 +45,10 @@ public class CountdownUIController : MonoBehaviour
         else if (source.ShouldShowGo && !_hasTriggeredGo)
         {
             SetCountdownPanelActive(true);
+
+            if (_lastDisplayedWord != "GO!")
+                SoundManager.Instance?.PlaySFX(SoundID.CountdownGo);
+
             UpdateWordDisplay("GO!");
 
             _goDisplayTimer += Time.deltaTime;

@@ -24,10 +24,10 @@ public class MainMenuUIController : MonoBehaviour
     [SerializeField] private TMP_InputField _joinCodeInputField; // place to enter room code
     [SerializeField] private TMP_Text _joinErrorText;
 
-    [Header("Controls Panel")]
-    [SerializeField] private Button _controlsButton;
-    [SerializeField] private Button _controlsBackButton;
-    [SerializeField] private GameObject _controlsPanel;
+    [Header("Settings Panel")]
+    [SerializeField] private Button _settingsButton;
+    [SerializeField] private Button _settingsBackButton;
+    [SerializeField] private GameObject _settingsPanel;
 
     [Header("Quit Button")]
     [SerializeField] private Button _quitButton;
@@ -73,11 +73,11 @@ public class MainMenuUIController : MonoBehaviour
         if (_joinBackButton != null)
             _joinBackButton.onClick.AddListener(ShowMainMenuPanel);
 
-        if (_controlsButton != null)
-            _controlsButton.onClick.AddListener(ShowControlsPanel);
+        if (_settingsButton != null)
+            _settingsButton.onClick.AddListener(ShowsettingsPanel);
 
-        if (_controlsBackButton != null)
-            _controlsBackButton.onClick.AddListener(ShowMainMenuPanel);
+        if (_settingsBackButton != null)
+            _settingsBackButton.onClick.AddListener(ShowMainMenuPanel);
 
         if (_quitButton != null)
             _quitButton.onClick.AddListener(ShowQuitPanel);
@@ -129,15 +129,15 @@ public class MainMenuUIController : MonoBehaviour
     }
 
     /// <summary>
-    /// back btn on join + controls     panel - return to main menu
+    /// back btn on join + settings     panel - return to main menu
     /// </summary>
     private void ShowMainMenuPanel()
     {
         if (_joinLobbyPanel != null)
             _joinLobbyPanel.SetActive(false);
 
-        if (_controlsPanel != null) 
-            _controlsPanel.SetActive(false);
+        if (_settingsPanel != null) 
+            _settingsPanel.SetActive(false);
 
         if (_menuSelectionPanel != null)
             _menuSelectionPanel.SetActive(true);
@@ -253,13 +253,13 @@ public class MainMenuUIController : MonoBehaviour
     {
         if (_joinLobbyPanel != null) _joinLobbyPanel.SetActive(false);
         if (_menuSelectionPanel != null) _menuSelectionPanel.SetActive(true);
-        if (_controlsPanel != null) _controlsPanel.SetActive(false);
+        if (_settingsPanel != null) _settingsPanel.SetActive(false);
     }
 
-    private void ShowControlsPanel()
+    private void ShowsettingsPanel()
     {
-        if (_controlsPanel != null)
-            _controlsPanel.SetActive(true);
+        if (_settingsPanel != null)
+            _settingsPanel.SetActive(true);
     }
 
     private void ShowQuitPanel()
