@@ -2,12 +2,12 @@ using UnityEngine;
 
 public class HoveringCrown : MonoBehaviour
 {
-    [SerializeField] private Transform _headTarget;
     [SerializeField] private float _heightOffset = 0.5f; // above head
     [SerializeField] private float _hoverAmplitude = 0.1f;
     [SerializeField] private float _hoverFrequency = 1.5f;
     [SerializeField] private float _spinSpeed = 30f;
 
+    private Transform _headTarget;
     private float _bobTimer;
 
     private void LateUpdate()   // after animation/physics, so it tracks the final head pose

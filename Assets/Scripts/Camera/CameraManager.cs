@@ -121,8 +121,6 @@ public class CameraManager : MonoBehaviour
     /// <param name="mode"></param>
     public void SetCameraState(CameraMode mode)
     {
-        Debug.Log($"[CAM] SetCameraState -> {mode}\n{System.Environment.StackTrace}");
-
         _currentMode = mode;
         if (_gameplayCam == null || _spectatorCam == null || _staticSpectatorCam == null || _characterSelectCam == null) return;
 
@@ -172,25 +170,6 @@ public class CameraManager : MonoBehaviour
             SetCameraState(CameraMode.Gameplay);
         else
             SetCameraState(CameraMode.StaticOverview);
-
-        //if (GameManager.Instance == null)
-        //{
-        //    SetCameraState(CameraMode.Gameplay);
-        //    return;
-        //}
-
-        //switch (GameManager.Instance.CurrentRoundState)
-        //{
-        //    case RoundState.Setup:
-        //        SetCameraState(CameraMode.StaticOverview);
-        //        break;
-        //    case RoundState.CharacterSelect:
-        //        SetCameraState(CameraMode.CharacterSelect);
-        //        break;
-        //    default:
-        //        SetCameraState(CameraMode.Gameplay);
-        //        break;
-        //}
     }
 
     private void HandlePlayerSpectatorReady(PlayerEliminationHandler handler)
@@ -219,51 +198,6 @@ public class CameraManager : MonoBehaviour
             _pendingCameraCutAction = null; // clear container
 
             OnCameraCutExecuted?.Invoke(); // tells shader to open eye (blink progress to 0)
-        }
-    }
-
-    private void CycleThroughLivingPlayers()
-    {
-        var livingPlayerIDs = GameManager.Instance.GetLivingPlayerIDs();
-
-        // if no one is alive, fall back to overview
-        if (livingPlayerIDs == null || livingPlayerIDs.Count == 0)
-        {
-            // if everyone is dead, use static view
-            SetCameraState(CameraMode.StaticOverview);
-            return;
-        }
-
-        // cycle through spectator cams
-        // loop through to find valid transform
-        int currentIndex = -1;
-
-        // look up current target pos in new list
-        if (_spectatorCam.Follow != null)
-        {
-            // find wat player we are spectating ow
-            for (int i = 0; i < livingPlayerIDs.Count; i++)
-            {
-                if (PlayerRegistry.GetAvatarTransform(livingPlayerIDs[i]) == _spectatorCam.Follow)
-                {
-                    currentIndex = i;
-                    break;
-                }
-            }
-        }
-
-        // loop forward from current spot to find next valid target
-        int nextIndex = (currentIndex + 1) % livingPlayerIDs.Count;
-        Fusion.PlayerRef nextTargetID = livingPlayerIDs[nextIndex];
-
-        Transform targetTransform = PlayerRegistry.GetAvatarTransform(nextTargetID);
-        if (targetTransform != null)
-        {
-            SpectateTarget(targetTransform);
-        }
-        else
-        {
-            SetCameraState(CameraMode.StaticOverview);
         }
     }
 
@@ -371,6 +305,8 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     public void SwapCameraFollowTarget(Transform oldTarget, Transform newTarget)
     {
+        Debug.Log($"[CAM] swap req old={oldTarget?.name} new={newTarget?.name} curFollow={_gameplayCam?.Follow?.name} match={_gameplayCam?.Follow == oldTarget}");
+
         if (_gameplayCam != null && _gameplayCam.Follow == oldTarget)
         {
             _gameplayCam.Follow = newTarget;
@@ -408,7 +344,7 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     private int GetSpectatorSlotCount()
     {
-        var living = GameManager.Instance != null ? GameManager.Instance.GetLivingPlayerIDs() : null;
+        var living = MatchContext.Current != null ? MatchContext.Current.GetLivingPlayerIDs() : null;
         int livingCount = living != null ? living.Count : 0;
         return 1 + livingCount; // +1 for overview
     }
@@ -455,7 +391,7 @@ public class CameraManager : MonoBehaviour
 
     private void ApplySpectatorSlot(int slot)
     {
-        var living = GameManager.Instance != null ? GameManager.Instance.GetLivingPlayerIDs() : null;
+        var living = MatchContext.Current != null ? MatchContext.Current.GetLivingPlayerIDs() : null;
         int livingCount = living != null ? living.Count : 0;
 
         // clamp in case players died since the arrow press
@@ -494,8 +430,8 @@ public class CameraManager : MonoBehaviour
 
     private string ResolveSpectatorName(Fusion.PlayerRef playerId)
     {
-        if (GameManager.Instance != null && GameManager.Instance.Runner != null
-            && GameManager.Instance.Runner.TryGetPlayerObject(playerId, out NetworkObject obj))
+        if (MatchContext.Current != null && MatchContext.Current.Runner != null
+            && MatchContext.Current.Runner.TryGetPlayerObject(playerId, out NetworkObject obj))
         {
             PlayerComponentRegistry reg = obj.GetComponent<PlayerComponentRegistry>();
             if (reg != null && reg.Stats != null && !string.IsNullOrEmpty(reg.Stats.PlayerName))

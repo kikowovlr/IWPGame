@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Scream
   m_EditorClassIdentifier: Assembly-CSharp::ScreamAbilitySO
   _name: Scream
-  _baseCooldown: 5
+  _baseCooldown: 9
   _icon: {fileID: 21300000, guid: 015b02386250843468b415c49708a2a5, type: 3}
   _description: 'Unleashes a high-pitch scream that knocks back and deals massive
     damage.
@@ -34,4 +34,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   _damage: 40
-  _knockbackForce: 5
+  _knockbackForce: 10

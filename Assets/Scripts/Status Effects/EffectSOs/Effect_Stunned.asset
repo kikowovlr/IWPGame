@@ -18,14 +18,14 @@ MonoBehaviour:
   _defaultDuration: 5
   _isSustained: 0
   _visualContainers:
-  - _prefab: {fileID: 3410096667960181508, guid: c63772ad074f65d4da31900484e6aca9, type: 3}
+  - _prefab: {fileID: 1389825906119079068, guid: 715b28092dea517438a666a0aa968785, type: 3}
     _anchorType: 1
-    _localPositionOffset: {x: -0.29, y: 0.014, z: -0.008}
-    _localRotationOffset: {x: 0, y: -5.62, z: 0}
-  - _prefab: {fileID: 3410096667960181508, guid: c63772ad074f65d4da31900484e6aca9, type: 3}
+    _localPositionOffset: {x: 0.032, y: 0.018, z: 0.006}
+    _localRotationOffset: {x: 0, y: 0, z: 0}
+  - _prefab: {fileID: 1389825906119079068, guid: 715b28092dea517438a666a0aa968785, type: 3}
     _anchorType: 2
-    _localPositionOffset: {x: -0.331, y: 0.02, z: -0.099}
-    _localRotationOffset: {x: 0, y: -21.41, z: 0}
+    _localPositionOffset: {x: -0.005, y: -0.009, z: 0.006}
+    _localRotationOffset: {x: 0.0000000407777, y: 345.14542, z: -0.00000034433126}
   - _prefab: {fileID: 8216548428951909697, guid: b57a2e446f788e5449b99ebdde9eaa42, type: 3}
     _anchorType: 0
     _localPositionOffset: {x: 1.606, y: 0.003, z: 2.963}

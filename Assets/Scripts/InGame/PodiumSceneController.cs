@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Unity.Collections.Unicode;
 
 public class PodiumSceneController : MonoBehaviour
 {
@@ -13,18 +14,21 @@ public class PodiumSceneController : MonoBehaviour
     [SerializeField] private Transform _thirdPlaceSpawn;
     [SerializeField] private Collider _crowdZone; // for rest of the players not on podium
 
+    [SerializeField] private GameObject _crownPrefab;
+
     private void Start()
     {
         // Run the initialization safely in a coroutine to prevent race conditions
         StartCoroutine(SafeNetworkInitRoutine());
         CameraManager.Instance.RequestCursorVisible("PodiumScene", true);
+
+        SoundManager.Instance?.PlayMusic(MusicID.Podium);
     }
 
     private IEnumerator SafeNetworkInitRoutine()
     {
         NetworkRunner runner = null;
 
-        // 1. Loop until we find the NetworkRunner active in the scene
         while (runner == null)
         {
             runner = FindAnyObjectByType<NetworkRunner>();
@@ -43,20 +47,18 @@ public class PodiumSceneController : MonoBehaviour
 
     private IEnumerator PodiumSequenceRoutine(NetworkRunner runner)
     {
-        ArrangePlayers(runner);
-
         yield return StartCoroutine(WaitForNetworkToSettle(runner)); // wait for syncing
 
         if (runner.TryGetPlayerObject(runner.LocalPlayer, out NetworkObject localPlayerObj))
-        {
             PlayerRegistry.RegisterLocalPlayerTransform(localPlayerObj.transform);
-        }
 
         if (GameManager.Instance != null)
             GameManager.Instance.SetGlobalInputRestrictions(InputRestrictions.None);
 
         if (CameraManager.Instance != null)
             CameraManager.Instance.SetCameraState(CameraManager.CameraMode.Gameplay);
+
+        SpawnCrownLocally(runner);
 
         if (LevelLoader.Instance != null)
             LevelLoader.Instance.TransitionIn();
@@ -74,98 +76,24 @@ public class PodiumSceneController : MonoBehaviour
         yield return new WaitForEndOfFrame(); // wait for extra frame to ensure interpolation finishes
     }
 
-    private void ArrangePlayers(NetworkRunner runner)
+    private void SpawnCrownLocally(NetworkRunner runner)
     {
-        // get leaderboard data
-        List<LeaderboardItemData> leaderboard = LeaderboardManager.Instance.GetSortedLeaderboard;
+        var leaderboard = LeaderboardManager.Instance.GetSortedLeaderboard;
+        if (leaderboard == null || leaderboard.Count == 0) return;
 
-        Vector3 cameraPos = Camera.main != null ? Camera.main.transform.position : Vector3.zero;
+        PlayerRef winner = leaderboard[0].PlayerReference;
+        if (!runner.TryGetPlayerObject(winner, out NetworkObject winnerObj)) return;
 
-        for (int i = 0; i < leaderboard.Count; i++)
-        {
-            PlayerRef playerRef = leaderboard[i].PlayerReference;
-            if (!runner.TryGetPlayerObject(playerRef, out NetworkObject playerObj)) continue;
+        PlayerComponentRegistry registry = winnerObj.GetComponent<PlayerComponentRegistry>();
+        if (registry == null || registry.vfxAnchors == null) return;
 
-            PlayerComponentRegistry registry = playerObj.GetComponent<PlayerComponentRegistry>();
-            if (registry == null || registry.RespawnHandler == null) continue;
+        Transform head = registry.vfxAnchors.Head;
+        if (head == null) return;
 
-            Vector3 targetPosition = Vector3.zero;
-            Quaternion targetRotation = Quaternion.identity;
-
-            // 1st place
-            if (i == 0)
-            {
-                targetPosition = _firstPlaceSpawn.position;
-            }
-            // 2nd place
-            else if (i == 1)
-            {
-                targetPosition = _secondPlaceSpawn.position;
-            }
-            // 3rd place
-            else if (i == 2)
-            {
-                targetPosition = _thirdPlaceSpawn.position;
-            }
-            // crown zone
-            else
-            {
-                targetPosition = GetRandomPointInBoxCollider(_crowdZone);
-            }
-
-            if (i < 3)
-            {
-                // Calculate flat rotation towards camera
-                Vector3 lookDir = cameraPos - targetPosition;
-                lookDir.y = 0f; // Keep the character upright
-                if (lookDir.sqrMagnitude > 0.01f)
-                {
-                    targetRotation = Quaternion.LookRotation(lookDir.normalized);
-                }
-            }
-            else
-            {
-                // Default to spawn rotation for the crowd
-                targetRotation = _firstPlaceSpawn.rotation;
-            }
-
-            // teleport players
-            registry.RespawnHandler.TeleportToSpawnPoint(targetPosition, targetRotation);
-            playerObj.transform.rotation = targetRotation;
-
-            if (runner.IsServer)
-            {
-                RPC_ResetPlayerStats(playerObj);
-            }
-
-            var nrb = playerObj.GetComponent<NetworkRigidbody3D>();
-            if (nrb != null)
-            {
-                nrb.InterpolationTarget = playerObj.transform;
-                nrb.enabled = true;
-            }
-        }
-    }
-
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void RPC_ResetPlayerStats(NetworkObject playerObj)
-    {
-        if (playerObj.TryGetComponent(out PlayerComponentRegistry registry))
-        {
-            if (registry.Health != null) registry.Health.ResetHealthToMax();
-            if (registry.Elimination != null) registry.Elimination.ResetLivesToMax();
-            if (registry.Drowning != null) registry.Drowning.ResetDrownState();
-            if (registry.Controller != null) registry.Controller.StopAllCoroutines();
-        }
-    }
-
-    private Vector3 GetRandomPointInBoxCollider(Collider col)
-    {
-        Bounds bounds = col.bounds;
-        float randomX = Random.Range(bounds.min.x, bounds.max.x);
-        float randomY = bounds.min.y;
-        float randomZ = Random.Range(bounds.min.z, bounds.max.z);
-        return new Vector3(randomX, randomY, randomZ);
+        GameObject crown = Instantiate(_crownPrefab);
+        HoveringCrown hover = crown.GetComponent<HoveringCrown>();
+        if (hover == null) hover = crown.AddComponent<HoveringCrown>();
+        hover.SetTarget(head);
     }
 
     private void OnDestroy()

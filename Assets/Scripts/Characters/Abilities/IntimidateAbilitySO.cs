@@ -32,6 +32,8 @@ public class IntimidateAbilitySO : AbilitySO
         player.Animator.SetInteger(_skillTypeString, _skillType);
 
         state._isCasting = true;
+
+        player.Registry.AbilityAudioNet.PlayAbilityOneShot(SoundID.RedPandaChitter);
     }
 
     /// <summary>
@@ -40,6 +42,8 @@ public class IntimidateAbilitySO : AbilitySO
     public override void OnAnimationImpactTriggered(NetworkPlayerController player)
     {
         if (!player.Object.HasStateAuthority) return;
+
+        player.Registry.AbilityAudioNet.PlayAbilityOneShot(SoundID.RedPandaStunShimmer);
 
         ref AbilityState state = ref player.AbilityStateRef;
         state._visualTime = _flashDuration;

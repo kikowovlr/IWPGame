@@ -12,11 +12,17 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
     [SerializeField] private float _baseKnockoutTime = 3f;
     [SerializeField] private float _maxKnockoutTime = 8f;
     [SerializeField] private float _knockOutForceMultiplier = 1.8f; // boost physical punch force on the KO blow
+
     [Networked, OnChangedRender(nameof(OnHealthChanged))] public float CurrentHealth {  get; private set; }
     [Networked] public float MaxHealth { get; private set; }
 
     // keep track of accumulated dmg for goat skill
     [Networked] private float AccumulatedDamageTaken { get; set; }
+
+    // networked hit sound trigger
+    [Networked] private SoundID _lastHitSound { get; set; }
+    [Networked, OnChangedRender(nameof(OnHitSoundChanged))] private byte _hitSoundTick { get; set; }
+    private PlayerCombatAudio _combatAudio;
 
     private NetworkPlayerController _playerController;
     private PlayerEliminationHandler _eliminationHandler;
@@ -32,6 +38,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         {
             _playerController = registry.Controller;
             _eliminationHandler = registry.Elimination;
+            _combatAudio = registry.CombatAudio;
         }
         _characterRoot = transform.root;
     }
@@ -55,7 +62,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
     /// - uses string of hitbonename rather than networkrigibody3d 
     /// </summary>
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void Rpc_TakeDamage(float damageAmount, Vector3 impactForce, Vector3 impactPoint, string hitBoneName)
+    public void Rpc_TakeDamage(float damageAmount, Vector3 impactForce, Vector3 impactPoint, string hitBoneName, SoundID hitSound)
     {
         float finalDamage = damageAmount;
 
@@ -84,7 +91,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         // check for knockout
         if (CurrentHealth <= 0)
         {
-            Knockout();
+            Knockout(); // knockout sound via player's IsKnockedOut OnChangedRender
             // amplified force to show knockout blow
             ApplyForceToBone(impactForce * _knockOutForceMultiplier, impactPoint, hitBoneName);
         }
@@ -92,7 +99,15 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         {
             // standard hit reaction
             ApplyForceToBone(impactForce, impactPoint, hitBoneName);
+            _lastHitSound = hitSound;
+            _hitSoundTick++;            // -> fires OnHitSoundChanged on all clients
         }
+    }
+
+        private void OnHitSoundChanged()
+    {
+        if (_combatAudio != null)
+            _combatAudio.PlaySound(_lastHitSound);
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
@@ -213,15 +228,9 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
 
         // dont wake up if they are eliminated
         if (_eliminationHandler != null && _eliminationHandler.IsEliminated)
-        {
-            Debug.Log($"[HEALTH] {gameObject.name} remains knocked out eternally (Eliminated).");
             yield break;
-        }
 
-        // start the get-up -> play animation + restore physics, but block input during the 2s
-        _playerController.BeginRecover();
-        yield return new WaitForSeconds(_playerController.RecoverAnimDuration);   // 2s get-up
-        _playerController.EndRecover(); // hand control back
+        _playerController.Recover(); // hand control back
         CurrentHealth = _maxHealth;
     }
 

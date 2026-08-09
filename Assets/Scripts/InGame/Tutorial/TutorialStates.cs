@@ -63,6 +63,9 @@ public class TutorialCharacterSelectState : ITutorialState
             manager.SetFinalCharacterSelectCountdown(false);
             manager.ResetStateTimer(manager.CharacterSelectDuration);
         }
+
+        TransitionUIManager.OnTransitionComplete -= HandleTransitionComplete; // remove before adding just in case
+        TransitionUIManager.OnTransitionComplete += HandleTransitionComplete;
     }
 
     public void OnStateUpdate(TutorialManager manager)
@@ -97,6 +100,14 @@ public class TutorialCharacterSelectState : ITutorialState
     public void OnStateExit(TutorialManager manager)
     {
         Debug.Log("[TUTORIAL] -> Exit CharacterSelect");
+        TransitionUIManager.OnTransitionComplete -= HandleTransitionComplete; // clean up just in case
+    }
+
+    private void HandleTransitionComplete()
+    {
+        SoundManager.Instance?.PlayMusic(MusicID.CharacterSelect);
+        // one-shot: stop listening once we've played
+        TransitionUIManager.OnTransitionComplete -= HandleTransitionComplete;
     }
 }
 
@@ -124,6 +135,8 @@ public class TutorialActiveState : ITutorialState
             manager.SetStepPhase(TutorialStepPhase.Intro, manager.Settings.TutorialIntroDuration);
             manager.ResetStepIndexToStart();
         }
+
+        SoundManager.Instance?.PlayMusic(MusicID.Tutorial);
     }
 
     public void OnStateUpdate(TutorialManager manager)
@@ -198,6 +211,8 @@ public class TutorialSuddenDeathState : ITutorialState
             manager.SetWallsActive(true);
             manager.SetSuddenDeathPhase(SuddenDeathPhase.Banner, manager.Settings.SuddenDeathBannerDuration);
         }
+
+        SoundManager.Instance?.PlayMusic(MusicID.SuddenDeath, 1.5f);
     }
 
     public void OnStateUpdate(TutorialManager manager)

@@ -54,7 +54,7 @@ public class HeadbuttHandler : NetworkBehaviour
 
         if (_headDamageDealer != null)
         {
-            _headDamageDealer.SetUpAttack(_damage, _knockbackForce, _hitLayer);
+            _headDamageDealer.SetUpAttack(_damage, _knockbackForce, _hitLayer, SoundID.HitHeadbutt);
             SetHeadbuttAttack(active: true);
         }
 

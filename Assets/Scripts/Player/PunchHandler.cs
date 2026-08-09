@@ -96,7 +96,7 @@ public class PunchHandler : NetworkBehaviour
             _activeTotalCycleTime = _strongTotalCycleTime;
             _activeDamageDealer = _rightHandDamageDealer;
 
-            _activeDamageDealer.SetUpAttack(_strongDamage, _strongForce, _hitLayer);
+            _activeDamageDealer.SetUpAttack(_strongDamage, _strongForce, _hitLayer, SoundID.HitStrongPunch);
             _animator.SetTrigger("StrongPunchTrigger");
             _strongPunchCooldownTimer = TickTimer.CreateFromSeconds(Runner, _strongPunchCooldown);
 
@@ -113,7 +113,7 @@ public class PunchHandler : NetworkBehaviour
             _activeTotalCycleTime = _weakTotalCycleTime;
 
             _activeDamageDealer = (_nextHandIndex == 0) ? _leftHandDamageDealer : _rightHandDamageDealer;
-            _activeDamageDealer.SetUpAttack(_weakDamage, _weakForce, _hitLayer);
+            _activeDamageDealer.SetUpAttack(_weakDamage, _weakForce, _hitLayer, SoundID.HitPunch);
 
             _animator.SetInteger("PunchHand", _nextHandIndex);
             _animator.SetTrigger("WeakPunchTrigger");

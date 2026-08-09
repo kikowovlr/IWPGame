@@ -20,12 +20,13 @@ public class DummyController : NetworkBehaviour, IAffectedByStatusEffects
     [SerializeField] private float _groundCheckRadius = 0.1f;
     [SerializeField] private float _groundCheckDist = 0.5f;
     [SerializeField] private float _brakeStrength = 18f;
+    [SerializeField] private PlayerCombatAudio _combatAudio;
 
     private readonly RaycastHit[] _raycastHits = new RaycastHit[10];
     private RaycastHit _groundHit;
     private bool _isGrounded;
 
-    [Networked] public NetworkBool IsKnockedOut { get; private set; }
+    [Networked, OnChangedRender(nameof(OnKnockoutChanged))] public NetworkBool IsKnockedOut { get; private set; }
 
     private ActiveRagdollMember[] _activeRagdollMembers;
     private Rigidbody[] _allChildRigidbodies;
@@ -230,6 +231,15 @@ public class DummyController : NetworkBehaviour, IAffectedByStatusEffects
             Knockout();
             _stunned = true;
             _stunTimer = TickTimer.CreateFromSeconds(Runner, duration);
+        }
+    }
+
+    private void OnKnockoutChanged()
+    {
+        if (IsKnockedOut && _combatAudio != null)
+        {
+            _combatAudio.PlaySound(SoundID.Knockout);
+            _combatAudio.PlaySound(SoundID.Oof);
         }
     }
 }

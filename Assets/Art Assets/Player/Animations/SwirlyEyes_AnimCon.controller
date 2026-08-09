@@ -8,7 +8,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Swirling
-  m_Speed: 1
+  m_Speed: 1.5
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours: []
@@ -20,7 +20,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: eeb552759e943874a9135af8293c7475, type: 3}
+  m_Motion: {fileID: 7400000, guid: baa9f838485f6094e91c52928c8325b9, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

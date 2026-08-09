@@ -4,20 +4,19 @@ public class BillboardUI : MonoBehaviour
 {
     private Transform _cameraTransform;
 
-    private void Start()
-    {
-        if (Camera.main != null)
-        {
-            _cameraTransform = Camera.main.transform;
-        }
-    }
-
     private void LateUpdate()
     {
-        if (_cameraTransform != null)
+        // re-acquire if we lost the camera (e.g. after a scene load)
+        if (_cameraTransform == null)
         {
-            // point towards camera
-            transform.LookAt(transform.position + _cameraTransform.rotation * Vector3.forward, _cameraTransform.rotation * Vector3.up);
+            if (Camera.main != null)
+                _cameraTransform = Camera.main.transform;
+            else
+                return;   // no camera yet this frame
         }
+
+        transform.LookAt(
+            transform.position + _cameraTransform.rotation * Vector3.forward,
+            _cameraTransform.rotation * Vector3.up);
     }
 }

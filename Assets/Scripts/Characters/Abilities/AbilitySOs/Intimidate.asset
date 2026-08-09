@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Intimidate
   m_EditorClassIdentifier: Assembly-CSharp::IntimidateAbilitySO
   _name: Intimidate
-  _baseCooldown: 5
+  _baseCooldown: 12
   _icon: {fileID: 21300000, guid: da23ac13c7e131842abbd999f7a8b7ff, type: 3}
   _description: 'Raises his arms to look big and scary. Stuns enemies in cone of
     vision.
@@ -28,7 +28,7 @@ MonoBehaviour:
   BlockJumping: 1
   BlockSprinting: 1
   _indicatorData: {fileID: 11400000, guid: 9cd9bec9b4671804e8300b4e738aeac0, type: 2}
-  _range: 3
+  _range: 4
   _coneAngle: 120
   _affectedLayer:
     serializedVersion: 2

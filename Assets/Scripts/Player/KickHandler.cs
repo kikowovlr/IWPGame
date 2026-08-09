@@ -91,7 +91,7 @@ public class KickHandler : NetworkBehaviour
 
         if (_rightFootDamageDealer != null)
         {
-            _rightFootDamageDealer.SetUpAttack(_kickDamage, _kickKnockbackForce, _hitLayer);
+            _rightFootDamageDealer.SetUpAttack(_kickDamage, _kickKnockbackForce, _hitLayer, SoundID.HitKick);
             SetKickDamage(active: true);
         }
 
@@ -130,7 +130,7 @@ public class KickHandler : NetworkBehaviour
         if (timeSinceKick >= (_ragdollDelayDuration + _ragdollDuration))
         {
             IsKicking = false;
-            _playerController.BeginRecover();
+            _playerController.Recover();
         }
     }
 

@@ -31,6 +31,9 @@ public class TransitionUIManager : MonoBehaviour
     [SerializeField] private float _mapLoadingMinDuration = 5.0f;
     [SerializeField] private MapCatalog _catalog;
 
+    private Coroutine _loadingRoutine;
+    public static event System.Action OnTransitionComplete;
+
     private void Awake()
     {
         if (Instance == null)
@@ -53,6 +56,9 @@ public class TransitionUIManager : MonoBehaviour
 
     public void ShowMapLoadingScreenTimed(string status, int sceneBuildIndex = -1)
     {
+        if (_loadingRoutine != null)
+            StopCoroutine(_loadingRoutine);
+
         Sprite preview = ResolvePreview(sceneBuildIndex);
         string mapName = ResolveMapName(sceneBuildIndex);
         Sprite nameSprite = ResolveNameSprite(sceneBuildIndex);
@@ -102,6 +108,9 @@ public class TransitionUIManager : MonoBehaviour
         if (_loadingBarGO != null)
             _loadingBarGO.SetActive(false);
         ClearAllOverlays();
+
+        _loadingRoutine = null;
+        OnTransitionComplete?.Invoke();
     }
 
     public void ShowMapLoadingScreen(string status, Sprite mapPreview = null, string mapName = null, Sprite nameSprite = null)

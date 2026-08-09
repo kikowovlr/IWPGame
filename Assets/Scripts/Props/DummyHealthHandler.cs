@@ -8,11 +8,15 @@ public class DummyHealthHandler : NetworkBehaviour, IDamageable
     [SerializeField] private float _recoverDelay = 3f;
     [SerializeField] private float _knockedDownDamageMultiplier = 0.3f;
     [SerializeField] private float _knockOutForceMultiplier = 1.8f;
+    [SerializeField] private DummyController _dummy;
+    [SerializeField] private PlayerCombatAudio _combatAudio;
 
     [Networked, OnChangedRender(nameof(OnHealthChanged))] public float CurrentHealth { get; private set; }
-    [Networked] public float MaxHealth { get; private set; }
+    [HideInInspector] [Networked] public float MaxHealth { get; private set; }
 
-    [SerializeField] private DummyController _dummy;
+    [Networked, OnChangedRender(nameof(OnHitSoundChanged))] private byte _hitSoundTick { get; set; }
+    [Networked] private SoundID _lastHitSound { get; set; }
+
     private Transform _characterRoot;
     public System.Action<float, float> OnHealthChangedEvent;
 
@@ -32,7 +36,7 @@ public class DummyHealthHandler : NetworkBehaviour, IDamageable
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void Rpc_TakeDamage(float damageAmount, Vector3 impactForce, Vector3 impactPoint, string hitBoneName)
+    public void Rpc_TakeDamage(float damageAmount, Vector3 impactForce, Vector3 impactPoint, string hitBoneName, SoundID hitSound)
     {
         if (_dummy.IsKnockedOut)
         {
@@ -45,14 +49,24 @@ public class DummyHealthHandler : NetworkBehaviour, IDamageable
 
         if (CurrentHealth <= 0)
         {
-            _dummy.Knockout();
+            _dummy.Knockout(); // knockout SOUND handled by DummyController's IsKnockedOut OnChangedRender
             ApplyForceToBone(impactForce * _knockOutForceMultiplier, impactPoint, hitBoneName);
             StartCoroutine(RecoverRoutine());
         }
         else
         {
             ApplyForceToBone(impactForce, impactPoint, hitBoneName);
+            // normal hit -> tell ALL clients to play the hit sound
+            _lastHitSound = hitSound;
+            _hitSoundTick++;  // change fires OnHitSoundChanged on every client
         }
+    }
+
+    // fires on ALL clients when a hit lands
+    private void OnHitSoundChanged()
+    {
+        if (_combatAudio != null)
+            _combatAudio.PlaySound(_lastHitSound);
     }
 
     private IEnumerator RecoverRoutine()

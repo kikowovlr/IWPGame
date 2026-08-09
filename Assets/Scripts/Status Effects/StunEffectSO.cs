@@ -21,6 +21,6 @@ public class StunEffectSO : StatusEffectSO
 
     public override void OnEffectRemoved(NetworkPlayerController player, ref StatusEffectState state)
     {
-        player.BeginRecover();
+        player.Recover();
     }
 }

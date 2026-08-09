@@ -62,7 +62,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     //States
     private bool _isGrounded;
     private bool _isRunning;
-    private bool _isKnockedOut = false; // == non-active ragdoll
+    [Networked, OnChangedRender(nameof(OnKnockoutChanged))] private bool _isKnockedOut { get; set; } // == non-active ragdoll
     private bool _isGrabbingActive = false;
     public bool IsGrounded => _isGrounded;
 
@@ -172,10 +172,19 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [SerializeField] private float _recoverAnimDuration = 2f;
     [Networked] private NetworkBool _isRecovering { get; set; }
 
+    // audio 
+    private PlayerCombatAudio _combatAudio;
+
+    // animation
+    [Networked] private float _netAnimSpeed { get; set; }
+    [Networked] private float _netVerticalVel { get; set; }
+    [Networked] private NetworkBool _netIsGrounded { get; set; }
+
     public bool IsCameraRotationLocked
     {
         get
         {
+            if (Object == null || !Object.IsValid) return false;
             return IsInputBlocked(InputRestrictions.BlockSeperateCameraMovement);
         }
     }
@@ -195,6 +204,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public ConfigurableJoint MainJoint => _mainJoint;
     public float AbilityCooldownRemaining => CurrentAbilityState._cooldownTimer;
     public float RecoverAnimDuration => _recoverAnimDuration;
+    public bool IsGroundedNetworked => Object.HasStateAuthority ? _isGrounded : _netIsGrounded;
 
     private void Awake()
     {
@@ -212,6 +222,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             _drowning = Registry.Drowning;
             _boost = Registry.Boost;
             _stamina = Registry.Stamina;
+            _combatAudio = Registry.CombatAudio;
         }
     }
 
@@ -491,6 +502,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
             _smoothedInputSpeed = Mathf.MoveTowards(_smoothedInputSpeed, targetAnimSpeed, Runner.DeltaTime * _animationSpeedDamp);
 
+            _netAnimSpeed = _smoothedInputSpeed;
+            _netVerticalVel = _rb.linearVelocity.y;
+            _netIsGrounded = _isGrounded;
+
             UpdateAnimations(_smoothedInputSpeed);
 
             foreach (HandGrabHandler handGrabHandler in _handGrabHandlers)
@@ -670,6 +685,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
     public override void Render()
     {
+        ApplyNetworkedAnimatorParams();   // all clients drive their own animator params
+
         // all clients run this code
         if (!Object.HasStateAuthority)
         {
@@ -836,6 +853,17 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         }
     }
 
+    // call on ALL clients (not gated) e.g. in Render()
+    private void ApplyNetworkedAnimatorParams()
+    {
+        if (_animator == null) return;
+        _animator.SetFloat("MovementSpeed", _netAnimSpeed);
+        _animator.SetBool("IsKnockedOut", _isKnockedOut);
+        _animator.SetBool("IsGrounded", Object.HasStateAuthority ? _isGrounded : _netIsGrounded);
+        _animator.SetFloat("VerticalVelocity", _netVerticalVel);
+        _animator.SetBool("IsSubmerged", _buoyancy.IsSubmerged);
+    }
+
     public void Knockout()
     {
         if (!Object.HasStateAuthority)
@@ -855,6 +883,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
         {
             _activeRagdollMembers[i].MakeRagdoll();
+        }
+    }
+
+    private void OnKnockoutChanged()
+    {
+        if (_isKnockedOut && _combatAudio != null)
+        {
+            _combatAudio.PlaySound(SoundID.Knockout);
+            _combatAudio.PlaySound(SoundID.Oof);
         }
     }
 

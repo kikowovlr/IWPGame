@@ -3,10 +3,16 @@ using UnityEngine;
 public class AnimationEventForwarder : MonoBehaviour
 {
     private NetworkPlayerController _playerController;
+    private PlayerCombatAudio _combatAudio;
 
     private void Awake()
     {
-        _playerController = GetComponentInParent<NetworkPlayerController>();
+        PlayerComponentRegistry registry = transform.root.GetComponent<PlayerComponentRegistry>();
+        if (registry != null)
+        {
+            _playerController = registry.Controller;
+            _combatAudio = registry.CombatAudio;
+        }
     }
 
     public void UnityEvent_OnAbilityImpact()
@@ -23,5 +29,11 @@ public class AnimationEventForwarder : MonoBehaviour
         {
             _playerController.UnityEvent_OnAbilityEnd();
         }
+    }
+
+    public void UnityEvent_OnFootstep()
+    {
+        if (_combatAudio != null)
+            _combatAudio.UnityEvent_OnFootstep();
     }
 }

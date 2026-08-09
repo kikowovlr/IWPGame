@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Ram
   m_EditorClassIdentifier: Assembly-CSharp::RamAbilitySO
   _name: Ram
-  _baseCooldown: 7
+  _baseCooldown: 10
   _icon: {fileID: 21300000, guid: e87e173a2f290494cba5d4a2243bd1e0, type: 3}
   _description: 'Rams into critters and knocks them back.
 
@@ -30,7 +30,7 @@ MonoBehaviour:
   _indicatorData: {fileID: 11400000, guid: a74ae3b97bf8fe34e9bf95858e3e417e, type: 2}
   _maxChargeTime: 2.3
   _damageTakenMultiplier: 0.5
-  _maxDamageBeforeCancel: 5
+  _maxDamageBeforeCancel: 30
   _cancelStunDuration: 3
   _maxRamDuration: 0.5
   _baseRamSpeed: 1.5

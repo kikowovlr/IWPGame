@@ -8,7 +8,7 @@ using UnityEngine;
 public class GooExposure : NetworkBehaviour
 {
     [HideInInspector] [Networked] public float ExposureAmount {  get; private set; }// 0 = clean, 1 = fully consumed
-    [Networked] private float _lastSourceRate { get; set; }// rate from whichever source last fed us
+    [HideInInspector][Networked] public NetworkBool IsInGooSource { get; private set; }
 
     [SerializeField] private float _recoveryRate = 0.15f;
     private bool _fedThisTick = false;
@@ -34,6 +34,7 @@ public class GooExposure : NetworkBehaviour
     public void ApplyExposure(float ratePerSecond)
     {
         _fedThisTick = true;
+        IsInGooSource = true;
         ExposureAmount = Mathf.Clamp01(ExposureAmount + ratePerSecond * Runner.DeltaTime);
     }
 
@@ -44,7 +45,10 @@ public class GooExposure : NetworkBehaviour
     public void EndTick()
     {
         if (!_fedThisTick)
+        {
+            IsInGooSource = false;
             ExposureAmount = Mathf.Clamp01(ExposureAmount - _recoveryRate * Runner.DeltaTime); // recovery from goo consumption
+        }
 
         _fedThisTick = false;
 
@@ -60,5 +64,17 @@ public class GooExposure : NetworkBehaviour
 
         _healthHandler.Rpc_EnvironmentalEliminate();
         ExposureAmount = 0f;
+    }
+
+    public override void Render()
+    {
+        // only drive local player's own screen overlay
+        if (!Object.HasInputAuthority) return;
+        if (ScreenGooOverlay.Instance == null) return;
+
+        if (ExposureAmount > 0.01f)
+            ScreenGooOverlay.Instance.SetGooExposure(1f);
+        else
+            ScreenGooOverlay.Instance.StopGoo();
     }
 }

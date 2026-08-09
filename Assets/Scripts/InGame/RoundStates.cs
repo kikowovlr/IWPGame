@@ -51,6 +51,9 @@ public class CharacterSelectState : IRoundState
             manager.SetFinalCharacterSelectCountdown(false);
             manager.ResetStateTimer(manager.Settings.CharacterSelectDuration);
         }
+
+        TransitionUIManager.OnTransitionComplete -= HandleTransitionComplete; // remove before adding just in case
+        TransitionUIManager.OnTransitionComplete += HandleTransitionComplete;
     }
 
     public void OnStateUpdate(GameManager manager)
@@ -86,6 +89,14 @@ public class CharacterSelectState : IRoundState
     public void OnStateExit(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Exited CharacterSelect State.");
+        TransitionUIManager.OnTransitionComplete -= HandleTransitionComplete; // clean up just in case
+    }
+
+    private void HandleTransitionComplete()
+    {
+        SoundManager.Instance?.PlayMusic(MusicID.CharacterSelect);
+        // one-shot: stop listening once we've played
+        TransitionUIManager.OnTransitionComplete -= HandleTransitionComplete;
     }
 }
 
@@ -114,6 +125,8 @@ public class SetupState : IRoundState
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
             manager.ResetRoundEntities();
         }
+
+        SoundManager.Instance?.PlayMusic(MusicID.Gameplay);
     }
 
     public void OnStateUpdate(GameManager manager)

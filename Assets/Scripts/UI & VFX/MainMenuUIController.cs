@@ -90,6 +90,8 @@ public class MainMenuUIController : MonoBehaviour
         {
             ShowMainMenuPanel();
         }
+
+        SoundManager.Instance?.PlayMusic(MusicID.Menu);
     }
 
     /// <summary>
@@ -264,6 +266,8 @@ public class MainMenuUIController : MonoBehaviour
     {
         if (_quitPanel != null)
             _quitPanel.SetActive(true);
+
+        SoundManager.Instance?.StopMusic(_delayUntilQuit * 0.9f); //fade out music before quitting
 
         StartCoroutine(QuitRoutine());
     }

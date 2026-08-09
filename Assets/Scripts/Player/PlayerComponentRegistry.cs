@@ -22,6 +22,10 @@ public class PlayerComponentRegistry : MonoBehaviour
     [SerializeField] private PlayerStamina _stamina;
     [SerializeField] private StatusEffectManager _statusEffectManager;
     [SerializeField] private PlayerFallHandler _fall;
+    [SerializeField] private PlayerCombatAudio _combatAudio;
+    [SerializeField] private PlayerAbilityAudio _abilityAudio;
+    [SerializeField] private PlayerAbilityAudioNetworked _abilityAudioNet;
+    [SerializeField] private PlayerImpactAudio _impactAudio;
 
     public NetworkPlayerController Controller => _playerController;
     public PlayerHealthHandler Health => _healthHandler;
@@ -44,6 +48,10 @@ public class PlayerComponentRegistry : MonoBehaviour
     public PlayerStamina Stamina => _stamina;
     public StatusEffectManager StatusManager => _statusEffectManager;
     public PlayerFallHandler Fall => _fall;
+    public PlayerCombatAudio CombatAudio => _combatAudio;
+    public PlayerAbilityAudio AbilityAudio => _abilityAudio;
+    public PlayerAbilityAudioNetworked AbilityAudioNet => _abilityAudioNet;
+    public PlayerImpactAudio ImpactAudio => _impactAudio;
 
     private void Awake()
     {

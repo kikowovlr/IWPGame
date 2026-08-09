@@ -451,8 +451,8 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _growDuration: 2
-  _puddleMinLifeTime: 10
-  _puddleMaxLifeTime: 15
+  _puddleMinLifeTime: 15
+  _puddleMaxLifeTime: 20
   _shrinkDuration: 2
   _shrinkCurve:
     serializedVersion: 2

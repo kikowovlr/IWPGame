@@ -167,6 +167,7 @@ public class GooPuddle : NetworkBehaviour
 
     public void HandleTriggerStay(Collider other)
     {
+        if (Object == null || !Object.IsValid) return;
         if (!IsActive) return; // dont trigger anything during telegraph window
         if (!Object.HasStateAuthority) return;
 

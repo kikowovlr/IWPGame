@@ -17,6 +17,11 @@ public class PlayerFallHandler : NetworkBehaviour
     private PlayerEliminationHandler _elimination;
     private Rigidbody _rb;
 
+    private Vector3 _proxyLocalPos;
+    private Quaternion _proxyLocalRot;
+    private Transform _proxyOriginalParent;
+    private bool _proxyCaptured;
+
     private void Awake()
     {
         _registry = transform.root.GetComponent<PlayerComponentRegistry>();
@@ -26,6 +31,10 @@ public class PlayerFallHandler : NetworkBehaviour
             _elimination = _registry.Elimination;
             _rb = _controller.NetworkedRb.Rigidbody;
         }
+
+        _proxyOriginalParent = _cameraFollowProxy.parent;
+        _cameraFollowProxy.localPosition = _proxyLocalPos;
+        _cameraFollowProxy.localRotation = _proxyLocalRot;
     }
 
     public override void FixedUpdateNetwork()
@@ -56,13 +65,20 @@ public class PlayerFallHandler : NetworkBehaviour
             _cameraFollowProxy.position = _frozenFallPos;
     }
 
+    private void CaptureProxyLocal()
+    {
+        if (_proxyCaptured) return;
+        _proxyOriginalParent = _cameraFollowProxy.parent;
+        _proxyLocalPos = _cameraFollowProxy.localPosition;
+        _proxyLocalRot = _cameraFollowProxy.localRotation;
+        _proxyCaptured = true;
+    }
+
     private void BeginFall()
     {
-        Debug.Log($"[FALL] BeginFall (host) pos={_controller.CameraTarget.position}");
-
         Vector3 p = _controller.CameraTarget.position;
         _frozenFallPos = p;
-
+        _cameraFollowProxy.SetParent(null, true); // detach
         IsFalling = true;
         _deathTimer = TickTimer.CreateFromSeconds(Runner, _knockoutToDeathDelay);
 
@@ -72,18 +88,21 @@ public class PlayerFallHandler : NetworkBehaviour
     // camera swap on every client
     private void OnFallingStateChanged()
     {
-        Debug.Log($"[FALL] OnFallingStateChanged fired: IsFalling={IsFalling}, cam={(CameraManager.Instance != null)}, proxy={(_cameraFollowProxy != null)}");
         if (CameraManager.Instance == null || _controller == null) return;
 
         if (IsFalling)
         {
-            if (_cameraFollowProxy != null)
-                _cameraFollowProxy.position = _frozenFallPos;   // fully frozen, no live tracking
+            _cameraFollowProxy.SetParent(null, true);
+            _cameraFollowProxy.position = _frozenFallPos;
+
             CameraManager.Instance.SwapCameraFollowTarget(_controller.CameraTarget, _cameraFollowProxy);
             Debug.Log($"[FALL] Swapped camera to proxy at {_frozenFallPos}");
         }
         else
         {
+            _cameraFollowProxy.SetParent(_proxyOriginalParent, false);
+            _cameraFollowProxy.localPosition = _proxyLocalPos;
+            _cameraFollowProxy.localRotation = _proxyLocalRot;
             CameraManager.Instance.SwapCameraFollowTarget(_cameraFollowProxy, _controller.CameraTarget);
         }
     }

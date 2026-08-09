@@ -102,6 +102,7 @@ GameObject:
   - component: {fileID: 1237206338521344586}
   - component: {fileID: 7376115956821572775}
   - component: {fileID: 6302463680881778411}
+  - component: {fileID: 3801954644054741809}
   m_Layer: 0
   m_Name: BoostPad
   m_TagString: Untagged
@@ -159,6 +160,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1237206338521344586}
+  - {fileID: 3801954644054741809}
   ForceRemoteRenderTimeframe: 0
 --- !u!65 &6302463680881778411
 BoxCollider:
@@ -181,3 +183,20 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.57, y: 0.24, z: 1.58}
   m_Center: {x: 0, y: 0.14, z: 0}
+--- !u!114 &3801954644054741809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7159736845851477725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 0

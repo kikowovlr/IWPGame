@@ -63,7 +63,8 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     // sudden death
     [Header("Sudden Death")]
     [SerializeField] private GameObject _tutorialWalls;
-    [HideInInspector] [Networked, OnChangedRender(nameof(OnSuddenDeathPhaseChanged))] public SuddenDeathPhase CurrentSuddenDeathPhase { get; private set; }
+    [HideInInspector] [Networked] public SuddenDeathPhase CurrentSuddenDeathPhase { get; private set; }
+    [Networked, OnChangedRender(nameof(OnSuddenDeathPhaseChanged))] private byte _sdPhaseTick { get; set; }
     public bool IsSuddenDeathCountdownPhase => CurrentSuddenDeathPhase == SuddenDeathPhase.Countdown;
     public bool IsSuddenDeathGoMoment => CurrentSuddenDeathPhase == SuddenDeathPhase.Fighting;
 
@@ -79,6 +80,7 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     private bool _botsSpawned;
 
     [HideInInspector] [Networked] public NetworkBool WasSoloTutorial { get; private set; }
+
 
     // getters
     public float CharacterSelectDuration => _settings.CharacterSelectDuration;
@@ -128,6 +130,7 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
 
         if (Object.HasStateAuthority)
         {
+            CurrentSuddenDeathPhase = SuddenDeathPhase.None;
             foreach (var player in Object.Runner.ActivePlayers)
             {
                 TrackPlayer(player);
@@ -173,12 +176,12 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
                 Rpc_RequestSkipStep();   
         }
 
-        // F10 = skip all steps -> SuddenDeath
-        if (Keyboard.current != null && Keyboard.current.f10Key.wasPressedThisFrame)
+        // F11 = skip all steps -> SuddenDeath
+        if (Keyboard.current != null && Keyboard.current.f11Key.wasPressedThisFrame)
         {
             if (Object.HasStateAuthority) DebugSkipToSuddenDeath();
             else Rpc_RequestSkipToSuddenDeath();
-        }
+        }   
 #endif
     }
 
@@ -474,7 +477,12 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
                 PlayerComponentRegistry registry = obj.transform.root.GetComponent<PlayerComponentRegistry>();
                 if (registry.Health != null)
                     registry.Health.ResetHealthToMax();
-                registry.Controller.Recover();
+
+                if (registry.Health != null)
+                    registry.Elimination.ResetLivesToMax();
+
+                if (registry.Controller != null)
+                    registry.Controller.Recover();
             }
         }
     }
@@ -780,16 +788,17 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
 
         Debug.Log($"[SUDDEN DEATH] EXIT {CurrentSuddenDeathPhase} -> ENTER {phase}");
         CurrentSuddenDeathPhase = phase;
+        _sdPhaseTick++;  // always changes -> OnChangedRender fires on ALL clients
         if (timerDuration > 0f)
             _stateTimer = TickTimer.CreateFromSeconds(Runner, timerDuration);
     }
 
     private void OnSuddenDeathPhaseChanged()
     {
-        Debug.Log($"[SUDDEN DEATH] (local, auth={Object.HasStateAuthority}) now {CurrentSuddenDeathPhase}");
-
         if (SuddenDeathUIController.Instance != null)
             SuddenDeathUIController.Instance.OnPhaseChanged(CurrentSuddenDeathPhase);
+        else
+            Debug.Log("SuddenDeathUIController INVALID");
 
         // walls: down once we start fighting (runs on all clients)
         if (CurrentSuddenDeathPhase == SuddenDeathPhase.Fighting)
@@ -842,6 +851,9 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     public void ReturnToLobby()
     {
         if (!Object.HasStateAuthority) return;
+
+        if (NetworkLauncher.Instance != null)
+            NetworkLauncher.Instance.IsReturningFromTutorial = true;
 
         DespawnBots();
         DespawnBoostPads();

@@ -587,20 +587,20 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     {
         yield return LevelLoader.Instance.TransitionOut();
 
-        if (Runner != null)
-        {
-            foreach (var player in Runner.ActivePlayers)
-            {
-                if (Runner.TryGetPlayerObject(player, out NetworkObject playerObj))
-                {
-                    var nrb = playerObj.GetComponent<NetworkRigidbody3D>();
-                    if (nrb != null)
-                    {
-                        nrb.enabled = false;
-                    }
-                }
-            }
-        }
+        //if (Runner != null)
+        //{
+        //    foreach (var player in Runner.ActivePlayers)
+        //    {
+        //        if (Runner.TryGetPlayerObject(player, out NetworkObject playerObj))
+        //        {
+        //            var nrb = playerObj.GetComponent<NetworkRigidbody3D>();
+        //            if (nrb != null)
+        //            {
+        //                nrb.enabled = false;
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     public void MarkCharacterSelectComplete()

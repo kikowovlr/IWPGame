@@ -149,6 +149,7 @@ GameObject:
   - component: {fileID: 7115298573297249113}
   - component: {fileID: 1368325072647136678}
   - component: {fileID: 8232205452210791683}
+  - component: {fileID: 7979487368665454324}
   m_Layer: 5
   m_Name: ControlsButton
   m_TagString: Untagged
@@ -258,6 +259,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7979487368665454324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2263871298218209476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7e377277b2ba404c9e7569cfd729402, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
+  _buttonType: 0
+  _playHoverSound: 1
 --- !u!1 &2933118763699296910
 GameObject:
   m_ObjectHideFlags: 0
@@ -459,6 +474,7 @@ GameObject:
   - component: {fileID: 1686276466845466623}
   - component: {fileID: 8364696666978984903}
   - component: {fileID: 5815911433827224076}
+  - component: {fileID: 2935646915407438357}
   m_Layer: 5
   m_Name: HostButton
   m_TagString: Untagged
@@ -568,6 +584,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2935646915407438357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3302281550029929676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7e377277b2ba404c9e7569cfd729402, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
+  _buttonType: 0
+  _playHoverSound: 1
 --- !u!1 &3539974031051386767
 GameObject:
   m_ObjectHideFlags: 0
@@ -796,6 +826,7 @@ GameObject:
   - component: {fileID: 2298184948552819326}
   - component: {fileID: 4089035178380390987}
   - component: {fileID: 4068252288640413828}
+  - component: {fileID: 4475104465692619876}
   m_Layer: 5
   m_Name: JoinButton
   m_TagString: Untagged
@@ -905,6 +936,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4475104465692619876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4248204043361655974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7e377277b2ba404c9e7569cfd729402, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
+  _buttonType: 0
+  _playHoverSound: 1
 --- !u!1 &5118107949159747993
 GameObject:
   m_ObjectHideFlags: 0
@@ -917,6 +962,7 @@ GameObject:
   - component: {fileID: 207775310334442135}
   - component: {fileID: 5229563391281863974}
   - component: {fileID: 8654744930713049406}
+  - component: {fileID: 8892915958877019311}
   m_Layer: 5
   m_Name: QuitButton
   m_TagString: Untagged
@@ -1026,6 +1072,20 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8892915958877019311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5118107949159747993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7e377277b2ba404c9e7569cfd729402, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonAudio
+  _buttonType: 0
+  _playHoverSound: 1
 --- !u!1 &5218640925161293677
 GameObject:
   m_ObjectHideFlags: 0
@@ -1546,8 +1606,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 19.8
-  m_fontSizeBase: 19.8
+  m_fontSize: 25.1
+  m_fontSizeBase: 25.1
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1821,8 +1881,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 19.8
-  m_fontSizeBase: 19.8
+  m_fontSize: 25.1
+  m_fontSizeBase: 25.1
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

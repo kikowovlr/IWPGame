@@ -28,6 +28,7 @@ public class FallingIslandPiece : NetworkBehaviour
     [SerializeField] private float _sinkEngageDistance = 2f; // splash triggers, sinking begins
     [SerializeField] private float _sinkRestDepth = 4f;
     [SerializeField] private float _sinkSpeed = 0.3f;
+    [SerializeField] private GameObject _breakWarningIndicator;
 
     [HideInInspector] [Networked, OnChangedRender(nameof(OnTiltingStateChanged))] public NetworkBool IsTilting { get; private set; }
     [HideInInspector][Networked, OnChangedRender(nameof(OnSinkEngagedChanged))] public NetworkBool HasEngagedSinking { get; private set; }
@@ -133,6 +134,18 @@ public class FallingIslandPiece : NetworkBehaviour
         if (!HasEngagedSinking) return;
 
         // TODO: splash VFX + sound + camera shake
+    }
+
+    public void ShowBreakWarning()
+    {
+        if (_breakWarningIndicator != null)
+            _breakWarningIndicator.SetActive(true);
+    }
+
+    public void HideBreakWarning()
+    {
+        if (_breakWarningIndicator != null)
+            _breakWarningIndicator.SetActive(false);
     }
 
     /// <summary>

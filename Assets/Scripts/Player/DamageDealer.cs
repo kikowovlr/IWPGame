@@ -17,6 +17,8 @@ public class DamageDealer : NetworkBehaviour
     private NetworkPlayerController _ownerController;
     private bool _isAttackActive = false;
 
+    private SoundID _hitSound = SoundID.HitPunch;
+
     private void Awake()
     {
         // find player who owns this limb
@@ -26,11 +28,12 @@ public class DamageDealer : NetworkBehaviour
     }
 
     // use this to set up attack in action scripts
-    public void SetUpAttack(float damage, float force, LayerMask hitLayer)
+    public void SetUpAttack(float damage, float force, LayerMask hitLayer, SoundID hitSound)
     {
         _currentDamage = damage;
         _currentKnockbackForce = force;
         _hitLayer = hitLayer;
+        _hitSound = hitSound;
     }
 
     // action scripts to call this fn to turn damage window on and off
@@ -69,7 +72,7 @@ public class DamageDealer : NetworkBehaviour
 
                 // send data to health script 
                 Vector3 contactPoint = other.ClosestPoint(_hitCheckPoint.position);
-                victim.Rpc_TakeDamage(_currentDamage, intendedForce, contactPoint, hitBoneName);
+                victim.Rpc_TakeDamage(_currentDamage, intendedForce, contactPoint, hitBoneName, _hitSound);
 
                 // deactivate attack after hitting
                 _isAttackActive = false;

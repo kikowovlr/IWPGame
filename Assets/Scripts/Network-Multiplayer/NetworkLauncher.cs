@@ -1,4 +1,5 @@
 using Fusion;
+using Fusion.Statistics;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ public class NetworkLauncher : MonoBehaviour
     [SerializeField] private NetworkRunner _runnerPrefab;
     public NetworkRunner Runner { get; private set; }
     public bool HasSkippedInitialSceneLoad { get; set; } = false;
+    public bool IsReturningFromTutorial { get; set; }
 
     private void Awake()
     {

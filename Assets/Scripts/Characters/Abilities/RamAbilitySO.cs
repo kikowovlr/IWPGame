@@ -70,6 +70,9 @@ public class RamAbilitySO : AbilitySO
 
         player.Registry.Health.ResetAccumulatedDamageCounter();
 
+        player.Registry.AbilityAudioNet.PlayAbilityOneShot(SoundID.GoatChargeSnortStart, SoundID.GoatChargeStompStart);
+        player.Registry.AbilityAudioNet.SetAbilityLoop(SoundID.GoatChargeRumbleLoop, true);
+
         player.Animator.SetTrigger(_skillTrigger);
         player.Animator.SetInteger(_skillTypeString, _skillType);
         player.Animator.SetBool(_activeBool, true);
@@ -112,6 +115,10 @@ public class RamAbilitySO : AbilitySO
         state._isCharging = false;
         state._isDashing = true;
         state._dashDurationTimer = _maxRamDuration;
+
+        player.Registry.AbilityAudioNet.SetAbilityLoop(SoundID.GoatChargeRumbleLoop, false);
+        player.Registry.AbilityAudioNet.PlayAbilityOneShot(SoundID.GoatRamScream);
+        player.Registry.AbilityAudioNet.SetAbilityLoop(SoundID.GoatRamGallopLoop, true);
     }
 
     private void ProcessCollisionCheck(NetworkPlayerController player, ref AbilityState state)
@@ -147,7 +154,7 @@ public class RamAbilitySO : AbilitySO
         );
 
         bool hitSomething = false;
-
+        bool hitPlayer = false;
         for ( int i = 0; i < hitCount; i++ )
         {
             RaycastHit hitInfo = hitBuffer[i];
@@ -187,6 +194,7 @@ public class RamAbilitySO : AbilitySO
                 enemy.ApplyKnockback(finalForceVector, ForceMode.Impulse);
 
                 hitSomething = true;
+                hitPlayer = true;
             }
             else
             {
@@ -198,9 +206,15 @@ public class RamAbilitySO : AbilitySO
         if (hitSomething)
         {
             state._isDashing = false;
+            player.Registry.AbilityAudioNet.SetAbilityLoop(SoundID.GoatRamGallopLoop, false);
+
+            if (hitPlayer)
+                player.Registry.AbilityAudioNet.PlayAbilityOneShot(SoundID.GoatRamHitThud, SoundID.GoatRamHitBoing);
+            else
+                player.Registry.AbilityAudioNet.PlayAbilityOneShot(SoundID.GoatRamHitThud);
+            
             player.Animator.SetTrigger(_releaseTrigger);
             player.Animator.SetBool(_activeBool, false);
-            Utils.DebugLog("[Goat Ram] Ram terminated via box target layer impact.");
         }
     }
 
@@ -217,6 +231,8 @@ public class RamAbilitySO : AbilitySO
         {
             state._isCharging = false;
             state._isDashing = false;
+
+            player.Registry.AbilityAudioNet.SetAbilityLoop(SoundID.GoatChargeRumbleLoop, false);
 
             player.Animator.SetTrigger(_releaseTrigger);
             state._isVisualShown = false;
@@ -363,6 +379,7 @@ public class RamAbilitySO : AbilitySO
             if (state._dashDurationTimer < 0f)
             {
                 state._isDashing = false;
+                player.Registry.AbilityAudioNet.SetAbilityLoop(SoundID.GoatRamGallopLoop, false);
                 Utils.DebugLog("[Goat Ram] Dash finished organically.");
                 player.Animator.SetBool(_activeBool, false);
                 return;

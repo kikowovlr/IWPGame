@@ -48,6 +48,15 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
         if (isPodiumTransition)
             return;
 
+        bool isTutorialExit = NetworkLauncher.Instance != null
+            && NetworkLauncher.Instance.IsReturningFromTutorial;
+        if (isTutorialExit)
+        {
+            NetworkLauncher.Instance.IsReturningFromTutorial = false;
+            Debug.Log("returning from tutorial");
+            return;
+        }
+
         // check for which map/scene is loading
         int loadingIndex = PendingMapCache.Instance != null
             ? PendingMapCache.Instance.PendingSceneIndex

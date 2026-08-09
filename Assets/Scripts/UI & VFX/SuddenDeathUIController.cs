@@ -8,6 +8,7 @@ public class SuddenDeathUIController : MonoBehaviour
 
     [SerializeField] private GameObject _bannerPanel;   // full-screen cover
 
+
     private void Awake()
     {
         Instance = this;

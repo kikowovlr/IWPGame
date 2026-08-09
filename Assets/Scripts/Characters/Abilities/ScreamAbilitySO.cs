@@ -25,11 +25,15 @@ public class ScreamAbilitySO : AbilitySO
         player.Animator.SetInteger(_skillTypeString, _skillType);
 
         state._isCasting = true;
+
+        player.Registry.AbilityAudioNet.PlayAbilityOneShot(SoundID.MonkeySoundwave);
     }
 
     public override void OnAnimationImpactTriggered(NetworkPlayerController player)
     {
         if (!player.Object.HasStateAuthority) return;
+
+        player.Registry.AbilityAudioNet.PlayAbilityOneShot(SoundID.MonkeyScream);
 
         // show soundwave + distance
         ref AbilityState state = ref player.AbilityStateRef;

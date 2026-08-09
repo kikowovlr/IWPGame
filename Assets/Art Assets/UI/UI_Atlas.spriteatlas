@@ -41,13 +41,16 @@ SpriteAtlas:
     - 68812060d9251c240b0f2f6f2ad03b92: 21300000
     - 119d3b60c11d0c54eb37ffc551c1a70e: 21300000
     - 63445b7052686b546a502b3ca683ffa6: 21300000
+    - d2ca2311f6399d04ba605c52c5b25f7f: 21300000
     - 4cca771113baf4e448810bdabcab40c8: 21300000
+    - 5795462172d182941bd03556f6a3b1d1: 21300000
     - da3fd181f2026ac42ab1a59931d473cc: 21300000
     - 38bb0c91295bc7a478d0391aedf7c027: 21300000
     - f276b4b185126894d8c4ec35edc6a6b6: 21300000
     - 760f38b1a61ac874a8804f0e5651e899: 21300000
     - a124b6523c3f0254ebecc40181a1b19e: 21300000
     - 9add0d6214e462644b86906ab9134a61: 21300000
+    - ba9c5ec21285aec499a967cd8af12bba: 21300000
     - 13c8bae2abcfdba40a56346935916127: 21300000
     - 0e23bbe2a5afb9d4b803bfa6dcda5455: 21300000
     - da23ac13c7e131842abbd999f7a8b7ff: 21300000
@@ -64,6 +67,7 @@ SpriteAtlas:
     - e131b6058a7ba584ba8f2decf4800760: 21300000
     - ad286d25ea2f36a47b153703b29bbe37: 21300000
     - 8419ae85732f53449975de78ae48f824: 21300000
+    - 1f2142d5361f18448ae1d7eaeb00e558: 21300000
     - a92405d5844236d45a04c3b06443bbde: 21300000
     - 9e6ce5d581faa9d4994fd4926b933350: 21300000
     - 93c0bf7649ace9a4a9b832f33024947f: 21300000
@@ -105,9 +109,11 @@ SpriteAtlas:
     - 2aebde2c66138ea48ad8b9182f4ea7e4: 21300000
     - 8263e65c547d3414bbc18838624ae7bb: 21300000
     - 18fad39c2f8177a4581db6bf755cea7e: 21300000
+    - d3eb52cc4cf7cd9498672c62b714aeba: 21300000
     - b8b04fdc0392d194f9f889394b8cd0d5: 21300000
     - 98109cfc0c4d2334cb8ba8fb4a96ec7c: 21300000
     - a1f25ffc02b1aab4f84eef6fcf2f62df: 21300000
+    - bd5ed40d4dded9b4a85e9fb5eb191bb2: 21300000
     - f1faa70d88d247e478b6c90090222f1b: 21300000
     - acc62d0df3be665419155157d2bd3dfc: 21300000
     - 1ec3ca5d453517248a9ca07f8335a9d0: 21300000
@@ -122,19 +128,23 @@ SpriteAtlas:
     - a6486cfe8ecffa24487a0d6d850266c6: 21300000
     - 92b0945f61800e6478a7f3e1637856c1: 21300000
     - bdf7a6bfed930e84888c3a2c7c78b2dc: 21300000
+    - 61dc70ff3bab7474cae9b9e52e79afeb: 21300000
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
   - {fileID: 21300000, guid: 43237e3045f2e4241aa5bc4e55cc5499, type: 3}
   - {fileID: 21300000, guid: 68812060d9251c240b0f2f6f2ad03b92, type: 3}
   - {fileID: 21300000, guid: 119d3b60c11d0c54eb37ffc551c1a70e, type: 3}
   - {fileID: 21300000, guid: 63445b7052686b546a502b3ca683ffa6, type: 3}
+  - {fileID: 21300000, guid: d2ca2311f6399d04ba605c52c5b25f7f, type: 3}
   - {fileID: 21300000, guid: 4cca771113baf4e448810bdabcab40c8, type: 3}
+  - {fileID: 21300000, guid: 5795462172d182941bd03556f6a3b1d1, type: 3}
   - {fileID: 21300000, guid: da3fd181f2026ac42ab1a59931d473cc, type: 3}
   - {fileID: 21300000, guid: 38bb0c91295bc7a478d0391aedf7c027, type: 3}
   - {fileID: 21300000, guid: f276b4b185126894d8c4ec35edc6a6b6, type: 3}
   - {fileID: 21300000, guid: 760f38b1a61ac874a8804f0e5651e899, type: 3}
   - {fileID: 21300000, guid: a124b6523c3f0254ebecc40181a1b19e, type: 3}
   - {fileID: 21300000, guid: 9add0d6214e462644b86906ab9134a61, type: 3}
+  - {fileID: 21300000, guid: ba9c5ec21285aec499a967cd8af12bba, type: 3}
   - {fileID: 21300000, guid: 13c8bae2abcfdba40a56346935916127, type: 3}
   - {fileID: 21300000, guid: 0e23bbe2a5afb9d4b803bfa6dcda5455, type: 3}
   - {fileID: 21300000, guid: da23ac13c7e131842abbd999f7a8b7ff, type: 3}
@@ -151,6 +161,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: e131b6058a7ba584ba8f2decf4800760, type: 3}
   - {fileID: 21300000, guid: ad286d25ea2f36a47b153703b29bbe37, type: 3}
   - {fileID: 21300000, guid: 8419ae85732f53449975de78ae48f824, type: 3}
+  - {fileID: 21300000, guid: 1f2142d5361f18448ae1d7eaeb00e558, type: 3}
   - {fileID: 21300000, guid: a92405d5844236d45a04c3b06443bbde, type: 3}
   - {fileID: 21300000, guid: 9e6ce5d581faa9d4994fd4926b933350, type: 3}
   - {fileID: 21300000, guid: 93c0bf7649ace9a4a9b832f33024947f, type: 3}
@@ -192,9 +203,11 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 2aebde2c66138ea48ad8b9182f4ea7e4, type: 3}
   - {fileID: 21300000, guid: 8263e65c547d3414bbc18838624ae7bb, type: 3}
   - {fileID: 21300000, guid: 18fad39c2f8177a4581db6bf755cea7e, type: 3}
+  - {fileID: 21300000, guid: d3eb52cc4cf7cd9498672c62b714aeba, type: 3}
   - {fileID: 21300000, guid: b8b04fdc0392d194f9f889394b8cd0d5, type: 3}
   - {fileID: 21300000, guid: 98109cfc0c4d2334cb8ba8fb4a96ec7c, type: 3}
   - {fileID: 21300000, guid: a1f25ffc02b1aab4f84eef6fcf2f62df, type: 3}
+  - {fileID: 21300000, guid: bd5ed40d4dded9b4a85e9fb5eb191bb2, type: 3}
   - {fileID: 21300000, guid: f1faa70d88d247e478b6c90090222f1b, type: 3}
   - {fileID: 21300000, guid: acc62d0df3be665419155157d2bd3dfc, type: 3}
   - {fileID: 21300000, guid: 1ec3ca5d453517248a9ca07f8335a9d0, type: 3}
@@ -209,18 +222,22 @@ SpriteAtlas:
   - {fileID: 21300000, guid: a6486cfe8ecffa24487a0d6d850266c6, type: 3}
   - {fileID: 21300000, guid: 92b0945f61800e6478a7f3e1637856c1, type: 3}
   - {fileID: 21300000, guid: bdf7a6bfed930e84888c3a2c7c78b2dc, type: 3}
+  - {fileID: 21300000, guid: 61dc70ff3bab7474cae9b9e52e79afeb, type: 3}
   m_PackedSpriteNamesToIndex:
   - ONLINE_LOBBY_Slider Button
   - WAH_INFO_Wah_info_pop_up 1
   - SMALL_ICONS_1st Leaderboard
   - IWP_2DAssets_PeanutSplash
+  - splat1
   - PLAYSCREEN_Full crown icon
+  - splat5
   - LOADING_Candyland render bg
   - CHARA_SELECT_Peanut icon
   - LOBBY_Select map button
   - PLAYSCREEN_Full heart icon
   - LOBBY_Background
   - PLAYSCREEN_Stunned icon
+  - splat7
   - LOBBYCODE_Join_button
   - LOADING_Loading bar top
   - PLAYSCREEN_Wah skill button
@@ -237,6 +254,7 @@ SpriteAtlas:
   - PLAYSCREEN_Empty heart icon
   - MATCHEND_Defeat UI
   - QUITGAME_Quit game button
+  - splat2
   - CHARA_SELECT_Character info button
   - CHARA_SELECT_Starting button
   - STARTSCREEN_Player name button
@@ -278,9 +296,11 @@ SpriteAtlas:
   - SELECTMAP_TutorialMap button
   - LOADING_TUTORIAL
   - WAH_INFO_Wah_info_pop_up
+  - splat3
   - PLAYSCREEN_Empty crown icon
   - CHARA_SELECT_Character Skill Info
   - PLAYSCREEN_Stamina top button
+  - splat4
   - IWP_2DAssets_WahSplash
   - LOBBY_Start game button
   - GREEN_NAMETAG
@@ -295,6 +315,7 @@ SpriteAtlas:
   - SPECTATOR_Right arrow button
   - SLIDER
   - LOBBY_Private - Public button
+  - splat6
   m_RenderDataMap: {}
   m_Tag: UI_Atlas
   m_IsVariant: 0

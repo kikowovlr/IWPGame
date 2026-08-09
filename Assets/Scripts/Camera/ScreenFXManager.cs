@@ -64,6 +64,14 @@ public class ScreenFXManager : MonoBehaviour
             _currentGrayscale = Mathf.MoveTowards(_currentGrayscale, _targetGrayscale, Time.deltaTime / _grayFadeDuration);
             if (_blackAndWhiteMaterial != null)
                 _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, Mathf.Clamp01(_currentGrayscale));
+
+            // muffle tracks grayscale exactly
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.SetMuffle(_currentGrayscale);
+                SoundManager.Instance.SetDuck(_currentGrayscale);
+            }
+
         }
 
         if (_isBlinking && Time.time - _blinkStartTime > _maxBlinkSafetyDuration)
@@ -156,6 +164,13 @@ public class ScreenFXManager : MonoBehaviour
 
             if (_blackAndWhiteMaterial != null)
                 _blackAndWhiteMaterial.SetFloat(_grayscaleIntensityID, 0f);
+
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.SetMuffle(0f);   // unmuffle when spectating
+                SoundManager.Instance.SetDuck(0f);
+            }
+
         }
     }
 
@@ -169,6 +184,12 @@ public class ScreenFXManager : MonoBehaviour
 
         if (_blinkMaterial != null)
             _blinkMaterial.SetFloat(_blinkProgressID, 0f);
+
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.SetMuffle(0f);   // ensure clear
+            SoundManager.Instance.SetDuck(0f);
+        }
     }
 
     private void OnDestroy()

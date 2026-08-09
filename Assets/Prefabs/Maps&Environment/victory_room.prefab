@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4225166435055387991}
   - component: {fileID: 1877842266359873817}
   - component: {fileID: 2478580238225378686}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4218886927128030970}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: group2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 8915760806654898724}
   - component: {fileID: 2210263698809268974}
   - component: {fileID: 92237112833602036}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -224,7 +224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6370701254548954547}
   - component: {fileID: 5959946807741268223}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -280,7 +280,7 @@ GameObject:
   - component: {fileID: 5333204071344026245}
   - component: {fileID: 4860851271944572217}
   - component: {fileID: 744883054996907108}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -368,7 +368,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1269716586728270581}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__tree_stump_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -406,7 +406,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7356093106812096975}
   - component: {fileID: 1159057219058511896}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -460,7 +460,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3169618907676260534}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaves_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -493,7 +493,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1254847148607962262}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaves_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -528,7 +528,7 @@ GameObject:
   - component: {fileID: 460758035397367129}
   - component: {fileID: 4080248136491288851}
   - component: {fileID: 4810317836612191498}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -616,7 +616,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 534776144414684349}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__tree_stump_UV2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -652,7 +652,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7708473810149122002}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: victory_room
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -670,7 +670,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 24.54, y: 3.8985786, z: -11.445945}
   m_LocalScale: {x: 0.72, y: 0.72, z: 0.72}
-  m_ConstrainProportionsScale: 1
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3307020410943166059}
   - {fileID: 1171615158197255431}
@@ -688,7 +688,7 @@ GameObject:
   - component: {fileID: 3889099463358261189}
   - component: {fileID: 2879765381723335340}
   - component: {fileID: 1533202128021755348}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__tree_stump_base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -776,7 +776,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 991996393256338906}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaves_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -812,7 +812,7 @@ GameObject:
   - component: {fileID: 4052092602641340308}
   - component: {fileID: 914234563302305590}
   - component: {fileID: 3800480059791877390}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pCube1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -924,7 +924,7 @@ GameObject:
   - component: {fileID: 7824116043987378698}
   - component: {fileID: 1940104862236152209}
   - component: {fileID: 2199506475850353556}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1014,7 +1014,7 @@ GameObject:
   - component: {fileID: 4618611677012678162}
   - component: {fileID: 8625628671402740373}
   - component: {fileID: 9162601419480645571}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1102,7 +1102,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1292793964129543763}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: First_Spawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1133,7 +1133,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6930416175943925219}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Second_Spawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1166,7 +1166,7 @@ GameObject:
   - component: {fileID: 619199531242803960}
   - component: {fileID: 8838984974443176980}
   - component: {fileID: 7973345981725821907}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1255,7 +1255,7 @@ GameObject:
   m_Component:
   - component: {fileID: 820780118948001702}
   - component: {fileID: 5103311906960415800}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_L_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1311,7 +1311,7 @@ GameObject:
   - component: {fileID: 2009831172883923808}
   - component: {fileID: 3738983773373228633}
   - component: {fileID: 2978978036605839668}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: baseColliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1386,7 +1386,7 @@ GameObject:
   - component: {fileID: 5508549390890023920}
   - component: {fileID: 4654591454140543944}
   - component: {fileID: 7517080396592726026}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1475,7 +1475,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9217332094829662516}
   - component: {fileID: 5351816927469431446}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: topCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1529,7 +1529,7 @@ GameObject:
   - component: {fileID: 3417497263263105206}
   - component: {fileID: 4483119070867950971}
   - component: {fileID: 2047235246779130327}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1619,7 +1619,7 @@ GameObject:
   - component: {fileID: 156306047178222042}
   - component: {fileID: 5516406918784614062}
   - component: {fileID: 6243923782312574958}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1707,7 +1707,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8512429570355097571}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__stump_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1742,7 +1742,7 @@ GameObject:
   m_Component:
   - component: {fileID: 176854735808017582}
   - component: {fileID: 4881216774613293412}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1798,7 +1798,7 @@ GameObject:
   - component: {fileID: 497770307946036237}
   - component: {fileID: 3545183425591675390}
   - component: {fileID: 2029089830658751919}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1886,7 +1886,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1435383605703461049}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shrooms_R_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1919,7 +1919,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4333342024792115992}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__stump_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1954,7 +1954,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7976446741676269677}
   - component: {fileID: 6315660078401631554}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroomS_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2010,7 +2010,7 @@ GameObject:
   - component: {fileID: 7975174327764094642}
   - component: {fileID: 8819799407700045727}
   - component: {fileID: 8975693073529197685}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2100,7 +2100,7 @@ GameObject:
   - component: {fileID: 97003936259051524}
   - component: {fileID: 7115341950225720755}
   - component: {fileID: 5961600252247074996}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__tree_stump_base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2188,7 +2188,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6152876629864011920}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaves_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2222,7 +2222,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1171615158197255431}
   - component: {fileID: 6143414003815088702}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: CrowdZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2276,7 +2276,7 @@ GameObject:
   - component: {fileID: 7039780084265923269}
   - component: {fileID: 6994653359206813324}
   - component: {fileID: 3591378530353099611}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2364,7 +2364,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2813299334189685511}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__stump_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2400,7 +2400,7 @@ GameObject:
   - component: {fileID: 371015752010802150}
   - component: {fileID: 3839187224198985328}
   - component: {fileID: 3561250832394169755}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2490,7 +2490,7 @@ GameObject:
   - component: {fileID: 635577496694327873}
   - component: {fileID: 3117676155985285562}
   - component: {fileID: 201919053531201237}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2580,7 +2580,7 @@ GameObject:
   - component: {fileID: 8894628826528313960}
   - component: {fileID: 168785155617133840}
   - component: {fileID: 1220097157322981281}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2643,7 +2643,7 @@ GameObject:
   - component: {fileID: 4316640914478221847}
   - component: {fileID: 5404626509812550136}
   - component: {fileID: 8699683209759662651}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2716,7 +2716,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 461029154473219636}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaves_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2751,7 +2751,7 @@ GameObject:
   - component: {fileID: 4291345480798651957}
   - component: {fileID: 1197450082595738647}
   - component: {fileID: 3307738871946072989}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2841,7 +2841,7 @@ GameObject:
   - component: {fileID: 1065657783411540043}
   - component: {fileID: 2053258796073284347}
   - component: {fileID: 5961864027704327162}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__tree_stump_base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2930,7 +2930,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7989791242557781094}
   - component: {fileID: 1627497742571053463}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_L_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2986,7 +2986,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3765003938883425925}
   - component: {fileID: 4591687407141347542}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroomS_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3042,7 +3042,7 @@ GameObject:
   - component: {fileID: 8126135592925428161}
   - component: {fileID: 7603460263939804811}
   - component: {fileID: 7016489230431734364}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3131,7 +3131,7 @@ GameObject:
   m_Component:
   - component: {fileID: 304073855399402008}
   - component: {fileID: 8464938329311584795}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroomS_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3186,7 +3186,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6519155525406202682}
   - component: {fileID: 548704361965333960}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_L_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3242,7 +3242,7 @@ GameObject:
   - component: {fileID: 7083698814925477212}
   - component: {fileID: 6934382899850389990}
   - component: {fileID: 8839057687104887262}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3331,7 +3331,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1468957524573415194}
   - component: {fileID: 6958142093944330652}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3385,7 +3385,7 @@ GameObject:
   - component: {fileID: 3587206068675962679}
   - component: {fileID: 3146525908361005975}
   - component: {fileID: 8599496956167912169}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3475,7 +3475,7 @@ GameObject:
   - component: {fileID: 6757694734626457874}
   - component: {fileID: 2507087306153445976}
   - component: {fileID: 3225262895899560855}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3563,7 +3563,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6560787952257151052}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__tree_stump_UV1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3599,7 +3599,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7142404733280877765}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shrooms_R_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3634,7 +3634,7 @@ GameObject:
   - component: {fileID: 1034453905219286135}
   - component: {fileID: 4071468185283017799}
   - component: {fileID: 7270583869482414757}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3722,7 +3722,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 391450335195653512}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaves_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3755,7 +3755,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1382172777605667294}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shrooms_R_UV
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3790,7 +3790,7 @@ GameObject:
   - component: {fileID: 7203621433847215620}
   - component: {fileID: 6238266039218588702}
   - component: {fileID: 1325555302737149848}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3865,7 +3865,7 @@ GameObject:
   - component: {fileID: 2059906235051375524}
   - component: {fileID: 8275552172813769841}
   - component: {fileID: 5976393348438376375}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3955,7 +3955,7 @@ GameObject:
   - component: {fileID: 8971176450067202745}
   - component: {fileID: 5317916923151874740}
   - component: {fileID: 7049910133315540899}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4045,7 +4045,7 @@ GameObject:
   - component: {fileID: 2814636435383883594}
   - component: {fileID: 3447226652424235607}
   - component: {fileID: 1518367847016812972}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4135,7 +4135,7 @@ GameObject:
   - component: {fileID: 4034787115686111519}
   - component: {fileID: 7170094597640272288}
   - component: {fileID: 9150669104670177280}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4225,7 +4225,7 @@ GameObject:
   - component: {fileID: 3261648974430558650}
   - component: {fileID: 280073183189403637}
   - component: {fileID: 3697160507916829374}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4315,7 +4315,7 @@ GameObject:
   - component: {fileID: 6546681964086386587}
   - component: {fileID: 7190728161879116014}
   - component: {fileID: 5477778765047094111}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4403,7 +4403,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 160394796061281974}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Third_Spawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4434,7 +4434,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3307020410943166059}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4469,7 +4469,7 @@ GameObject:
   - component: {fileID: 7717417048248502820}
   - component: {fileID: 775887086160197748}
   - component: {fileID: 718199378532749815}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4559,7 +4559,7 @@ GameObject:
   - component: {fileID: 3074220707146072658}
   - component: {fileID: 84847757994315127}
   - component: {fileID: 9217504195511889799}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__shroom_stem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4649,7 +4649,7 @@ GameObject:
   - component: {fileID: 1882999356911222034}
   - component: {fileID: 2481447594359590671}
   - component: {fileID: 195750930371288262}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: pasted__leaf2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

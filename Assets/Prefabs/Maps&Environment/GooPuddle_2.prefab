@@ -332,7 +332,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66f33eaf6daaa8940a184145efd7f944, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GooPuddle
-  _puddleGooRate: 0.55
+  _puddleGooRate: 0.2
   _visualRoot: {fileID: 194616893893797128}
   _rainVFX: {fileID: 1213929215656937017}
   _rainAreaSize: {x: 2.31, y: 2.2}
@@ -360,10 +360,10 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _growDuration: 3
-  _puddleMinLifeTime: 10
-  _puddleMaxLifeTime: 15
-  _shrinkDuration: 3
+  _growDuration: 2
+  _puddleMinLifeTime: 15
+  _puddleMaxLifeTime: 20
+  _shrinkDuration: 2
   _shrinkCurve:
     serializedVersion: 2
     m_Curve:

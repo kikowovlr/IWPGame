@@ -63,6 +63,9 @@ public class HandGrabHandler : NetworkBehaviour
 
     // references
     NetworkPlayerController _networkPlayer;
+    PlayerCombatAudio _combatAudio;
+
+    [Networked, OnChangedRender(nameof(OnThrowSoundChanged))] private byte _throwSoundTick { get; set; }
 
     // getters
     public bool IsGrabbingSomething => _grabJoint != null;
@@ -73,7 +76,10 @@ public class HandGrabHandler : NetworkBehaviour
     {
         PlayerComponentRegistry registry = transform.root.GetComponent<PlayerComponentRegistry>();
         if (registry != null)
+        {
             _networkPlayer = registry.Controller;
+            _combatAudio = registry.CombatAudio;
+        }
         else
             _networkPlayer = transform.root.GetComponent<NetworkPlayerController>();
 
@@ -330,12 +336,12 @@ public class HandGrabHandler : NetworkBehaviour
         if (_handSide == HandSide.Right)
         {
             // right hand can reach anything on the right and slightly left
-            return sideDot >= -0.2f;
+            return sideDot >= -0.35f;
         }
         else
         {
             // left hand can reach anyt on the left and slightly right
-            return sideDot <= 0.2f;
+            return sideDot <= 0.35f;
         }
     }
 
@@ -417,11 +423,19 @@ public class HandGrabHandler : NetworkBehaviour
                 playerRb.AddForce(-_networkPlayer.transform.forward * (currentForceMultiplier * 0.15f), ForceMode.Impulse);
             }
 
-            Utils.DebugLog("Two-Handed Throw Executed!");
             _throwCooldownTimer = TickTimer.CreateFromSeconds(Runner, _throwCooldown);
             TutorialManager.Instance?.NotifyPlayerAction(_networkPlayer.Object.InputAuthority, TutorialActionType.Throw);
+
+            _throwSoundTick++;
+
             ReleaseGrab(true);
         }
+    }
+
+    private void OnThrowSoundChanged()
+    {
+        if (_combatAudio != null)
+            _combatAudio.PlaySound(SoundID.ThrowRelease);
     }
 
     private void ReleaseGrab(bool wantToThrow)

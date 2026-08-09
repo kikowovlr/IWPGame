@@ -15,17 +15,19 @@ public struct ActiveEffectInfo
 /// </summary>
 public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
 {
+    public const int MAX_EFFECTS = 4;
+
     [SerializeField] private PlayerVFXHandler _vfxHandler;
     [SerializeField] private List<StatusEffectSO> _effectDatabase = new List<StatusEffectSO>();
-    private Dictionary<StatusEffectType, StatusEffectSO> _effectsDictionary;
 
-    public const int MAX_EFFECTS = 4;
     // active effects on this current player, stored as a networked array for syncing across clients
     [Networked, Capacity(MAX_EFFECTS)] private NetworkArray<StatusEffectState> _activeEffects => default;
+
+    private readonly HashSet<StatusEffectType> _prevActiveTypes = new HashSet<StatusEffectType>();
+    private Dictionary<StatusEffectType, StatusEffectSO> _effectsDictionary;
     private NetworkPlayerController _player;
 
     public bool SuppressVisuals { get; set; }
-
 
     private void Awake()
     {
@@ -110,8 +112,6 @@ public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
 
     private void UpdateModifiers()
     {
-        // todo: add speed modifier to player controller cs
-
         // loop through all slots and tick down continuous modifiers
         for (int i = 0; i < _activeEffects.Length; i++)
         {
@@ -132,6 +132,7 @@ public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
         if (SuppressVisuals)
         {
             _vfxHandler?.SyncStatusVisualEffects(new HashSet<StatusEffectType>(), _effectsDictionary);
+            HandleStatusAudioTransitions(new HashSet<StatusEffectType>()); // clear audio 
             return;
         }
 
@@ -148,6 +149,58 @@ public class StatusEffectManager : NetworkBehaviour, IAffectedByStatusEffects
         // pass to vfx handler and update active types
         if (_vfxHandler != null)
             _vfxHandler.SyncStatusVisualEffects(activeTypes, _effectsDictionary);
+
+        HandleStatusAudioTransitions(activeTypes);
+    }
+
+    private void HandleStatusAudioTransitions(HashSet<StatusEffectType> activeTypes)
+    {
+        var audio = _player != null ? _player.Registry.AbilityAudio : null;
+        if (audio == null) 
+        { 
+            _prevActiveTypes.Clear(); 
+            _prevActiveTypes.UnionWith(activeTypes);  // sync
+            return; 
+        }
+
+        // newly ADDED effects this frame
+        foreach (var type in activeTypes)
+        {
+            if (!_prevActiveTypes.Contains(type))
+                OnStatusEffectStarted(type, audio);
+        }
+
+        // newly REMOVED effects this frame
+        foreach (var type in _prevActiveTypes)
+        {
+            if (!activeTypes.Contains(type))
+                OnStatusEffectEnded(type, audio);
+        }
+
+        _prevActiveTypes.Clear();
+        _prevActiveTypes.UnionWith(activeTypes);
+    }
+
+    private void OnStatusEffectStarted(StatusEffectType type, PlayerAbilityAudio audio)
+    {
+        switch (type)
+        {
+            case StatusEffectType.Stunned:
+                audio.StartLoop(SoundID.StunnedBirdsChirping);
+                break;
+            case StatusEffectType.Poisoned:
+                break;
+        }
+    }
+
+    private void OnStatusEffectEnded(StatusEffectType type, PlayerAbilityAudio audio)
+    {
+        switch (type)
+        {
+            case StatusEffectType.Stunned:
+                audio.StopLoop();
+                break;
+        }
     }
 
     public List<ActiveEffectInfo> GetActiveEffectsForUI()
