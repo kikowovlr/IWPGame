@@ -24,7 +24,6 @@ public class KickHandler : NetworkBehaviour
     [Networked] private float _kickStartTime { get; set; }
     [Networked] public bool IsKicking { get; private set; }
 
-    private Quaternion _initialJointRotation;
     private const float InputThreshold = 0.01f;
 
     private void Awake()
@@ -41,14 +40,6 @@ public class KickHandler : NetworkBehaviour
             _damageCollider = _rightFootDamageDealer.GetComponent<Collider>();
             _damageCollider.enabled = false;
             _rightFootDamageDealer.SetAttackActive(false);
-        }
-    }
-
-    private void Start()
-    {
-        if (_playerController != null)
-        {
-            _initialJointRotation = _playerController.InitialJointRotation;
         }
     }
 
@@ -123,14 +114,13 @@ public class KickHandler : NetworkBehaviour
         if (timeSinceKick >= _ragdollDelayDuration && !_playerController.IsKnockedOut)
         {
             SetKickDamage(false);
-            _playerController.Knockout();
+            _playerController.RequestKnockout(_ragdollDuration); // registers wake time, doesn't own recovery
         }
         
         // total ragdoll has ended -> recover
         if (timeSinceKick >= (_ragdollDelayDuration + _ragdollDuration))
         {
             IsKicking = false;
-            _playerController.Recover();
         }
     }
 

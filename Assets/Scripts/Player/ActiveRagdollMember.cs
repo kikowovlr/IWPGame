@@ -16,27 +16,45 @@ public class ActiveRagdollMember : MonoBehaviour
     [SerializeField] bool _isSetupInEditor = false;
 
     [SerializeField, HideInInspector] Quaternion _worldRotationOffset; // saves the exact difference between the animated bone and physical bone
+    [Header("Rig Alignment")]
+    [Tooltip("If this rig's physical bones weren't authored aligned to the animated bones, " +
+         "enable this to snap the physical bone to the animated bone at setup so the offset is identity.")]
+    [SerializeField] private bool _forceAlignToAnimated = false;
 
     [ContextMenu("Capture Pristine Bind-Pose (CLICK ME)")]
     public void SetupBaselineInEditor()
     {
         _joint = GetComponent<ConfigurableJoint>();
-        if (_joint != null)
+        if (_joint == null) return;
+
+        CaptureBaseline();
+        _isSetupInEditor = true;
+
+        Debug.Log($"[Ragdoll] Captured bind-pose for {gameObject.name}: " +
+                  $"offset={_worldRotationOffset.eulerAngles}, aligned={_forceAlignToAnimated}");
+    }
+
+    private void CaptureBaseline()
+    {
+        if (_joint == null) return;
+
+        // if the physical bone wasn't authored aligned to the animated bone,
+        // snap it into alignment once so the offset comes out identity —
+        // same starting condition as a correctly-authored rig.
+        if (_forceAlignToAnimated && _animatedRb != null)
         {
-            // CRITICAL FIX: Calculate the starting rotation relative to the physics anchor (Chest)
-            // instead of the raw hierarchy parent (Clavicle)!
-            Transform physicalAnchor = _joint.connectedBody != null ? _joint.connectedBody.transform : transform.parent;
-            _startLocalRotation = Quaternion.Inverse(physicalAnchor.rotation) * transform.rotation;
-
-            if (_animatedRb != null)
-                _worldRotationOffset = Quaternion.Inverse(_animatedRb.transform.rotation) * transform.rotation;
-            else
-                _worldRotationOffset = Quaternion.identity;
-
-            _startSlerpPositionSpring = _joint.slerpDrive.positionSpring;
-            _isSetupInEditor = true;
-            Debug.Log($"[Ragdoll] Manually captured pristine bind-pose for {gameObject.name} relative to {physicalAnchor.name}: {_startLocalRotation.eulerAngles}");
+            transform.rotation = _animatedRb.transform.rotation;
         }
+
+        Transform physicalAnchor = _joint.connectedBody != null ? _joint.connectedBody.transform : transform.parent;
+        _startLocalRotation = Quaternion.Inverse(physicalAnchor.rotation) * transform.rotation;
+
+        if (_animatedRb != null)
+            _worldRotationOffset = Quaternion.Inverse(_animatedRb.transform.rotation) * transform.rotation;
+        else
+            _worldRotationOffset = Quaternion.identity;
+
+        _startSlerpPositionSpring = _joint.slerpDrive.positionSpring;
     }
 
     private void Awake()
@@ -56,25 +74,17 @@ public class ActiveRagdollMember : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _joint = GetComponent<ConfigurableJoint>();
 
-        // Only capture at runtime if we forgot to do it in the Editor!
         if (!_isSetupInEditor && _joint != null)
         {
-            Transform physicalAnchor = _joint.connectedBody != null ? _joint.connectedBody.transform : transform.parent;
-            _startLocalRotation = Quaternion.Inverse(physicalAnchor.rotation) * transform.rotation;
-
-            if (_animatedRb != null)
-                _worldRotationOffset = Quaternion.Inverse(_animatedRb.transform.rotation) * transform.rotation;
-            else
-                _worldRotationOffset = Quaternion.identity;
-
-            _startSlerpPositionSpring = _joint.slerpDrive.positionSpring;
+            CaptureBaseline();
             _isSetupInEditor = true;
         }
     }
 
     public void UpdateJointFromAnimation()
     {
-        if (!_syncAnimation || _joint == null) return;
+        if (!_syncAnimation || _joint == null)
+            return;
 
         // 1. Where the animated arm wants to be
         Quaternion targetWorldRotation = _animatedRb.transform.rotation * _worldRotationOffset;
@@ -156,5 +166,15 @@ public class ActiveRagdollMember : MonoBehaviour
                 _hasCachedDrive = false;
             }
         }
+    }
+
+    public void LogWorldRotationOffset()
+    {
+        Vector3 euler = _worldRotationOffset.eulerAngles;
+        // normalize to -180..180 so a "backwards" bone reads as ~±180 instead of ~180/360 noise
+        euler.x = Mathf.DeltaAngle(0f, euler.x);
+        euler.y = Mathf.DeltaAngle(0f, euler.y);
+        euler.z = Mathf.DeltaAngle(0f, euler.z);
+        Debug.Log($"[RagdollOffset] {gameObject.name}: worldRotationOffset={euler} (setupInEditor={_isSetupInEditor})");
     }
 }

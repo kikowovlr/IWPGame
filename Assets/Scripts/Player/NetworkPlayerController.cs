@@ -52,6 +52,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
     [Header("Ragdoll Settings")]
     [SerializeField] private float _unconsciousMass = 0.2f;
+    [SerializeField] private float _knockedOutStickForce = 8f;   // push into slope; raise if they still slide
+    [SerializeField] private float _knockedOutSlideDamp = 2f;    // bleeds off slide velocity; raise for stickier
 
     //Input
     Vector2 _moveInputVector = Vector2.zero;
@@ -171,6 +173,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [Header("Recovery")]
     [SerializeField] private float _recoverAnimDuration = 2f;
     [Networked] private NetworkBool _isRecovering { get; set; }
+    [Networked] private float _knockoutUntil { get; set; } // networked wake time (SimulationTime)
 
     // audio 
     private PlayerCombatAudio _combatAudio;
@@ -309,6 +312,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             TargetSpeedMultiplier = 1.0f; // reset each frame, status effects, etc, will continuously overwrite this during ticks
             _boost.ApplyTargetSpeedMultiplier();
 
+            TickKnockoutRecovery();
+
             if (_drowning.IsSinking)
             {
                 // PlayerDrowning.FixedUpdateNetwork fully owns force application during the drowning sequence, do nothing 
@@ -325,6 +330,22 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             {
                 // apply downward gravity when unconscious so their dead weight falls naturally
                 _rb.AddForce(Vector3.down * _gravity, ForceMode.Force); // ragdolled, not submerged — simple fall
+
+                // mild stick force on slopes so downed bodies rest instead of sliding away
+                if (_isGrounded && !_buoyancy.IsSubmerged)
+                {
+                    float slopeAngle = Vector3.Angle(Vector3.up, _groundNormal);
+                    if (slopeAngle > 3f && slopeAngle <= _maxSlopeAngle)
+                    {
+                        // push into the slope surface to add friction, scaled by how steep it is
+                        float slopeFactor = slopeAngle / _maxSlopeAngle;
+                        _rb.AddForce(-_groundNormal * _knockedOutStickForce * slopeFactor, ForceMode.Force);
+
+                        // gently bleed off horizontal slide velocity (not full stop — let them settle)
+                        Vector3 horizontalVel = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+                        _rb.AddForce(-horizontalVel * _knockedOutSlideDamp, ForceMode.Force);
+                    }
+                }
             }
         }
 
@@ -716,6 +737,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     {
         ApplyNetworkedAnimatorParams();   // all clients drive their own animator params
 
+        if (Object.HasInputAuthority && Input.GetKeyDown(KeyCode.L))
+        {
+            DebugLogRagdollOffsets();
+        }
+
         // all clients run this code
         if (!Object.HasStateAuthority)
         {
@@ -905,6 +931,34 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         _animator.SetBool("IsSubmerged", _buoyancy.IsSubmerged);
     }
 
+    /// <summary>
+    /// Request a knockout lasting at least `duration`. Extends the wake time if longer than what's already pending, so overlapping knockouts don't cut each other short.
+    /// </summary>
+    public void RequestKnockout(float duration, bool fromCombatHit = false)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        float wakeTime = Runner.SimulationTime + duration;
+        if (wakeTime > _knockoutUntil)
+            _knockoutUntil = wakeTime;
+
+        if (!_isKnockedOut)
+            Knockout(fromCombatHit);
+    }
+
+    /// <summary>
+    /// Called every tick on state authority. Recovers only when ALL knockout time has elapsed.
+    /// </summary>
+    private void TickKnockoutRecovery()
+    {
+        if (!Object.HasStateAuthority) return;
+        if (!_isKnockedOut) return;
+
+        if (Runner.SimulationTime >= _knockoutUntil)
+            Recover();
+    }
+
+
     public void Knockout(bool fromCombatHit = false)
     {
         if (!Object.HasStateAuthority)
@@ -913,8 +967,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         _isKnockedOut = true;
         _isGrabbingActive = false;
         _wasKnockedOutByHit = fromCombatHit;
-
-        SetCharacterMass(true);
 
         // update main joint
         JointDrive jointDrive = _mainJoint.slerpDrive;
@@ -947,7 +999,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         _isKnockedOut = false;
         _isGrabbingActive = false;
         _isRecovering = false;
-        SetCharacterMass(false);
 
         // update main joint
         JointDrive jointDrive = _mainJoint.slerpDrive;
@@ -957,20 +1008,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         // update joints rotation and send them to clients
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
             _activeRagdollMembers[i].MakeActiveRagdoll();
-    }
-
-    void SetCharacterMass(bool isKnockedOut)
-    {
-        if (_allChildRigidbodies == null || _allChildRigidbodies.Length == 0) return;
-
-        for (int i = 0; i < _allChildRigidbodies.Length; i++)
-        {
-            if (_allChildRigidbodies[i] != null)
-            {
-                // if knocked out, make them weightless
-                _allChildRigidbodies[i].mass = isKnockedOut ? _unconsciousMass : _originalMasses[i];
-            }
-        }
     }
 
     /// <summary>
@@ -1193,6 +1230,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 }
             }
         }
+
+        DebugLogRagdollOffsets();
     }
 
     /// <summary>
@@ -1290,14 +1329,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     {
         if (!Object.HasStateAuthority) return;
 
-        // are any joints still holding this body?
-        var joints = GetComponentsInChildren<ConfigurableJoint>();
-        int liveGrabJoints = 0;
-        foreach (var j in joints)
-            if (j.connectedBody != null && j.gameObject.name.Contains("Hand")) liveGrabJoints++;
-
-        Debug.Log($"[THROW] applying. incoming vel mag={velocity.magnitude:F1}, current root vel mag={_rb.linearVelocity.magnitude:F1}");
-
         velocity = Vector3.ClampMagnitude(velocity, _maxThrowSpeed);
 
         // brief control lock so they can't instantly fight the throw
@@ -1317,6 +1348,13 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 _allChildRigidbodies[i].angularVelocity = Vector3.zero;   // kill spin that stretches joints
             }
         }
+    }
+
+    public void StartThrowCooldownAllHands(float seconds)
+    {
+        if (_handGrabHandlers == null) return;
+        foreach (var hand in _handGrabHandlers)
+            hand?.StartThrowCooldown(seconds);
     }
 
     /// <summary>
@@ -1591,6 +1629,18 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         _isJumpButtonPressed = false;
 
         return networkInputData;
+    }
+
+    public void DebugLogRagdollOffsets()
+    {
+        if (!Object.HasInputAuthority) return;
+        if (_activeRagdollMembers == null) return;
+
+        foreach (var member in _activeRagdollMembers)
+        {
+            if (member != null)
+                member.LogWorldRotationOffset();
+        }
     }
 
     public override void Spawned()

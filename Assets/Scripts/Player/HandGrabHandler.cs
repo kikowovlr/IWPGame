@@ -419,7 +419,7 @@ public class HandGrabHandler : NetworkBehaviour
             objThrowForce = throwDirection * currentForceMultiplier;
         }
 
-        _throwCooldownTimer = TickTimer.CreateFromSeconds(Runner, _throwCooldown);
+        _networkPlayer.StartThrowCooldownAllHands(_throwCooldown);
         TutorialManager.Instance?.NotifyPlayerAction(_networkPlayer.Object.InputAuthority, TutorialActionType.Throw);
         _throwSoundTick++;
 
@@ -526,6 +526,11 @@ public class HandGrabHandler : NetworkBehaviour
 
         hit = default;
         return false;
+    }
+
+    public void StartThrowCooldown(float seconds)
+    {
+        _throwCooldownTimer = TickTimer.CreateFromSeconds(Runner, seconds);
     }
 
     private void OnDrawGizmos()
