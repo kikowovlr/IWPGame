@@ -29,7 +29,9 @@ public class HandGrabHandler : NetworkBehaviour
     [SerializeField] private float _relaxedArmSpring = 10f; // spring strength when trying to reach (allow for arm to reach out)
     [SerializeField] private float _objThrowForceMultiplier = 0.1f;
     [SerializeField] private float _playerThrowForceMultiplier = 10f;
+    [Range(0f, 1f)] [SerializeField] private float _consciousThrowResistance = 0.4f;
     [SerializeField] private float _throwCooldown = 0.5f; // how long before this hand can grab again after a throw
+    [SerializeField] private float _maxCarrySpeed = 8f;
     [Networked] private TickTimer _throwCooldownTimer { get; set; }
     private float _originalArmSpring;
 
@@ -57,10 +59,6 @@ public class HandGrabHandler : NetworkBehaviour
     // states
     private GrabState _currentGrabState = GrabState.None;
 
-    // climbing
-    private bool _isClimbing;
-    private Vector3 _climbSurfaceNormal;
-
     // references
     NetworkPlayerController _networkPlayer;
     PlayerCombatAudio _combatAudio;
@@ -69,8 +67,7 @@ public class HandGrabHandler : NetworkBehaviour
 
     // getters
     public bool IsGrabbingSomething => _grabJoint != null;
-    public bool IsClimbing => _isClimbing;
-    public Vector3 ClimbSurfaceNormal => _climbSurfaceNormal;
+
 
     private void Awake()
     {
@@ -394,41 +391,53 @@ public class HandGrabHandler : NetworkBehaviour
             return;
 
         Rigidbody targetRb = _grabJoint.connectedBody;
-
         // only allow throw if BOTH hands are holding the same object
-        if (_networkPlayer.IsObjectHeldByBothHands(targetRb))
+        if (!_networkPlayer.IsObjectHeldByBothHands(targetRb))
+            return;
+
+        float currentForceMultiplier = _objThrowForceMultiplier;
+        bool isPlayer = targetRb.transform.root.TryGetComponent(out NetworkPlayerController otherPlayer);
+
+        Vector3 throwVelocity = Vector3.zero;   // for player throws
+        Vector3 objThrowForce = Vector3.zero;   // for object throws
+
+        if (isPlayer)
         {
-            float currentForceMultiplier = _objThrowForceMultiplier;
-            Vector3 throwDirection;
+            currentForceMultiplier = _playerThrowForceMultiplier;
 
-            // check if is another player
-            if (targetRb.TryGetComponent(out NetworkPlayerController otherPlayer))
-            {
-                currentForceMultiplier = _playerThrowForceMultiplier;
-                throwDirection = (_networkPlayer.transform.forward + Vector3.up * 1.2f).normalized;
+            Vector3 aimDir = (_networkPlayer.transform.forward + Vector3.up * 1.2f).normalized;
+            Vector3 carry = _networkPlayer.RootVelocity;
+            carry = Vector3.ClampMagnitude(carry, _maxCarrySpeed);
+            throwVelocity = aimDir * currentForceMultiplier + carry * 0.6f;
 
-                Vector3 finalThrowForce = throwDirection * currentForceMultiplier;
-                otherPlayer.ApplyKnockback(finalThrowForce, ForceMode.Impulse);
-            }
-            else
-            {
-                // fire obj forward
-                throwDirection = _networkPlayer.transform.forward + Vector3.up * 0.3f * currentForceMultiplier;
-                targetRb.AddForce(throwDirection * currentForceMultiplier, ForceMode.Impulse);
-            }
+            if (!otherPlayer.IsKnockedOut)
+                throwVelocity *= _consciousThrowResistance;
+        }
+        else
+        {
+            Vector3 throwDirection = _networkPlayer.transform.forward + Vector3.up * 0.3f * currentForceMultiplier;
+            objThrowForce = throwDirection * currentForceMultiplier;
+        }
 
-            // add recoil after throwing
-            if (transform.root.TryGetComponent(out Rigidbody playerRb))
-            {
-                playerRb.AddForce(-_networkPlayer.transform.forward * (currentForceMultiplier * 0.15f), ForceMode.Impulse);
-            }
+        _throwCooldownTimer = TickTimer.CreateFromSeconds(Runner, _throwCooldown);
+        TutorialManager.Instance?.NotifyPlayerAction(_networkPlayer.Object.InputAuthority, TutorialActionType.Throw);
+        _throwSoundTick++;
 
-            _throwCooldownTimer = TickTimer.CreateFromSeconds(Runner, _throwCooldown);
-            TutorialManager.Instance?.NotifyPlayerAction(_networkPlayer.Object.InputAuthority, TutorialActionType.Throw);
+        _networkPlayer.ForceReleaseAllHands();
 
-            _throwSoundTick++;
+        if (isPlayer)
+        {
+            otherPlayer.ApplyThrowImpulse(throwVelocity);
+        }
+        else
+        {
+            targetRb.AddForce(objThrowForce, ForceMode.Impulse);
+        }
 
-            ReleaseGrab(true);
+        // add recoil after throwing
+        if (transform.root.TryGetComponent(out Rigidbody playerRb))
+        {
+            playerRb.AddForce(-_networkPlayer.transform.forward * (currentForceMultiplier * 0.15f), ForceMode.Impulse);
         }
     }
 
@@ -441,7 +450,6 @@ public class HandGrabHandler : NetworkBehaviour
     private void ReleaseGrab(bool wantToThrow)
     {
         _currentGrabState = GrabState.None;
-        _isClimbing = false;
         _handIKConstraint.weight = Mathf.MoveTowards(_handIKConstraint.weight, 0f, Runner.DeltaTime * _ikBlendSpeed);
         RelaxArm(false);
 
@@ -461,7 +469,10 @@ public class HandGrabHandler : NetworkBehaviour
                 _grabJoint.connectedBody.AddForce(Vector3.down * 0.1f, ForceMode.Impulse);
             }
 
+            _grabJoint.connectedBody = null;                      
+            _grabJoint.projectionMode = JointProjectionMode.None; 
             Destroy(_grabJoint);
+            _grabJoint = null;                                    
             _rb.mass = _originalHandMass;
         }
 

@@ -184,6 +184,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     private RigidbodyConstraints _originalRootConstraints;
     private bool _rootFrozenForSelect;
 
+    // throw
+    [Header("Throw Limits")]
+    [SerializeField] private float _maxThrowSpeed = 20f;
+
     public bool IsCameraRotationLocked
     {
         get
@@ -209,6 +213,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public float AbilityCooldownRemaining => CurrentAbilityState._cooldownTimer;
     public float RecoverAnimDuration => _recoverAnimDuration;
     public bool IsGroundedNetworked => Object.HasStateAuthority ? _isGrounded : _netIsGrounded;
+    public Vector3 RootVelocity => _rb != null ? _rb.linearVelocity : Vector3.zero;
 
     private void Awake()
     {
@@ -999,6 +1004,13 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         return false;
     }
 
+    public void ForceReleaseAllHands()
+    {
+        if (_handGrabHandlers == null) return;
+        foreach (var hand in _handGrabHandlers)
+            hand?.ForceRelease();
+    }
+
     private void UpdateAbility(NetworkInputData inputData)
     {
         if (_equippedAbility != null)
@@ -1266,6 +1278,44 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         {
             _rb.linearVelocity = Vector3.zero;
             _rb.AddForce(forceVector, mode);
+        }
+    }
+
+    /// <summary>
+    /// use for throws
+    /// launches the entire ragdoll as one piece
+    /// sets velocity on every child body so mass is irrelevant
+    /// </summary>
+    public void ApplyThrowImpulse(Vector3 velocity)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        // are any joints still holding this body?
+        var joints = GetComponentsInChildren<ConfigurableJoint>();
+        int liveGrabJoints = 0;
+        foreach (var j in joints)
+            if (j.connectedBody != null && j.gameObject.name.Contains("Hand")) liveGrabJoints++;
+
+        Debug.Log($"[THROW] applying. incoming vel mag={velocity.magnitude:F1}, current root vel mag={_rb.linearVelocity.magnitude:F1}");
+
+        velocity = Vector3.ClampMagnitude(velocity, _maxThrowSpeed);
+
+        // brief control lock so they can't instantly fight the throw
+        _physicsControlLockTimer = TickTimer.CreateFromSeconds(Runner, _maxKnockbackControlLockDuration);
+
+        if (_rb != null)
+        {
+            _rb.linearVelocity = velocity;
+        }
+
+        if (_allChildRigidbodies == null) return;
+        for (int i = 0; i < _allChildRigidbodies.Length; i++)
+        {
+            if (_allChildRigidbodies[i] != null)
+            {
+                _allChildRigidbodies[i].linearVelocity = velocity;
+                _allChildRigidbodies[i].angularVelocity = Vector3.zero;   // kill spin that stretches joints
+            }
         }
     }
 

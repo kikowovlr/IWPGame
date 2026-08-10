@@ -46,8 +46,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthHandler
   _maxHealth: 150
   _knockedDownDamageMultiplier: 0.3
-  _baseKnockoutTime: 5
-  _maxKnockoutTime: 10
+  _baseKnockoutTime: 100
+  _maxKnockoutTime: 100
   _knockOutForceMultiplier: 1.8
   _CurrentHealth: 0
   _MaxHealth: 0
@@ -912,6 +912,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: e4e9e4ebf4e139441adef1a6a9ac34bf, type: 3}
   _NametagSpriteIndex: -1
   _recoverAnimDuration: 2
+  _maxThrowSpeed: 20
 --- !u!114 &4647790447083351236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2541,6 +2542,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 1334930843253778074, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}
+      propertyPath: _playerThrowForceMultiplier
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1336156478998257307, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}
       propertyPath: m_Layer
       value: 8
@@ -2600,6 +2605,10 @@ PrefabInstance:
     - target: {fileID: 1883051415781932531, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}
       propertyPath: m_Layer
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1958086690318505101, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}
+      propertyPath: _playerThrowForceMultiplier
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1965770121915517462, guid: 5af30b488ee825642be8c8b1fb0ee89f, type: 3}
       propertyPath: m_Layer
@@ -3845,7 +3854,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3447559562347550488, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _playerThrowForceMultiplier
-      value: 400
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3498988876215049298, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4021,7 +4030,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6489397798570523340, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _playerThrowForceMultiplier
-      value: 400
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6702509345651407269, guid: fdb02e7dbd67f1c4fbc469e557118926, type: 3}
       propertyPath: _syncAnimation
@@ -5182,6 +5191,10 @@ PrefabInstance:
       propertyPath: _startSlerpPositionSpring
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 5608515606259508579, guid: 650fdfb11759916428fa98c4d34bdfb1, type: 3}
+      propertyPath: _playerThrowForceMultiplier
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5762630997141624238, guid: 650fdfb11759916428fa98c4d34bdfb1, type: 3}
       propertyPath: m_Layer
       value: 8
@@ -5461,6 +5474,10 @@ PrefabInstance:
     - target: {fileID: 8030020385240859610, guid: 650fdfb11759916428fa98c4d34bdfb1, type: 3}
       propertyPath: m_Layer
       value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8076928952241234970, guid: 650fdfb11759916428fa98c4d34bdfb1, type: 3}
+      propertyPath: _playerThrowForceMultiplier
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8142994134741171948, guid: 650fdfb11759916428fa98c4d34bdfb1, type: 3}
       propertyPath: m_Layer
