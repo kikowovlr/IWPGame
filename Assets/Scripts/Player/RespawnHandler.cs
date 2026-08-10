@@ -8,12 +8,16 @@ public class RespawnHandler : NetworkBehaviour
 
     private void Awake()
     {
-        _registry = GetComponentInParent<PlayerComponentRegistry>();
+        _registry = transform.root.GetComponentInParent<PlayerComponentRegistry>();
     }
 
 
     public void TeleportToSpawnPoint(Vector3 position, Quaternion rotation)
     {
+        // if the registry exposes the impact audio, suppress right after teleporting
+        if (_registry != null && _registry.ImpactAudio != null)
+            _registry.ImpactAudio.SuppressImpacts(0.3f);
+
         if (_registry != null)
             _registry.VisualsOverrider.EnableVisuals();
 

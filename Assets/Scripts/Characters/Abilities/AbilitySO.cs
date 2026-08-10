@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -49,4 +50,16 @@ public abstract class AbilitySO : ScriptableObject
     }
 
     public abstract void InitIndicatorVisual(AbilityIndicatorController indicator);
+
+    public virtual void ForceCancel(NetworkPlayerController player, ref AbilityState state)
+    {
+        if (!player.Object.HasStateAuthority) return;
+
+        state._isCharging = false;
+        state._isDashing = false;
+        state._isCasting = false;
+        state._isVisualShown = false;
+        state._customVelocity = Vector3.zero;
+        state._hitCount = 0;
+    }
 }

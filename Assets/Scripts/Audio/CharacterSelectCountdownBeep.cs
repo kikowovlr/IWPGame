@@ -15,8 +15,6 @@ public class CharacterSelectCountdownBeep : MonoBehaviour
             return;
         }
 
-        Debug.Log(ctx.IsInFinalCharacterSelectCountdown);
-
         int whole = Mathf.CeilToInt(ctx.GetRemainingStateTime());
         if (whole != _lastWholeSecond && whole > 0)
         {

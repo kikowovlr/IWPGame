@@ -92,8 +92,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     ActiveRagdollMember[] _activeRagdollMembers;
     private Quaternion _initialJointRotation;
 
-    // TODO: change to sending bytes instead of Quaternion
-    //[HideInInspector] [Networked, Capacity(30)] public NetworkArray<Quaternion> NetworkPhysicsSyncedRotation { get; }
+    // sending bytes instead of Quaternion
     [HideInInspector][Networked, Capacity(30)] public NetworkArray<uint> NetworkPhysicsSyncedRotation { get; }
 
     private const float InputThreshold = 0.01f;
@@ -175,11 +174,15 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
 
     // audio 
     private PlayerCombatAudio _combatAudio;
+    [Networked] private NetworkBool _wasKnockedOutByHit { get; set; }
 
     // animation
     [Networked] private float _netAnimSpeed { get; set; }
     [Networked] private float _netVerticalVel { get; set; }
     [Networked] private NetworkBool _netIsGrounded { get; set; }
+
+    private RigidbodyConstraints _originalRootConstraints;
+    private bool _rootFrozenForSelect;
 
     public bool IsCameraRotationLocked
     {
@@ -525,6 +528,26 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         Vector3 moveDir = CalculateMoveDirection(networkInputData);
         HandleRotation(moveDir);
 
+        // if airborne and pushing into a wall, don't apply the into-wall force (prevents wall cling)
+        if (!_isGrounded)
+        {
+            Vector3 flatMove = new Vector3(moveDir.x, 0f, moveDir.z).normalized;
+            if (flatMove.sqrMagnitude > 0.01f)
+            {
+                Vector3 castOrigin = _rb.position + Vector3.up * 0.2f;
+                if (Physics.SphereCast(castOrigin, _groundCheckRadius, flatMove, out RaycastHit wallHit, 0.5f))
+                {
+                    // there's a wall in the move direction while airborne — kill the into-wall component
+                    float intoWall = Vector3.Dot(flatMove, -wallHit.normal);
+                    if (intoWall > 0f)
+                    {
+                        // remove the component of moveDir pointing into the wall
+                        moveDir -= Vector3.Project(moveDir, -wallHit.normal);
+                    }
+                }
+            }
+        }
+
         // calculate max speed based on speed multiplier
         float speedScale = isSprinting ? _sprintSpeedMultiplier : 1f;
         float dynamicMaxSpeed = _maxSpeed * CurrentSpeedMultiplier * speedScale;
@@ -696,7 +719,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             // get networked physics objects from the host and update clients
             for (int i = 0; i < _activeRagdollMembers.Length; i++)
             {
-                _activeRagdollMembers[i].transform.localRotation = Quaternion.Slerp(_activeRagdollMembers[i].transform.localRotation, NetworkPhysicsSyncedRotation.Get(i), interpolated.Alpha);
+                // decompress before slerp
+                Quaternion target = QuatCompression.Decompress(NetworkPhysicsSyncedRotation.Get(i));
+                _activeRagdollMembers[i].transform.localRotation = Quaternion.Slerp(_activeRagdollMembers[i].transform.localRotation, target, interpolated.Alpha);
+
             }
         }
 
@@ -730,6 +756,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 continue;
             if (_raycastHits[i].transform.root.TryGetComponent(out NetworkPlayerController otherPlayer))
                 continue;
+
+            // reject steep surfaces (walls)
+            float surfaceAngle = Vector3.Angle(Vector3.up, _raycastHits[i].normal);
+            if (surfaceAngle > _maxSlopeAngle)
+            {
+                Debug.Log("SLOPE");
+                continue;
+            }
 
             if (_raycastHits[i].distance < closestDistance)
             {
@@ -850,8 +884,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
         {
             _activeRagdollMembers[i].UpdateJointFromAnimation();
+            // compress before storing
             NetworkPhysicsSyncedRotation.Set(i, QuatCompression.Compress(_activeRagdollMembers[i].transform.localRotation));
-            //NetworkPhysicsSyncedRotation.Set(i, _activeRagdollMembers[i].transform.localRotation);
         }
     }
 
@@ -866,13 +900,14 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         _animator.SetBool("IsSubmerged", _buoyancy.IsSubmerged);
     }
 
-    public void Knockout()
+    public void Knockout(bool fromCombatHit = false)
     {
         if (!Object.HasStateAuthority)
             return;
 
         _isKnockedOut = true;
         _isGrabbingActive = false;
+        _wasKnockedOutByHit = fromCombatHit;
 
         SetCharacterMass(true);
 
@@ -892,35 +927,13 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     {
         if (_isKnockedOut && _combatAudio != null)
         {
-            _combatAudio.PlaySound(SoundID.Knockout);
+            // only play knockout hit sound if they were knocked out by a combat hit
+            if (_wasKnockedOutByHit)
+                _combatAudio.PlaySound(SoundID.Knockout);
+
             _combatAudio.PlaySound(SoundID.Oof);
         }
     }
-
-    public void BeginRecover(bool playAnim = true)
-    {
-        if (!Object.HasStateAuthority)
-            return;
-
-        if (playAnim && _animator != null)
-            _animator.SetTrigger("Recover");
-
-        _isKnockedOut = false;
-        _isGrabbingActive = false;
-        _isRecovering = true;
-        SetCharacterMass(false);
-
-        // update main joint
-        JointDrive jointDrive = _mainJoint.slerpDrive;
-        jointDrive.positionSpring = _startSlerpPositionSpring;
-        _mainJoint.slerpDrive = jointDrive;
-
-        // update joints rotation and send them to clients
-        for (int i = 0; i < _activeRagdollMembers.Length; i++)
-            _activeRagdollMembers[i].MakeActiveRagdoll();
-
-    }
-
     public void Recover(bool playAnim = true)
     {
         if (!Object.HasStateAuthority)
@@ -939,12 +952,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         // update joints rotation and send them to clients
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
             _activeRagdollMembers[i].MakeActiveRagdoll();
-    }
-
-    public void EndRecover()
-    {
-        if (!Object.HasStateAuthority) return;
-        _isRecovering = false;
     }
 
     void SetCharacterMass(bool isKnockedOut)
@@ -1360,6 +1367,70 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         if (_nametagSpriteOptions == null || NametagSpriteIndex < 0 || NametagSpriteIndex >= _nametagSpriteOptions.Length)
             return null;
         return _nametagSpriteOptions[NametagSpriteIndex];
+    }
+
+    public void SetCharacterSelectHold(bool hold)
+    {
+        if (_rb != null)
+        {
+            if (hold && !_rootFrozenForSelect)
+            {
+                _rootFrozenForSelect = true;
+                _originalRootConstraints = _rb.constraints;
+                // must run in FixedUpdateNetwork (host)
+                _rb.linearVelocity = Vector3.zero;
+                _rb.angularVelocity = Vector3.zero;
+                _rb.constraints = RigidbodyConstraints.FreezeAll;  // stop root drift; joints still simulate the pose
+            }
+            else if (!hold && _rootFrozenForSelect)
+            {
+                _rootFrozenForSelect = false;
+                _rb.constraints = _originalRootConstraints;
+            }
+        }
+
+        // damp the bones so the idle pose doesn't ring while the body is static
+        if (_activeRagdollMembers != null)
+        {
+            for (int i = 0; i < _activeRagdollMembers.Length; i++)
+                _activeRagdollMembers[i]?.SetHighDamping(hold);
+        }
+
+    }
+
+    /// <summary>
+    /// Hard-cancel all in-progress player actions
+    /// Called by the match manager when the round ends so nothing keeps running through the round-over screen
+    /// </summary>
+    public void CancelAllActiveActions()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        if (_equippedAbility != null)
+        {
+            var state = CurrentAbilityState;
+            state._isCharging = false;
+            state._isDashing = false;
+            state._isCasting = false;
+            state._customVelocity = Vector3.zero;
+            CurrentAbilityState = state;
+            _equippedAbility.ForceCancel(this, ref CurrentAbilityState);
+        }
+
+        if (_rb != null)
+        {
+            _rb.linearVelocity = Vector3.zero;
+            _rb.angularVelocity = Vector3.zero;
+        }
+
+        _isGrabbingActive = false;
+
+        _isAbilityPressed = false;
+        _isAbilityHeld = false;
+        _isAbilityReleased = false;
+        _isJumpButtonPressed = false;
+        _isHeadbuttButtonPressed = false;
+        _isRightClickButtonPressed = false;
     }
 
     // spawner calls this then transmit info to host

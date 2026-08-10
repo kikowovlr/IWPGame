@@ -13,9 +13,9 @@ public class PlayerEliminationHandler : NetworkBehaviour
     [Networked] private TickTimer SpectatorTransitionTimer { get; set; }
     [HideInInspector] [Networked, OnChangedRender(nameof(OnSpectatorTransitionCompleteChanged))] public bool IsSpectatorTransitionComplete { get; private set; }
 
-    private PlayerHealthHandler _healthHandler;
     private NetworkPlayerController _playerController;
     private PlayerComponentRegistry _registry;
+    private PlayerNametagController _nametagController;
 
     // events
     public static event Action<PlayerEliminationHandler> OnPlayerEliminated; // for showing local UI screen, triggering gray screen
@@ -26,7 +26,6 @@ public class PlayerEliminationHandler : NetworkBehaviour
         _registry = transform.root.GetComponent<PlayerComponentRegistry>();
         if (_registry != null)
         {
-            _healthHandler = _registry.Health;
             _playerController = _registry.Controller;
         }
     }
@@ -44,6 +43,9 @@ public class PlayerEliminationHandler : NetworkBehaviour
     public void DeductLife()
     {
         if (!Object.HasStateAuthority || IsEliminated) return;
+
+        if (TutorialManager.Instance != null && TutorialManager.Instance.EliminationDisabled)
+            return;
 
         if (CurrentLives > 0)
         {

@@ -414,4 +414,20 @@ public class RamAbilitySO : AbilitySO
 
         return hit;
     }
+
+    public override void ForceCancel(NetworkPlayerController player, ref AbilityState state)
+    {
+        base.ForceCancel(player, ref state);
+        if (!player.Object.HasStateAuthority) return;
+
+        player.Registry.AbilityAudioNet.SetAbilityLoop(SoundID.GoatChargeRumbleLoop, false);
+        player.Registry.AbilityAudioNet.SetAbilityLoop(SoundID.GoatRamGallopLoop, false);
+
+        player.Animator.SetBool(_activeBool, false);
+        player.Animator.SetTrigger(_releaseTrigger);
+
+        state._chargeTime = 0f;
+        state._dashDurationTimer = 0f;
+        state._noFloorTickCount = 0;
+    }
 }

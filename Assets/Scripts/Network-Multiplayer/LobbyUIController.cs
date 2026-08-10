@@ -18,10 +18,11 @@ public class LobbyUIController : MonoBehaviour
     [SerializeField] private int _gameplaySceneBuildIndex = 1;
     [SerializeField] private int _minPlayersToStart = 2;
 
+    private const float REFRESH_INTERVAL = 0.5f;
     private NetworkRunner _runner => NetworkLauncher.Instance != null ? NetworkLauncher.Instance.Runner : null;
     private List<LobbyPlayerRowUI> _spawnedRows = new List<LobbyPlayerRowUI>();
     private float _refreshTimer;
-    private const float REFRESH_INTERVAL = 0.5f;
+    private bool _hasMarkedLoaded = false;
 
     public void ShowLobby(string lobbyCode)
     {
@@ -49,6 +50,24 @@ public class LobbyUIController : MonoBehaviour
     {
         if (_lobbyPanel == null || !_lobbyPanel.activeSelf) return;
 
+        // mark ourselves loaded once we actually appear in the replicated roster
+        if (!_hasMarkedLoaded && LobbyManager.Instance != null && _runner != null)
+        {
+            PlayerRef me = _runner.LocalPlayer;
+            var roster = LobbyManager.Instance.GetLobbyRoster();
+            bool inRoster = false;
+            foreach (var entry in roster)
+            {
+                if (entry.player == me) { inRoster = true; break; }
+            }
+
+            if (inRoster)
+            {
+                LobbyManager.Instance.Rpc_MarkLoaded(me);
+                _hasMarkedLoaded = true;
+            }
+        }
+
         _refreshTimer += Time.deltaTime;
         if (_refreshTimer >= REFRESH_INTERVAL)
         {
@@ -57,7 +76,7 @@ public class LobbyUIController : MonoBehaviour
         }
 
         bool isHost = _runner != null && _runner.IsServer;
-        int currentPlayerCount = LobbyManager.Instance != null ? LobbyManager.Instance.GetLobbyRoster().Count : 0;
+        int currentPlayerCount = LobbyManager.Instance != null ? LobbyManager.Instance.GetLoadedPlayerCount() : 0;
         bool hasEnoughPlayers = currentPlayerCount >= _minPlayersToStart;
 
         // tutorial can be started solo
@@ -107,7 +126,7 @@ public class LobbyUIController : MonoBehaviour
     {
         if (_runner == null || !_runner.IsServer) return;
 
-        int currentPlayerCount = LobbyManager.Instance != null ? LobbyManager.Instance.GetLobbyRoster().Count : 0;
+        int currentPlayerCount = LobbyManager.Instance != null ? LobbyManager.Instance.GetLoadedPlayerCount() : 0;
 
         bool isTutorialSelected = LobbyMapSelection.Instance != null && LobbyMapSelection.Instance.SelectedMode == LobbyMode.Tutorial;
 
@@ -136,6 +155,7 @@ public class LobbyUIController : MonoBehaviour
             await _runner.Shutdown();
 
         if (_lobbyPanel != null) _lobbyPanel.SetActive(false);
+        _hasMarkedLoaded = false;
 
         foreach (var row in _spawnedRows)
             if (row != null) Destroy(row.gameObject);
@@ -148,6 +168,7 @@ public class LobbyUIController : MonoBehaviour
     public void HandleForcedDisconnect()
     {
         if (_lobbyPanel != null) _lobbyPanel.SetActive(false);
+        _hasMarkedLoaded = false;
 
         foreach (var row in _spawnedRows)
             if (row != null) Destroy(row.gameObject);

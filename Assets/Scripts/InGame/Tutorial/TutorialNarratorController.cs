@@ -39,6 +39,7 @@ public class TutorialNarratorController : MonoBehaviour
             _typeRoutine = null; 
         }
 
+        _narratorText.text = "";
         Slide(false);
     }
 
@@ -86,6 +87,5 @@ public class TutorialNarratorController : MonoBehaviour
             yield return null;
         }
         _panel.anchoredPosition = new Vector2(_panel.anchoredPosition.x, targetY);
-        _narratorText.text = "";
     }
 }

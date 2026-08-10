@@ -27,16 +27,6 @@ public class SpectatorUIController : MonoBehaviour
         CameraManager.OnSpectatorTargetChanged -= UpdateName;
     }
 
-    public void ShowSpectatorUI()
-    {
-        if (_spectatorRoot != null) _spectatorRoot.SetActive(true);
-    }
-
-    public void HideSpectatorUI()
-    {
-        if (_spectatorRoot != null) _spectatorRoot.SetActive(false);
-    }
-
     private void OnPrev()
     {
         if (CameraManager.Instance != null)

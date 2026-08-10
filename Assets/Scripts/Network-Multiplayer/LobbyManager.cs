@@ -16,6 +16,7 @@ public class LobbyManager : NetworkBehaviour
     [Networked] public PlayerRef HostPlayerRef { get; private set; }
     [Networked, Capacity(MAX_LOBBY_PLAYERS)] private NetworkArray<PlayerRef> _playerSlots => default;
     [Networked, Capacity(MAX_LOBBY_PLAYERS)] private NetworkArray<NetworkString<_16>> _playerNames => default;
+    [Networked, Capacity(MAX_LOBBY_PLAYERS)] private NetworkArray<NetworkBool> _playerLoaded => default;
 
     public override void Spawned()
     {
@@ -99,6 +100,7 @@ public class LobbyManager : NetworkBehaviour
             {
                 _playerSlots.Set(i, PlayerRef.None);
                 _playerNames.Set(i, default);
+                _playerLoaded.Set(i, false);
                 return;
             }
         }
@@ -115,5 +117,30 @@ public class LobbyManager : NetworkBehaviour
         }
 
         return list;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void Rpc_MarkLoaded(PlayerRef player)
+    {
+        if (!Object.HasStateAuthority) return;
+        for (int i = 0; i < MAX_LOBBY_PLAYERS; i++)
+        {
+            if (_playerSlots[i] == player)
+            {
+                _playerLoaded.Set(i, true);
+                return;
+            }
+        }
+    }
+
+    public int GetLoadedPlayerCount()
+    {
+        int count = 0;
+        for (int i = 0; i < MAX_LOBBY_PLAYERS; i++)
+        {
+            if (_playerSlots[i] != PlayerRef.None && _playerLoaded[i])
+                count++;
+        }
+        return count;
     }
 }

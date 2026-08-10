@@ -59,6 +59,7 @@ public class TutorialCharacterSelectState : ITutorialState
         {
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
             manager.TeleportPlayersToCharacterSelectStage();
+            manager.SetAllPlayersCharacterSelectHold(true);
             manager.ResetAllPlayersCharacterSelectState();
             manager.SetFinalCharacterSelectCountdown(false);
             manager.ResetStateTimer(manager.CharacterSelectDuration);
@@ -71,7 +72,7 @@ public class TutorialCharacterSelectState : ITutorialState
     public void OnStateUpdate(TutorialManager manager)
     {
         if (!manager.Object.HasStateAuthority) return;
-
+        if (manager.HasCompletedCharacterSelect) return;
         if (!manager.IsInFinalCharacterSelectCountdown)
         {
             bool allReady = manager.AreAllPlayersReady();
@@ -101,6 +102,10 @@ public class TutorialCharacterSelectState : ITutorialState
     public void OnStateExit(TutorialManager manager)
     {
         Debug.Log("[TUTORIAL] -> Exit CharacterSelect");
+
+        if (manager.Object.HasStateAuthority)
+            manager.SetAllPlayersCharacterSelectHold(false);
+
         TransitionUIManager.OnTransitionComplete -= HandleTransitionComplete; // clean up just in case
     }
 
@@ -201,10 +206,15 @@ public class TutorialActiveState : ITutorialState
 public class TutorialSuddenDeathState : ITutorialState
 {
     public TutorialState StateType => TutorialState.SuddenDeath;
+    private PlayerRef _latchedWinner = PlayerRef.None;
+    private bool _winnerLatched = false;
 
     public void OnStateEnter(TutorialManager manager)
     {
         Debug.Log("[TUTORIAL] -> SuddenDeath");
+
+        _winnerLatched = false;
+        _latchedWinner = PlayerRef.None;
 
         if (manager.Object.HasStateAuthority)
         {
@@ -241,10 +251,18 @@ public class TutorialSuddenDeathState : ITutorialState
             case SuddenDeathPhase.Fighting:
                 // last player standing wins
                 int living = manager.GetLivingPlayerCount();
+
+                // latch the sole survivor the instant we reach one player
+                if (!_winnerLatched && living == 1)
+                {
+                    _latchedWinner = manager.GetLastLivingPlayer();
+                    _winnerLatched = true;
+                }
+
                 if (living <= 1)
                 {
                     PlayerRef winner = living == 1
-                        ? manager.GetLastLivingPlayer()
+                        ? _latchedWinner
                         : manager.PickRandomWinnerFallback();  // 0 alive = same-tick, random
                     manager.SetMatchWinner(winner);
                     manager.SetSuddenDeathPhase(SuddenDeathPhase.Done);
@@ -263,13 +281,18 @@ public class TutorialSuddenDeathState : ITutorialState
 public class TutorialStageOverState : ITutorialState
 {
     public TutorialState StateType => TutorialState.TutorialStageOver;
+    private bool _returnTriggered = false;
 
     public void OnStateEnter(TutorialManager manager)
     {
         Debug.Log("[TUTORIAL] -> TutorialStageOver");
+        _returnTriggered = false;
 
         if (manager.Object.HasStateAuthority)
+        {
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
+            manager.CancelAllPlayerActions();
+        }
 
         if (manager.WasSoloTutorial)
         {
@@ -296,7 +319,9 @@ public class TutorialStageOverState : ITutorialState
     {
         if (!manager.Object.HasStateAuthority) return;
         if (!manager.IsStateTimerExpired) return;
+        if (_returnTriggered) return;
 
+        _returnTriggered = true;
         manager.ReturnToLobby();
     }
 

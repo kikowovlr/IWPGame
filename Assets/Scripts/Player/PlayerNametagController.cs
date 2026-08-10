@@ -30,7 +30,6 @@ public class PlayerNametagController : MonoBehaviour
     [SerializeField] private float _opponentAlpha = 0.6f;
 
     private PlayerComponentRegistry _registry;
-    private Camera _mainCamera;
 
     private void Awake()
     {
@@ -40,6 +39,15 @@ public class PlayerNametagController : MonoBehaviour
     private void LateUpdate()
     {
         if (_playerObj == null || !_playerObj.IsValid) return;
+
+        // hide nametag if player eliminated
+        bool hidetag = _registry != null && _registry.Elimination != null && _registry.Elimination.IsSpectatorTransitionComplete;
+
+        if (hidetag)
+        {
+            if (_canvasGroup != null) _canvasGroup.alpha = 0f;
+            return;   // skip the rest 
+        }
 
         bool isLocalPlayer = _playerObj.HasInputAuthority;
 

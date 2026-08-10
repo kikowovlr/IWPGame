@@ -28,7 +28,8 @@ public class HUDCoordinator : MonoBehaviour
 
     private void Update()
     {
-        if (MatchContext.Current == null || !MatchContext.Current.IsSpawned) return;
+        var ctx = MatchContext.Current;
+        if (ctx == null || !ctx.IsSpawned) return;
 
         // reevaluate whenever tutorial state changes -> every frame when tutorial manager is active
         if (TutorialManager.Instance != null)
@@ -153,10 +154,5 @@ public class HUDCoordinator : MonoBehaviour
     private void SetPlayerHUDActive(bool active)
     {
         if (_playerHUDRoot != null) _playerHUDRoot.SetActive(active);
-    }
-
-    private void SetTutorialHUDActive(bool active)
-    {
-        if (_tutorialHUDRoot != null) _tutorialHUDRoot.SetActive(active);
     }
 }

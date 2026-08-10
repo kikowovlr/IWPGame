@@ -65,15 +65,6 @@ public class PlayerFallHandler : NetworkBehaviour
             _cameraFollowProxy.position = _frozenFallPos;
     }
 
-    private void CaptureProxyLocal()
-    {
-        if (_proxyCaptured) return;
-        _proxyOriginalParent = _cameraFollowProxy.parent;
-        _proxyLocalPos = _cameraFollowProxy.localPosition;
-        _proxyLocalRot = _cameraFollowProxy.localRotation;
-        _proxyCaptured = true;
-    }
-
     private void BeginFall()
     {
         Vector3 p = _controller.CameraTarget.position;

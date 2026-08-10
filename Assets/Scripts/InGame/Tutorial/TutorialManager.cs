@@ -107,6 +107,7 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     public bool IsTrackingPhase => CurrentStepPhase == TutorialStepPhase.Tracking;
     public bool IsStepCompletePhase => CurrentStepPhase == TutorialStepPhase.StepComplete;
     public bool IsPhaseTimerExpired => _phaseTimer.ExpiredOrNotRunning(Runner);
+    public bool HasCompletedCharacterSelect => _hasCompletedCharacterSelect;
 
     private void Awake()
     {
@@ -325,6 +326,8 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
         }
     }
 
+    #region CHARACTER SELECT
+
     public void TeleportPlayersToCharacterSelectStage()
     {
         if (!Object.HasStateAuthority) return;
@@ -343,7 +346,6 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
         }
     }
 
-    #region CHARACTER SELECT
     public void ResetAllPlayersCharacterSelectState()
     {
         if (!Object.HasStateAuthority) return;
@@ -408,6 +410,19 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     {
         if (Object.HasStateAuthority)
             _hasCompletedCharacterSelect = true;
+    }
+
+    public void SetAllPlayersCharacterSelectHold(bool hold)
+    {
+        foreach (PlayerRef p in Object.Runner.ActivePlayers)
+        {
+            if (Object.Runner.TryGetPlayerObject(p, out NetworkObject obj)
+                && obj.TryGetComponent(out PlayerComponentRegistry reg)
+                && reg.Controller != null)
+            {
+                reg.Controller.SetCharacterSelectHold(hold);
+            }
+        }
     }
 
     #endregion
@@ -711,6 +726,7 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
         _transitionInProgress = true;
         Rpc_PlayTransitionWipe();
     }
+
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void Rpc_PlayTransitionWipe()
     {
@@ -851,6 +867,7 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     public void ReturnToLobby()
     {
         if (!Object.HasStateAuthority) return;
+        Debug.Log($"[ReturnToLobby] loading menu, frame {Time.frameCount}\n{System.Environment.StackTrace}");
 
         if (NetworkLauncher.Instance != null)
             NetworkLauncher.Instance.IsReturningFromTutorial = true;
@@ -877,6 +894,21 @@ public class TutorialManager : NetworkBehaviour, IMatchContext, ICountdownSource
     public void MarkSoloTutorial()
     {
         if (Object.HasStateAuthority) WasSoloTutorial = true;
+    }
+
+    public void CancelAllPlayerActions()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        foreach (PlayerRef p in Object.Runner.ActivePlayers)
+        {
+            if (Object.Runner.TryGetPlayerObject(p, out NetworkObject obj)
+                && obj.TryGetComponent(out PlayerComponentRegistry reg)
+                && reg.Controller != null)
+            {
+                reg.Controller.CancelAllActiveActions();
+            }
+        }
     }
 
     #region BOOST PADS

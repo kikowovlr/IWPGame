@@ -7,6 +7,7 @@ using UnityEngine;
 public class PlayerBuoyancy : NetworkBehaviour
 {
     [SerializeField] private float _minSubmergeDepth = 0.5f; // ignore shallow dipping
+    [SerializeField] private float _exitSubmergeDepth = 0.1f;
 
     [Header("Buoyancy Settings")]
     [SerializeField] private float _floatDepth = 0.4f;
@@ -70,9 +71,33 @@ public class PlayerBuoyancy : NetworkBehaviour
     /// </summary>
     public void UpdateSubmersionState()
     {
+        //bool inWater = WaterBody.TryGetSurfaceHeight(_rb.position, out float surfaceY);
+        //_currentSurfaceHeight = surfaceY;
+        //IsSubmerged = inWater && (surfaceY - _rb.position.y > _minSubmergeDepth);
+        //Debug.Log(IsSubmerged);
         bool inWater = WaterBody.TryGetSurfaceHeight(_rb.position, out float surfaceY);
         _currentSurfaceHeight = surfaceY;
-        IsSubmerged = inWater && (surfaceY - _rb.position.y > _minSubmergeDepth);
+
+        if (!inWater)
+        {
+            IsSubmerged = false;
+            return;
+        }
+
+        float depth = surfaceY - _rb.position.y;   // how far below the surface
+
+        if (!IsSubmerged)
+        {
+            // not yet submerged -> need to be deep enough to enter
+            if (depth > _minSubmergeDepth)
+                IsSubmerged = true;
+        }
+        else
+        {
+            // already submerged -> only exit when we rise ABOVE the surface (or nearly)
+            if (depth < _exitSubmergeDepth)
+                IsSubmerged = false;
+        }
     }
 
     /// <summary>

@@ -51,17 +51,12 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
         bool isTutorialExit = NetworkLauncher.Instance != null
             && NetworkLauncher.Instance.IsReturningFromTutorial;
         if (isTutorialExit)
-        {
-            NetworkLauncher.Instance.IsReturningFromTutorial = false;
-            Debug.Log("returning from tutorial");
             return;
-        }
 
         // check for which map/scene is loading
         int loadingIndex = PendingMapCache.Instance != null
             ? PendingMapCache.Instance.PendingSceneIndex
             : -1;
-
 
         if (TransitionUIManager.Instance != null)
             TransitionUIManager.Instance.ShowMapLoadingScreenTimed("Starting Match...", loadingIndex);
@@ -72,6 +67,9 @@ public class Spawner : SimulationBehaviour, INetworkRunnerCallbacks
     /// </summary>
     public void OnSceneLoadDone(NetworkRunner runner)
     {
+        if (NetworkLauncher.Instance != null && NetworkLauncher.Instance.IsReturningFromTutorial)
+            NetworkLauncher.Instance.IsReturningFromTutorial = false;
+
         if (!runner.IsServer) return;
 
         if (!UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Game")) return;

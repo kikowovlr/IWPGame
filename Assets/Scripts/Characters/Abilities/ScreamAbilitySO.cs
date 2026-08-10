@@ -125,4 +125,11 @@ public class ScreamAbilitySO : AbilitySO
         if (_indicatorData != null)
             indicator.ConfigureIndicator(_indicatorData, _range, _coneAngle);
     }
+
+    public override void ForceCancel(NetworkPlayerController player, ref AbilityState state)
+    {
+        base.ForceCancel(player, ref state);
+        if (!player.Object.HasStateAuthority) return;
+        state._visualTime = 0f;
+    }
 }

@@ -17,20 +17,22 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     [Networked, Capacity(MAX_PLAYERS), OnChangedRender(nameof(OnActivePlayersChanged))]
     private NetworkArray<PlayerRef> _activePlayersInRound => default;
     private HashSet<PlayerRef> _localLivingPlayers = new HashSet<PlayerRef>(); // local tracking
+    private bool _characterSelectTeleportDone;
+    private RoundState _lastTrackedState = RoundState.None;
+    private bool _firstRoundInitialised = false;
+    // state machine tracking dictionary
+    private Dictionary<RoundState, IRoundState> _stateMachine = new Dictionary<RoundState, IRoundState>();
+    private bool _csTransitionInProgress;
 
     // match
     [SerializeField] private MatchSettings _matchSettings;
 
     // rounds
-    [Networked] public int CurrentRoundNumber { get; private set; } = 0;
+    [Networked, OnChangedRender(nameof(OnRoundNumberChanged))] public int CurrentRoundNumber { get; private set; } = 0;
     [Networked, OnChangedRender(nameof(OnRoundStateChanged))] public RoundState CurrentRoundState { get; private set; }
-    private RoundState _lastTrackedState = RoundState.None;
     [Networked] private TickTimer StateTimer { get; set; }
     [HideInInspector] [Networked, OnChangedRender(nameof(OnSetupUIStateChanged))] public NetworkBool IsSetupUIActive { get; private set; }
-    private bool _firstRoundInitialised = false;
 
-    // state machine tracking dictionary
-    private Dictionary<RoundState, IRoundState> _stateMachine = new Dictionary<RoundState, IRoundState>();
     [HideInInspector] public bool IsStateTimerExpired => StateTimer.Expired(Runner); // helper for state classes to check if time is up
 
     // end of round
@@ -43,14 +45,12 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     [HideInInspector][Networked] public bool IsInFinalCharacterSelectCountdown { get; private set; }
 
     // getters
-    // getters
     public MatchSettings Settings => _matchSettings;
     public RoundState GetCurrentRoundState() => CurrentRoundState;
     public int GetLivingPlayerCount() => _localLivingPlayers.Count;
     public RoundEndDisplayController RoundEndDisplay => _roundEndDisplayController;
     public bool IsSpawned { get; private set; }
-    public bool IsInGameplayPhase =>
-    CurrentRoundState == RoundState.RoundActive || CurrentRoundState == RoundState.Countdown;
+    public bool IsInGameplayPhase => CurrentRoundState == RoundState.RoundActive || CurrentRoundState == RoundState.Countdown;
     public bool IsInCharacterSelect => CurrentRoundState == RoundState.CharacterSelect;
 
     public bool IsCountdownActive => CurrentRoundState == RoundState.Countdown;
@@ -135,8 +135,24 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     public override void FixedUpdateNetwork()
     {
         if (IsCurrentlyOnPodiumScene()) return;
-
         if (!Object.HasStateAuthority) return;
+
+        // teleport once per character-select entry, in-sim
+        if (CurrentRoundState == RoundState.CharacterSelect)
+        {
+            if (!_characterSelectTeleportDone)
+            {
+                _characterSelectTeleportDone = true;
+                TeleportPlayersToCharacterSelectStage();
+                SetAllPlayersCharacterSelectHold(true);   // freeze roots after teleport
+            }
+        }
+        else
+        {
+            if (_characterSelectTeleportDone)
+                SetAllPlayersCharacterSelectHold(false);  // release on leaving
+            _characterSelectTeleportDone = false;   // reset for next time we enter character select
+        }
 
         // wait until fusion generates player network wrappers before starting
         if (!_firstRoundInitialised)
@@ -181,7 +197,7 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     }
 
     private void OnRoundStateChanged()
-    {
+    {   
         if (_lastTrackedState != CurrentRoundState)
         {
             if (_stateMachine.TryGetValue(_lastTrackedState, out IRoundState oldState))
@@ -386,6 +402,13 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
     {
         if (Object.HasStateAuthority)
             StateTimer = duration > 0f ? TickTimer.CreateFromSeconds(Runner, duration) : TickTimer.None;
+    }
+
+    private void OnRoundNumberChanged()
+    {
+        // if the round UI is already showing when the number finally arrives, refresh it
+        if (IsSetupUIActive)
+            OnSetupUIStateChanged();
     }
 
     private void OnSetupUIStateChanged()
@@ -658,6 +681,19 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
         }
     }
 
+    private void SetAllPlayersCharacterSelectHold(bool hold)
+    {
+        foreach (PlayerRef p in Object.Runner.ActivePlayers)
+        {
+            if (Object.Runner.TryGetPlayerObject(p, out NetworkObject obj)
+                && obj.TryGetComponent(out PlayerComponentRegistry reg)
+                && reg.Controller != null)
+            {
+                reg.Controller.SetCharacterSelectHold(hold);
+            }
+        }
+    }
+
     public bool AreAllPlayersReady()
     {
         foreach (PlayerRef playerRef in Object.Runner.ActivePlayers)
@@ -728,6 +764,69 @@ public class GameManager : NetworkBehaviour, IPlayerJoined, ICleanup, IMatchCont
                 return false;
         }
         return true;
+    }
+
+    public void BeginTransitionToSetup()
+    {
+        if (!Object.HasStateAuthority) return;
+        if (_csTransitionInProgress) return;
+
+        _csTransitionInProgress = true;
+        RPC_PlayCharacterSelectWipe();
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_PlayCharacterSelectWipe()
+    {
+        StartCoroutine(CoveredCharacterSelectTransition());
+    }
+
+    private IEnumerator CoveredCharacterSelectTransition()
+    {
+        // cover the screen on every client
+        if (LevelLoader.Instance != null)
+            yield return LevelLoader.Instance.PlayWipeCover();
+
+        if (Object.HasStateAuthority)
+        {
+            SetFinalCharacterSelectCountdown(false);
+            MarkCharacterSelectComplete();
+            ResetRoundEntities();
+            TransitionToState(RoundState.Setup, _matchSettings.SetUpDuration);
+        }
+
+        // wait until the setup UI is actually up on THIS client (networked state may lag),
+        // with a timeout so a client can never get stuck under the cover
+        float timeout = 3f;
+        float elapsed = 0f;
+        while (!IsSetupUIActive && elapsed < timeout)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // one extra frame so the UI has rendered before we reveal
+        yield return null;
+
+        if (LevelLoader.Instance != null)
+            LevelLoader.Instance.PlayWipeReveal();
+
+        _csTransitionInProgress = false;
+    }
+
+    public void CancelAllPlayerActions()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        foreach (PlayerRef p in Object.Runner.ActivePlayers)
+        {
+            if (Object.Runner.TryGetPlayerObject(p, out NetworkObject obj)
+                && obj.TryGetComponent(out PlayerComponentRegistry reg)
+                && reg.Controller != null)
+            {
+                reg.Controller.CancelAllActiveActions();
+            }
+        }
     }
 
     public static void ResetInstance()

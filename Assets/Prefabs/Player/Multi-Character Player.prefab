@@ -676,7 +676,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1724745621430386209}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: d260e0a892ae4b24a8e2a7b76aca2a58, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -895,7 +895,7 @@ MonoBehaviour:
   _normalSmoothSpeed: 15
   _idleAnchorSpringStrength: 100
   _idleAnchorDampening: 20
-  _NetworkPhysicsSyncedRotation: []
+  _NetworkPhysicsSyncedRotation: 
   _animationSpeedDamp: 2
   HoldThreshold: 0.2
   _characterPackages:
@@ -1654,7 +1654,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerBoost
   _boostSpeedMultiplier: 1.5
-  _airControlFactor: 0.35
+  _airControlFactor: 0.157
   _IsBoosting:
     _value: 0
 --- !u!1 &5809376578176355480
@@ -1927,8 +1927,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a35847d6765f714bbe81f059245bc1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerBuoyancy
-  _minSubmergeDepth: 0.4
-  _floatDepth: 0.7
+  _minSubmergeDepth: 0
+  _exitSubmergeDepth: -0.2
+  _floatDepth: 0
   _buoyancySpringStrength: 60
   _buoyancyDamping: 8
   _waterDrag: 6
@@ -1970,6 +1971,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GooExposure
   _ExposureAmount: 0
+  _IsInGooSource:
+    _value: 0
   _recoveryRate: 0.1
 --- !u!1 &7429223573516146864
 GameObject:

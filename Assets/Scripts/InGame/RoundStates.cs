@@ -46,7 +46,6 @@ public class CharacterSelectState : IRoundState
         if (manager.Object.HasStateAuthority)
         {
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
-            manager.TeleportPlayersToCharacterSelectStage();
             manager.ResetAllPlayersCharacterSelectState();
             manager.SetFinalCharacterSelectCountdown(false);
             manager.ResetStateTimer(manager.Settings.CharacterSelectDuration);
@@ -79,10 +78,7 @@ public class CharacterSelectState : IRoundState
         {
             if (manager.IsStateTimerExpired)
             {
-                manager.SetFinalCharacterSelectCountdown(false);
-                manager.MarkCharacterSelectComplete();
-                manager.ResetRoundEntities();
-                manager.TransitionToState(RoundState.Setup, manager.Settings.SetUpDuration);
+                manager.BeginTransitionToSetup();
             }
         }
     }
@@ -105,11 +101,9 @@ public class CharacterSelectState : IRoundState
 public class SetupState : IRoundState
 {
     public RoundState StateType => RoundState.Setup;
-    private bool _hasStartedTimer = false;
 
     public void OnStateEnter(GameManager manager)
     {
-        _hasStartedTimer = false;
         Debug.Log("[MATCH ENGINE] -> Entered Setup State.");
 
         // all players on overview camera mode on scene boot
@@ -123,6 +117,8 @@ public class SetupState : IRoundState
         if (manager.Object.HasStateAuthority)
         {
             manager.IncrementRoundCounter();
+            manager.SetSetupUIActive(true);
+            manager.ResetStateTimer(manager.Settings.SetUpDuration);
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
             manager.ResetRoundEntities();
         }
@@ -132,21 +128,9 @@ public class SetupState : IRoundState
 
     public void OnStateUpdate(GameManager manager)
     {
-        if (!_hasStartedTimer)
-        {
-            // show round ui 
-            if (manager.Object.HasStateAuthority)
-                manager.SetSetupUIActive(true);
-
-            manager.ResetStateTimer(manager.Settings.SetUpDuration);
-            _hasStartedTimer = true;
-        }
-
         // once setup timer finishes, transition to next state
         if (manager.IsStateTimerExpired)
-        {
             manager.TransitionToState(RoundState.Countdown, manager.Settings.CountdownDuration);
-        }
     }
 
     public void OnStateExit(GameManager manager)
@@ -207,11 +191,15 @@ public class RoundActiveState : IRoundState
 {
     public RoundState StateType => RoundState.RoundActive;
     private bool _roundEndingSequenceTriggered = false;
+    private PlayerRef _latchedWinner = PlayerRef.None;
+    private bool _winnerLatched = false;
 
     public void OnStateEnter(GameManager manager)
     {
         Debug.Log("[MATCH ENGINE] -> Enter RoundActive State.");
         _roundEndingSequenceTriggered = false;
+        _winnerLatched = false;
+        _latchedWinner = PlayerRef.None;
 
         // allow controls
         if (manager.Object.HasStateAuthority)
@@ -226,39 +214,38 @@ public class RoundActiveState : IRoundState
         int totalPlayersInMatch = manager.Runner.ActivePlayers.Count();
         int livingPlayers = manager.GetLivingPlayerCount();
         int readySpectators = manager.GetActiveSpectatorCount();
-
         int expectedSpectators = totalPlayersInMatch - 1;
 
-        // if one player left
-        if (livingPlayers == 1)
+        //latch winner the instant round is decided (one player left) -> BEFORE waiting for spectator transitions
+        if (!_winnerLatched && livingPlayers == 1)
         {
-            // check if all other players turned into spectators alr
-            if (readySpectators >= expectedSpectators)
+            List<PlayerRef> alive = manager.GetLivingPlayerIDs();
+            if (alive.Count > 0)
             {
-                if (!_roundEndingSequenceTriggered)
-                {
-                    _roundEndingSequenceTriggered = true;
-                    List<PlayerRef> winnerList = manager.GetLivingPlayerIDs();
-                    if (winnerList.Count > 0)
-                    {
-                        manager.SetRoundWinner(winnerList[0]);
-                        manager.TransitionToState(RoundState.RoundOver, manager.Settings.RoundOverBufferDuration);
-                    }
-                }
+                _latchedWinner = alive[0];
+                _winnerLatched = true;
+            }
+        }
+
+        // one player left -> wait for others to become spectators, then end
+        if (_winnerLatched)
+        {
+            if (readySpectators >= expectedSpectators && !_roundEndingSequenceTriggered)
+            {
+                _roundEndingSequenceTriggered = true;
+                manager.SetRoundWinner(_latchedWinner);   // use the latched winner, not current living
+                manager.TransitionToState(RoundState.RoundOver, manager.Settings.RoundOverBufferDuration);
             }
         }
         // if draw (players died at the same network tick) -> draw: no one wins crown
         else if (livingPlayers == 0)
         {
             // wait until all players turn into spectators then transition
-            if (readySpectators >= totalPlayersInMatch)
+            if (readySpectators >= totalPlayersInMatch && !_roundEndingSequenceTriggered)
             {
-                if (!_roundEndingSequenceTriggered)
-                {
-                    _roundEndingSequenceTriggered = true;
-                    manager.SetRoundWinner(PlayerRef.None);
-                    manager.TransitionToState(RoundState.RoundOver, manager.Settings.RoundOverBufferDuration);
-                }
+                _roundEndingSequenceTriggered = true;
+                manager.SetRoundWinner(PlayerRef.None);
+                manager.TransitionToState(RoundState.RoundOver, manager.Settings.RoundOverBufferDuration);
             }
         }
     }
@@ -284,6 +271,7 @@ public class RoundOverState : IRoundState
         if (manager.Object.HasStateAuthority)
         {
             manager.SetGlobalInputRestrictions(InputRestrictions.BlockEverything);
+            manager.CancelAllPlayerActions();
         }
 
         PlayerRef winner = manager.LastRoundWinner;

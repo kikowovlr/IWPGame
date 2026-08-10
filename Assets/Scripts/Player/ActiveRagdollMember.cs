@@ -8,6 +8,8 @@ public class ActiveRagdollMember : MonoBehaviour
     [SerializeField] bool _syncAnimation = false;
     Rigidbody _rb;
     ConfigurableJoint _joint;
+    private JointDrive _cachedSlerpDrive;
+    private bool _hasCachedDrive;
 
     [SerializeField] Quaternion _startLocalRotation; // keep track of starting rotation
     [SerializeField] float _startSlerpPositionSpring = 0.0f;
@@ -74,44 +76,6 @@ public class ActiveRagdollMember : MonoBehaviour
     {
         if (!_syncAnimation || _joint == null) return;
 
-        //// 1. Calculate how the animated bone is rotated relative to its main character root
-        //Quaternion animatedRootRelative = Quaternion.Inverse(_animatedRoot.rotation) * _animatedRb.transform.rotation;
-
-        //// 2. CRITICAL FIX: Find the actual physical anchor. 
-        //// If the joint has a connected Rigidbody (like the Chest), use THAT rotation. 
-        //// Only fall back to transform.parent if there is no connected body.
-        //Transform physicalAnchor = _joint.connectedBody != null ? _joint.connectedBody.transform : transform.parent;
-
-        //// 3. Calculate target rotation relative to the true physics anchor, bypassing the empty Clavicle!
-        //Quaternion targetLocalRotation = Quaternion.Inverse(physicalAnchor.rotation) * (_physicalRoot.rotation * animatedRootRelative);
-
-        ////// 2. Convert that root-relative target back into the local space of this specific joint's parent
-        ////// This completely bypasses intermediate missing spine bones!
-        ////Quaternion targetLocalRotation = Quaternion.Inverse(transform.parent.rotation) * (_physicalRoot.rotation * animatedRootRelative);
-
-        //// 3. Set the joint's target rotation using your extension method
-        //ConfigurableJointExtensions.SetTargetRotationLocal(_joint, targetLocalRotation, _startLocalRotation);
-
-
-
-        //// CRITICAL FIX: We must apply the backwards offset to the continuous math!
-        //// Instead of targeting the animated bone directly, target the animated bone PLUS the structural offset.
-        //Quaternion targetWorldRotation = _animatedRb.transform.rotation * _worldRotationOffset;
-
-        //// 1. Calculate how that offset target is rotated relative to its main character root
-        //Quaternion animatedRootRelative = Quaternion.Inverse(_animatedRoot.rotation) * targetWorldRotation;
-
-        //// 2. Find the actual physical anchor (Chest)
-        //Transform physicalAnchor = _joint.connectedBody != null ? _joint.connectedBody.transform : transform.parent;
-
-        //// 3. Calculate target rotation relative to the true physics anchor
-        //Quaternion targetLocalRotation = Quaternion.Inverse(physicalAnchor.rotation) * (_physicalRoot.rotation * animatedRootRelative);
-
-        //// 4. Set the joint's target rotation using your extension method
-        //ConfigurableJointExtensions.SetTargetRotationLocal(_joint, targetLocalRotation, _startLocalRotation);
-
-
-
         // 1. Where the animated arm wants to be
         Quaternion targetWorldRotation = _animatedRb.transform.rotation * _worldRotationOffset;
 
@@ -164,5 +128,33 @@ public class ActiveRagdollMember : MonoBehaviour
         UpdateJointFromAnimation();
 
         _joint.connectedBody = cachedConnectedBody;
+    }
+
+    public void SetHighDamping(bool high)
+    {
+        if (_joint == null) return;
+
+        if (high)
+        {
+            if (!_hasCachedDrive)
+            {
+                _cachedSlerpDrive = _joint.slerpDrive;   // remember the gameplay drive
+                _hasCachedDrive = true;
+            }
+
+            JointDrive drive = _joint.slerpDrive;
+            // keep the spring so bones still follow the idle animation,
+            // but add heavy damping so they don't overshoot / ring
+            drive.positionDamper = Mathf.Max(drive.positionDamper, _cachedSlerpDrive.positionSpring * 0.3f);
+            _joint.slerpDrive = drive;
+        }
+        else
+        {
+            if (_hasCachedDrive)
+            {
+                _joint.slerpDrive = _cachedSlerpDrive;   // restore exact gameplay drive
+                _hasCachedDrive = false;
+            }
+        }
     }
 }

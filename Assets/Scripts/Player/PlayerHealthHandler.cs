@@ -91,7 +91,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         // check for knockout
         if (CurrentHealth <= 0)
         {
-            Knockout(); // knockout sound via player's IsKnockedOut OnChangedRender
+            Knockout(true); // combat hit
             // amplified force to show knockout blow
             ApplyForceToBone(impactForce * _knockOutForceMultiplier, impactPoint, hitBoneName);
         }
@@ -104,7 +104,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         }
     }
 
-        private void OnHitSoundChanged()
+    private void OnHitSoundChanged()
     {
         if (_combatAudio != null)
             _combatAudio.PlaySound(_lastHitSound);
@@ -141,7 +141,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         // check for knockout
         if (CurrentHealth <= 0)
         {
-            Knockout();
+            Knockout(true);
             // amplified force to show knockout blow
             _playerController.ApplyKnockback(impactForce * _knockOutForceMultiplier, ForceMode.Impulse);
         }
@@ -204,10 +204,9 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         return null;
     }
 
-    private void Knockout()
+    private void Knockout(bool fromCombatHit)
     {
         bool isPodiumScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Podium");
-        bool eliminationBlocked = TutorialManager.Instance != null && TutorialManager.Instance.EliminationDisabled;
 
         if (_eliminationHandler != null && !isPodiumScene)
             _eliminationHandler.DeductLife();   
@@ -217,12 +216,12 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         float extraTime = overkill * 0.05f; // adds 1 sec per 20 points of overkill
         float totalKnockoutTime = Mathf.Clamp(_baseKnockoutTime + extraTime, _baseKnockoutTime, _maxKnockoutTime);
 
-        StartCoroutine(KnockoutRoutine(totalKnockoutTime));
+        StartCoroutine(KnockoutRoutine(totalKnockoutTime, fromCombatHit));
     }
 
-    private IEnumerator KnockoutRoutine(float duration)
+    private IEnumerator KnockoutRoutine(float duration, bool fromCombatHit)
     {
-        _playerController.Knockout();
+        _playerController.Knockout(fromCombatHit);
 
         yield return new WaitForSeconds(duration);
 
@@ -243,7 +242,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         if (_playerController.IsKnockedOut) return;
 
         CurrentHealth = 0f;
-        Knockout();
+        Knockout(false);
     }
 
     /// <summary>
