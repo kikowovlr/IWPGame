@@ -51,7 +51,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [SerializeField] private float _groundCheckDist = 0.5f;
 
     [Header("Ragdoll Settings")]
-    [SerializeField] private float _unconsciousMass = 0.2f;
     [SerializeField] private float _knockedOutStickForce = 8f;   // push into slope; raise if they still slide
     [SerializeField] private float _knockedOutSlideDamp = 2f;    // bleeds off slide velocity; raise for stickier
 
