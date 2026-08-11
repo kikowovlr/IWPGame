@@ -174,6 +174,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     [SerializeField] private float _recoverAnimDuration = 2f;
     [Networked] private NetworkBool _isRecovering { get; set; }
     [Networked] private float _knockoutUntil { get; set; } // networked wake time (SimulationTime)
+    [Networked] private int _knockoutHolds { get; set; } // open-ended knockout: stays down until explicitly released
 
     // audio 
     private PlayerCombatAudio _combatAudio;
@@ -217,6 +218,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     public float RecoverAnimDuration => _recoverAnimDuration;
     public bool IsGroundedNetworked => Object.HasStateAuthority ? _isGrounded : _netIsGrounded;
     public Vector3 RootVelocity => _rb != null ? _rb.linearVelocity : Vector3.zero;
+
+    public event System.Action OnRecovered;
 
     private void Awake()
     {
@@ -737,10 +740,10 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     {
         ApplyNetworkedAnimatorParams();   // all clients drive their own animator params
 
-        if (Object.HasInputAuthority && Input.GetKeyDown(KeyCode.L))
-        {
-            DebugLogRagdollOffsets();
-        }
+        //if (Object.HasInputAuthority && Input.GetKeyDown(KeyCode.L))
+        //{
+        //    DebugLogRagdollOffsets();
+        //}
 
         // all clients run this code
         if (!Object.HasStateAuthority)
@@ -946,16 +949,42 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             Knockout(fromCombatHit);
     }
 
+    public void PushKnockoutHold(bool fromCombatHit = false)
+    {
+        if (!Object.HasStateAuthority) return;
+        _knockoutHolds++;
+        if (!_isKnockedOut) 
+            Knockout(fromCombatHit);
+    }
+    public void ReleaseKnockoutHold()
+    {
+        if (!Object.HasStateAuthority) return;
+        _knockoutHolds = Mathf.Max(0, _knockoutHolds - 1);
+    }
+
+    // force-wake regardless of pending holds/time (round reset, respawn)
+    public void ForceRecover()
+    {
+        if (!Object.HasStateAuthority) return;
+        _knockoutUntil = 0f;
+        _knockoutHolds = 0;
+        Recover();
+    }
+
     /// <summary>
     /// Called every tick on state authority. Recovers only when ALL knockout time has elapsed.
     /// </summary>
     private void TickKnockoutRecovery()
     {
-        if (!Object.HasStateAuthority) return;
-        if (!_isKnockedOut) return;
+        if (!Object.HasStateAuthority || !_isKnockedOut) return;
 
-        if (Runner.SimulationTime >= _knockoutUntil)
-            Recover();
+        // don't wake while an open-ended hold is active OR time hasn't elapsed
+        if (_knockoutHolds > 0) return;
+        if (Runner.SimulationTime < _knockoutUntil) return;
+
+        // don't wake the eliminated
+        if (Registry != null && Registry.Elimination != null && Registry.Elimination.IsEliminated) return;
+        Recover();
     }
 
 
@@ -991,6 +1020,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             _combatAudio.PlaySound(SoundID.Oof);
         }
     }
+
     public void Recover(bool playAnim = true)
     {
         if (!Object.HasStateAuthority)
@@ -1008,6 +1038,8 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
         // update joints rotation and send them to clients
         for (int i = 0; i < _activeRagdollMembers.Length; i++)
             _activeRagdollMembers[i].MakeActiveRagdoll();
+
+        OnRecovered?.Invoke();
     }
 
     /// <summary>
@@ -1231,7 +1263,7 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
             }
         }
 
-        DebugLogRagdollOffsets();
+        //DebugLogRagdollOffsets();
     }
 
     /// <summary>

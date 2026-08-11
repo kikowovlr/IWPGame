@@ -12,7 +12,7 @@ public class StunEffectSO : StatusEffectSO
 {
     public override void OnEffectAdded(NetworkPlayerController player, ref StatusEffectState state)
     {
-        player.Knockout();
+        player.PushKnockoutHold();
     }
 
     public override void ApplyTickModifiers(NetworkPlayerController player, ref StatusEffectState state)
@@ -21,6 +21,6 @@ public class StunEffectSO : StatusEffectSO
 
     public override void OnEffectRemoved(NetworkPlayerController player, ref StatusEffectState state)
     {
-        player.Recover();
+        player.ReleaseKnockoutHold();
     }
 }

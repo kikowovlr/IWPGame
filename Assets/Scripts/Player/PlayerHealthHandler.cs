@@ -41,6 +41,8 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
             _combatAudio = registry.CombatAudio;
         }
         _characterRoot = transform.root;
+
+        _playerController.OnRecovered += () => { if (Object.HasStateAuthority) CurrentHealth = _maxHealth; };
     }
 
     public override void Spawned()
@@ -216,21 +218,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         float extraTime = overkill * 0.05f; // adds 1 sec per 20 points of overkill
         float totalKnockoutTime = Mathf.Clamp(_baseKnockoutTime + extraTime, _baseKnockoutTime, _maxKnockoutTime);
 
-        StartCoroutine(KnockoutRoutine(totalKnockoutTime, fromCombatHit));
-    }
-
-    private IEnumerator KnockoutRoutine(float duration, bool fromCombatHit)
-    {
-        _playerController.Knockout(fromCombatHit);
-
-        yield return new WaitForSeconds(duration);
-
-        // dont wake up if they are eliminated
-        if (_eliminationHandler != null && _eliminationHandler.IsEliminated)
-            yield break;
-
-        _playerController.Recover(); // hand control back
-        CurrentHealth = _maxHealth;
+        _playerController.RequestKnockout(totalKnockoutTime, fromCombatHit);
     }
 
     /// <summary>
@@ -254,7 +242,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         if (_eliminationHandler != null && _eliminationHandler.IsEliminated) return;
 
         CurrentHealth = 0f;
-        _playerController.Knockout();
+        _playerController.PushKnockoutHold();
 
         if (_eliminationHandler != null)
             _eliminationHandler.Eliminate();
@@ -279,7 +267,7 @@ public class PlayerHealthHandler : NetworkBehaviour, IDamageable
         if (Object.HasStateAuthority)
         {
             CurrentHealth = MaxHealth;
-            _playerController.Recover();
+            _playerController.ForceRecover();
         }
     }
 }

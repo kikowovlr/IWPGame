@@ -61,10 +61,28 @@ public class IntimidateAbilitySO : AbilitySO
             if (hit == null) continue;
             if (hit.transform.root == player.transform) continue;
 
-            Vector3 dirToTarget = (hit.transform.position - player.transform.position).normalized;
+            Vector3 toTarget = hit.transform.position - player.transform.position;
+            toTarget.y = 0f;   // cone is horizontal — ignore vertical offset (jumping / close pivots)
+
+            Vector3 flatForward = player.transform.forward;
+            flatForward.y = 0f;
+            flatForward.Normalize();
+
+            // point-blank: too close to compute a stable horizontal angle -> always counts
+            const float pointBlankRadius = 0.3f;
+            bool inCone;
+            if (toTarget.sqrMagnitude < pointBlankRadius * pointBlankRadius)
+            {
+                inCone = true;
+            }
+            else
+            {
+                Vector3 dirToTarget = toTarget.normalized;
+                inCone = Vector3.Angle(flatForward, dirToTarget) < _coneAngle * 0.5f;
+            }
 
             // check for cone
-            if (Vector3.Angle(forwardDir, dirToTarget) < _coneAngle * 0.5f)
+            if (inCone)
             {
                 Transform root = hit.transform.root;
 

@@ -34,4 +34,4 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   _damage: 40
-  _knockbackForce: 10
+  _knockbackForce: 20

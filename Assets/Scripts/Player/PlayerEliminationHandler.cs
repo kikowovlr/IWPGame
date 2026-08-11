@@ -115,7 +115,7 @@ public class PlayerEliminationHandler : NetworkBehaviour
     {
         if (Object.HasStateAuthority)
         {
-            _playerController.Knockout();
+            _playerController.PushKnockoutHold();
         }
     }
 

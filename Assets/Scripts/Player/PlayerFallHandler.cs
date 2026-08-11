@@ -73,7 +73,7 @@ public class PlayerFallHandler : NetworkBehaviour
         IsFalling = true;
         _deathTimer = TickTimer.CreateFromSeconds(Runner, _knockoutToDeathDelay);
 
-        _controller.Knockout();   // ragdoll so they can't cling to the sides
+        _controller.PushKnockoutHold();   // ragdoll so they can't cling to the sides
     }
 
     // camera swap on every client
