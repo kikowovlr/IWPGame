@@ -1352,6 +1352,30 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
     }
 
     /// <summary>
+    /// knockback that applies to the whole ragdoll, not just the root —
+    /// so hits on a ragdolled/limp body actually launch it.
+    /// </summary>
+    public void ApplyKnockbackFull(Vector3 forceVector, ForceMode mode = ForceMode.Impulse)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        _physicsControlLockTimer = TickTimer.CreateFromSeconds(Runner, _maxKnockbackControlLockDuration);
+
+        if (_rb != null)
+        {
+            _rb.linearVelocity = Vector3.zero;
+            _rb.AddForce(forceVector, mode);
+        }
+
+        if (_allChildRigidbodies == null) return;
+        for (int i = 0; i < _allChildRigidbodies.Length; i++)
+        {
+            if (_allChildRigidbodies[i] != null)
+                _allChildRigidbodies[i].AddForce(forceVector, mode);
+        }
+    }
+
+    /// <summary>
     /// use for throws
     /// launches the entire ragdoll as one piece
     /// sets velocity on every child body so mass is irrelevant
