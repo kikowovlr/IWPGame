@@ -214,6 +214,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 300
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 3.6280809e-19, y: 2.9103834e-11, z: 0.0000000026484488, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!114 &872424075942392609
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -567,6 +568,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: -0.25886506, y: 0.000000016565874, z: -0.000000014286688, w: 0.9659136}
+  _forceAlignToAnimated: 0
 --- !u!1 &490398674081614194
 GameObject:
   m_ObjectHideFlags: 0
@@ -1104,6 +1106,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 500
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 2.5524596e-14, y: 2.910382e-11, z: 0.0000000148720565, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!114 &2642575785472566146
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2186,6 +2189,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 400
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 3.6280809e-19, y: 2.9103834e-11, z: 0.0000000026484488, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!114 &5010782953575571912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2686,6 +2690,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: -0.71067303, y: -0.25413525, z: -0.21314906, w: 0.620425}
+  _forceAlignToAnimated: 0
 --- !u!114 &6070952246084935094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3917,6 +3922,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: -0.29567742, y: 0.04477358, z: -0.32865295, w: 0.895856}
+  _forceAlignToAnimated: 0
 --- !u!114 &3354190704977847444
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4578,6 +4584,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: -0.25886506, y: 0.0000002389127, z: -0.0000001301905, w: 0.96591365}
+  _forceAlignToAnimated: 0
 --- !u!1 &4971466232546955515
 GameObject:
   m_ObjectHideFlags: 0
@@ -4787,6 +4794,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: -0.2964106, y: 0.044504266, z: -0.32868928, w: 0.89561373}
+  _forceAlignToAnimated: 0
 --- !u!114 &2513760194654572760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5169,6 +5177,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0.42252213, y: 0.0000002324323, z: 0.00000014145623, w: 0.9063528}
+  _forceAlignToAnimated: 0
 --- !u!1 &5520708203036472280
 GameObject:
   m_ObjectHideFlags: 0
@@ -5921,6 +5930,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: -0.71019, y: -0.25396928, z: -0.213347, w: 0.6209777}
+  _forceAlignToAnimated: 0
 --- !u!114 &1160537295249925596
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6863,6 +6873,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0.42252237, y: 0.000000020696879, z: 0.000000007162058, w: 0.9063527}
+  _forceAlignToAnimated: 0
 --- !u!1 &7352341739298300735
 GameObject:
   m_ObjectHideFlags: 0

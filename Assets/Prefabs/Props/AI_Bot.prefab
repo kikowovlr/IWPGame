@@ -590,7 +590,8 @@ MonoBehaviour:
   _startLocalRotation: {x: 0.000042282372, y: 0.096422985, z: 0.99534047, w: 0.000436466}
   _startSlerpPositionSpring: 10
   _isSetupInEditor: 1
-  _worldRotationOffset: {x: -0.25886473, y: 0.000000015302868, z: -0.000000029135256, w: 0.9659138}
+  _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 1
 --- !u!136 &8897650396071032086
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -772,7 +773,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1025848785845208209}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.11877508, y: 0.0047733686, z: -0.03987117, w: 0.9921089}
+  m_LocalRotation: {x: -0.11877506, y: 0.0047733593, z: -0.03987125, w: 0.9921089}
   m_LocalPosition: {x: 0.0018327787, y: 0.14827581, z: -0.0010504295}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -925,10 +926,11 @@ MonoBehaviour:
   _animatedRoot: {fileID: 8848530707658154270}
   _physicalRoot: {fileID: 338802817761086699}
   _syncAnimation: 1
-  _startLocalRotation: {x: -0.06789959, y: -0.06789961, z: 0.7038393, w: 0.70383936}
+  _startLocalRotation: {x: -0.06789958, y: -0.0678996, z: 0.7038392, w: 0.7038394}
   _startSlerpPositionSpring: 100
   _isSetupInEditor: 1
-  _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _worldRotationOffset: {x: 0.000000010488023, y: -0.0000000023937594, z: -0.00000008491596, w: 1.0000001}
+  _forceAlignToAnimated: 1
 --- !u!136 &4996786115921997885
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1513,7 +1515,8 @@ MonoBehaviour:
   _startLocalRotation: {x: -0.17289872, y: -1.3825911e-12, z: -2.929772e-11, w: 0.98493975}
   _startSlerpPositionSpring: 10
   _isSetupInEditor: 1
-  _worldRotationOffset: {x: 0.4225226, y: 0.00000003290713, z: -0.0000000014388297, w: 0.90635264}
+  _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 1
 --- !u!136 &17992106189104823
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1814,7 +1817,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2160508197733574038}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.11877508, y: 0.0047733686, z: -0.03987117, w: 0.9921089}
+  m_LocalRotation: {x: -0.11877506, y: 0.004773374, z: -0.039871152, w: 0.9921089}
   m_LocalPosition: {x: 0.0000004527121, y: -0.14831144, z: 0.00000003414525}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1967,10 +1970,11 @@ MonoBehaviour:
   _animatedRoot: {fileID: 8848530707658154270}
   _physicalRoot: {fileID: 338802817761086699}
   _syncAnimation: 1
-  _startLocalRotation: {x: -0.7038393, y: 0.70383936, z: 0.06789959, w: -0.0678996}
+  _startLocalRotation: {x: -0.7038393, y: 0.70383936, z: 0.067899585, w: -0.06789959}
   _startSlerpPositionSpring: 100
   _isSetupInEditor: 1
-  _worldRotationOffset: {x: -0.2964106, y: 0.044504266, z: -0.32868928, w: 0.89561373}
+  _worldRotationOffset: {x: 0.000000010488023, y: -4.440892e-16, z: 5.551115e-17, w: 1.0000001}
+  _forceAlignToAnimated: 1
 --- !u!136 &4156461757014027408
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2435,6 +2439,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 20
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 3.6280809e-19, y: 2.910383e-11, z: 0.0000000026775526, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!136 &8776214414705140376
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3136,7 +3141,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombatAudio
   _source: {fileID: 753374013435452016}
+  _footstepSource: {fileID: 0}
   _library: {fileID: 11400000, guid: 6c81e9e30cbbb4b4994c60608a746dd3, type: 2}
+  _runSpeedThreshold: 4
+  _runDust: {fileID: 0}
+  _dustMin: 2
+  _dustMax: 5
 --- !u!1 &3947482362941870135
 GameObject:
   m_ObjectHideFlags: 0
@@ -3599,9 +3609,10 @@ MonoBehaviour:
   _recoverDelay: 3
   _knockedDownDamageMultiplier: 0.3
   _knockOutForceMultiplier: 1.8
+  _dummy: {fileID: 5660436039564872381}
+  _combatAudio: {fileID: 0}
   _CurrentHealth: 0
   _MaxHealth: 0
-  _dummy: {fileID: 5660436039564872381}
 --- !u!1 &4667347053996963921
 GameObject:
   m_ObjectHideFlags: 0
@@ -4110,6 +4121,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 300
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 3.6280809e-19, y: 2.910383e-11, z: 0.0000000026775526, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!65 &1284088842266125943
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4315,7 +4327,8 @@ MonoBehaviour:
   _startLocalRotation: {x: -0.17289872, y: 1.3825911e-12, z: 2.929772e-11, w: 0.98493975}
   _startSlerpPositionSpring: 10
   _isSetupInEditor: 1
-  _worldRotationOffset: {x: 0.42252234, y: 0.0000000034532603, z: -0.000000024690992, w: 0.9063528}
+  _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 1
 --- !u!136 &4555992327413414545
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4660,6 +4673,10 @@ MonoBehaviour:
   _stamina: {fileID: 0}
   _statusEffectManager: {fileID: 0}
   _fall: {fileID: 0}
+  _combatAudio: {fileID: 0}
+  _abilityAudio: {fileID: 0}
+  _abilityAudioNet: {fileID: 0}
+  _impactAudio: {fileID: 0}
 --- !u!114 &5660436039564872381
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4683,6 +4700,7 @@ MonoBehaviour:
   _groundCheckRadius: 0.1
   _groundCheckDist: 0.5
   _brakeStrength: 18
+  _combatAudio: {fileID: 0}
   _IsKnockedOut:
     _value: 0
 --- !u!82 &753374013435452016
@@ -5377,7 +5395,8 @@ MonoBehaviour:
   _startLocalRotation: {x: 0.000436466, y: 0.99534047, z: -0.096422985, w: -0.000042282372}
   _startSlerpPositionSpring: 10
   _isSetupInEditor: 1
-  _worldRotationOffset: {x: -0.25886488, y: -0.000000019544554, z: -0.000000015385577, w: 0.9659137}
+  _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 1
 --- !u!136 &5092380218918598173
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -5940,7 +5959,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6372259482370319084}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.23477995, y: -0, z: -0, w: 0.9720486}
+  m_LocalRotation: {x: 0.23477995, y: 0.00000003026798, z: 0.000000027066559, w: 0.9720486}
   m_LocalPosition: {x: 5.684342e-16, y: 0.12551025, z: 8.881784e-18}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -6093,10 +6112,11 @@ MonoBehaviour:
   _animatedRoot: {fileID: 8848530707658154270}
   _physicalRoot: {fileID: 338802817761086699}
   _syncAnimation: 1
-  _startLocalRotation: {x: 0.23478001, y: 0.000000028032819, z: 0.00000008372054, w: 0.9720488}
+  _startLocalRotation: {x: 0.23477998, y: 0.000000067184054, z: 0.000000040361716, w: 0.9720487}
   _startSlerpPositionSpring: 100
   _isSetupInEditor: 1
-  _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000004}
+  _worldRotationOffset: {x: 0.000000011131711, y: -0.000000012530299, z: -0.00000012592841, w: 1.0000002}
+  _forceAlignToAnimated: 1
 --- !u!136 &5130050872376772987
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7035,7 +7055,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7755020454394351859}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.23477995, y: -4.414722e-16, z: -1.1937998e-16, w: 0.9720486}
+  m_LocalRotation: {x: 0.23477991, y: -0.000000024680043, z: 0.00000009697394, w: 0.9720485}
   m_LocalPosition: {x: -4.8316907e-15, y: -0.12550959, z: 0.000000089590536}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -7188,10 +7208,11 @@ MonoBehaviour:
   _animatedRoot: {fileID: 8848530707658154270}
   _physicalRoot: {fileID: 338802817761086699}
   _syncAnimation: 1
-  _startLocalRotation: {x: 0.00000004069565, y: 0.9990037, z: -0.044631954, w: -0.000000012611174}
+  _startLocalRotation: {x: 0.23477995, y: -0.000000043052264, z: 0.00000012530047, w: 0.9720487}
   _startSlerpPositionSpring: 100
   _isSetupInEditor: 1
-  _worldRotationOffset: {x: -0.71067303, y: -0.25413525, z: -0.21314906, w: 0.620425}
+  _worldRotationOffset: {x: -0.000000014250032, y: -0.000000003817615, z: 0.000000085677634, w: 1.0000002}
+  _forceAlignToAnimated: 1
 --- !u!136 &6194380106795269327
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7623,6 +7644,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 100
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 2.5524594e-14, y: 2.9103818e-11, z: 0.00000001490116, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!65 &1724218761430237235
 BoxCollider:
   m_ObjectHideFlags: 0

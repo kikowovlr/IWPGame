@@ -461,6 +461,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!1 &475224887341647986
 GameObject:
   m_ObjectHideFlags: 0
@@ -701,6 +702,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!1 &512856685076592060
 GameObject:
   m_ObjectHideFlags: 0
@@ -1262,6 +1264,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 400
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!114 &1427327494138479350
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1757,6 +1760,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!1 &1633092787596797329
 GameObject:
   m_ObjectHideFlags: 0
@@ -3030,6 +3034,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 500
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!114 &2282815825106262443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4250,6 +4255,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!136 &2133887960977991417
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4628,6 +4634,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 300
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!114 &4936778913091894137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5690,6 +5697,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!1 &6942827686730150270
 GameObject:
   m_ObjectHideFlags: 0
@@ -6325,6 +6333,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!1 &7975741727441899401
 GameObject:
   m_ObjectHideFlags: 0
@@ -6613,6 +6622,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!114 &956808380286067979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7371,6 +7381,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!1 &9034726721103700122
 GameObject:
   m_ObjectHideFlags: 0

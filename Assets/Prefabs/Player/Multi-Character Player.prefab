@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthHandler
   _maxHealth: 150
-  _knockedDownDamageMultiplier: 0.3
+  _knockedDownDamageMultiplier: 0.7
   _baseKnockoutTime: 5
   _maxKnockoutTime: 10
   _knockOutForceMultiplier: 1.8
@@ -478,7 +478,7 @@ MonoBehaviour:
   _knockbackForce: 15
   _attackWindowDuration: 0.2
   _totalCycleTime: 0.45
-  _cooldown: 1
+  _cooldown: 2
 --- !u!1 &1135856881270890712
 GameObject:
   m_ObjectHideFlags: 0
@@ -884,7 +884,6 @@ MonoBehaviour:
   _jumpCooldown: 0.15
   _groundCheckRadius: 0.05
   _groundCheckDist: 0.2
-  _unconsciousMass: 1
   _knockedOutStickForce: 8
   _knockedOutSlideDamp: 5
   _maxSlopeAngle: 55

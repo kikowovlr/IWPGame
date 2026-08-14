@@ -814,6 +814,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!136 &1532458630348143815
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1367,6 +1368,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!136 &3365906041452655965
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1579,6 +1581,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 500
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!65 &8158197388435091542
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2362,6 +2365,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!136 &4026633654313255136
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3801,6 +3805,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!136 &938359480074135855
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4124,6 +4129,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!136 &8352944342720315901
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4395,6 +4401,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 150
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!136 &7049080444089666941
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4939,6 +4946,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 300
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!136 &1119882101855857832
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6710,6 +6718,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000001}
+  _forceAlignToAnimated: 0
 --- !u!136 &7891694680414629620
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7107,6 +7116,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 400
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!65 &7802508625165789403
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7937,6 +7947,7 @@ MonoBehaviour:
   _startSlerpPositionSpring: 200
   _isSetupInEditor: 1
   _worldRotationOffset: {x: 0, y: 0, z: 0, w: 1.0000002}
+  _forceAlignToAnimated: 0
 --- !u!136 &1691676266047039783
 CapsuleCollider:
   m_ObjectHideFlags: 0
