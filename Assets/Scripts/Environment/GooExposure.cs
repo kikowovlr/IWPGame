@@ -14,8 +14,11 @@ public class GooExposure : NetworkBehaviour
     private bool _fedThisTick = false;
 
     private PlayerHealthHandler _healthHandler;
+    private PlayerEliminationHandler _elimHandler;
     private PlayerDrowning _drowning;
     private PlayerBuoyancy _buoyancy;
+
+    [Networked, OnChangedRender(nameof(OnConsumedTickChanged))] private byte _consumedTick { get; set; }
 
     private void Awake()
     {
@@ -23,6 +26,7 @@ public class GooExposure : NetworkBehaviour
         if (registry != null)
         {
             _healthHandler = registry.Health;
+            _elimHandler = registry.Elimination;
             _drowning = registry.Drowning;
             _buoyancy = registry.Buoyancy;
         }
@@ -33,6 +37,9 @@ public class GooExposure : NetworkBehaviour
     /// </summary>
     public void ApplyExposure(float ratePerSecond)
     {
+        if (_elimHandler != null && _elimHandler.IsEliminated) return;
+        if (_drowning != null && _drowning.IsSinking) return;
+
         _fedThisTick = true;
         IsInGooSource = true;
         ExposureAmount = Mathf.Clamp01(ExposureAmount + ratePerSecond * Runner.DeltaTime);
@@ -64,6 +71,14 @@ public class GooExposure : NetworkBehaviour
 
         _healthHandler.Rpc_EnvironmentalEliminate();
         ExposureAmount = 0f;
+        _consumedTick++;
+    }
+
+    private void OnConsumedTickChanged()
+    {
+        if (!Object.HasInputAuthority) return;
+        if (ScreenGooOverlay.Instance != null)
+            ScreenGooOverlay.Instance.StopGoo();
     }
 
     public override void Render()

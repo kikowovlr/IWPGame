@@ -191,7 +191,7 @@ public class RamAbilitySO : AbilitySO
                 knockbackDir.y = 1.5f; // lift slightly
 
                 Vector3 finalForceVector = knockbackDir * finalKnockback;
-                enemy.ApplyKnockbackFull(finalForceVector, ForceMode.Impulse);
+                enemy.ApplyKnockback(finalForceVector, ForceMode.Impulse);
 
                 hitSomething = true;
                 hitPlayer = true;

@@ -62,6 +62,11 @@ public class LevelLoader : MonoBehaviour, ICleanup
         Instance = null;
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
     public void Cleanup()
     {
     }

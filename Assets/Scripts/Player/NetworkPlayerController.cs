@@ -349,6 +349,11 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                     }
                 }
             }
+
+            if (_buoyancy.IsSubmerged)
+            {
+                _goo.ApplyExposure(_buoyancy.WaterGooRate);
+            }
         }
 
         // reset input restrictions
@@ -402,8 +407,6 @@ public class NetworkPlayerController : NetworkBehaviour, IPlayerLeft, ICameraLoc
                 }
                 else if (_buoyancy.IsSubmerged)
                 {
-                    _goo.ApplyExposure(_buoyancy.WaterGooRate);
-
                     if (inputMagnitude > InputThreshold)
                     {
                         targetAnimSpeed = _walkInputScale;

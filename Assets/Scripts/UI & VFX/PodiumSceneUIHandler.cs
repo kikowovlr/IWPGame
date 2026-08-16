@@ -34,6 +34,8 @@ public class PodiumSceneUIHandler : MonoBehaviour
 
     private void OnExitClicked()
     {
+        CleanupPersistentManagers();
+
         // exit = leave the session entirely, back to title (shuts down runner)
         SceneTransitioner.Instance.PerformTransition(_mainMenuSceneName);
     }
@@ -43,10 +45,33 @@ public class PodiumSceneUIHandler : MonoBehaviour
         if (!IsHost) return; // safety
 
         DespawnAllPlayers();
+        DespawnMatchManagers();
+        CleanupPersistentManagers();
 
         // host-authoritative Fusion scene load: brings the WHOLE session back to
         // the main menu scene together, where the lobby UI re-shows.
         _runner.LoadScene(SceneRef.FromIndex(_mainMenuSceneBuildIndex), LoadSceneMode.Single);
+    }
+
+    private void CleanupPersistentManagers()
+    {
+        if (LeaderboardManager.Instance != null)
+            Destroy(LeaderboardManager.Instance.gameObject);
+
+        if (LevelLoader.Instance != null)
+            Destroy(LevelLoader.Instance.gameObject);
+    }
+
+    private void DespawnMatchManagers()
+    {
+        if (!IsHost) return;
+
+        if (GameManager.Instance != null
+            && GameManager.Instance.Object != null
+            && GameManager.Instance.Object.IsValid)
+        {
+            _runner.Despawn(GameManager.Instance.Object);
+        }
     }
 
     private void DespawnAllPlayers()

@@ -35,7 +35,7 @@ MonoBehaviour:
   _maxRamDuration: 0.5
   _baseRamSpeed: 1.5
   _maxRamSpeedMultiplier: 4
-  _baseKnockbackForce: 0.3
+  _baseKnockbackForce: 0.6
   _hitLayer:
     serializedVersion: 2
     m_Bits: 384
